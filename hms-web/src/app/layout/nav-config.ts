@@ -74,7 +74,7 @@ export const NAV_GROUPS: NavGroup[] = [
     icon: 'how_to_reg',
     items: [
       { label: 'Patients', route: '/registration/patients', icon: 'person_add' },
-      { label: 'Patient Past History', route: '/registration/patients/history', icon: 'history_edu' },
+      { label: 'Patient Information (OP/IP)', route: '/registration/patients/history', icon: 'history_edu' },
       { label: 'Review Date Report', route: '/registration/patients/review-date-report', icon: 'event_repeat' },
       { label: 'Logs', route: '/registration/patients/logs', icon: 'history' }
     ]

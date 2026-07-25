@@ -56,6 +56,11 @@ public class InvoiceService {
         return toDto(getOrThrow(id));
     }
 
+    // Patient Information (OP/IP) screen's Billing Details tab.
+    public List<InvoiceDto> findByPatientId(Long patientId) {
+        return repository.findByPatientIdOrderByCreatedAtDesc(patientId).stream().map(this::toDto).toList();
+    }
+
     @Transactional
     public InvoiceDto create(InvoiceDto dto) {
         Patient patient = patientRepository.findById(dto.patientId())
@@ -134,6 +139,7 @@ public class InvoiceService {
                 invoice.getStatus(),
                 invoice.getTotalAmount(),
                 invoice.getCancellationReason(),
-                lineItems);
+                lineItems,
+                invoice.getCreatedAt());
     }
 }

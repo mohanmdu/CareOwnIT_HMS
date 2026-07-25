@@ -1,70 +1,392 @@
 <div class="hms-page">
-  <app-page-header title="Patient Past History" subtitle="Search a patient to review their full visit history." />
+  <app-page-header title="Patient Information (OP/IP)" subtitle="Search a patient to review their full OP/IP record." />
 
   @if (!patient()) {
-    <section class="hms-card-surface patient-history-search-section">
+    <section class="hms-card-surface patient-info-search-section">
       <app-patient-search (patientSelected)="selectPatient($event)" />
     </section>
   } @else {
-    <section class="hms-card-surface patient-history-patient-section">
-      <table class="patient-history-patient-table">
-        <tbody>
-          <tr>
-            <td><strong>Patient ID</strong>: {{ patient()!.registrationNumber }}</td>
-            <td><strong>Name</strong>: {{ patient()!.firstName }} {{ patient()!.lastName }}</td>
-            <td><strong>Mobile</strong>: {{ patient()!.mobileNumber }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <button mat-button type="button" (click)="reset()">Change Patient</button>
+    <section class="hms-card-surface patient-info-header">
+      <div class="patient-info-photo">
+        @if (patient()!.photoPath) {
+          <img [src]="patient()!.photoPath" alt="" class="patient-info-photo-image" />
+        } @else {
+          <div class="patient-info-photo-placeholder">
+            <mat-icon aria-hidden="true">person</mat-icon>
+          </div>
+        }
+        <button mat-stroked-button type="button" [disabled]="uploadingPhoto()" (click)="photoInput.click()">
+          {{ uploadingPhoto() ? 'Uploading...' : 'Upload New' }}
+        </button>
+        <input #photoInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onPhotoSelected($event)" />
+      </div>
+
+      <div class="patient-info-demographics">
+        <div class="patient-info-name-row">
+          <h2>{{ patient()!.firstName }} {{ patient()!.lastName }}</h2>
+          <span class="patient-info-uhid">UHID: {{ patient()!.registrationNumber }}</span>
+        </div>
+        <div class="patient-info-fields">
+          <span><strong>Gender</strong>: {{ patient()!.gender ?? '-' }}</span>
+          <span><strong>Age</strong>: {{ patient()!.age ?? '-' }}</span>
+          <span><strong>DOB</strong>: {{ (patient()!.dateOfBirth | date: 'dd-MM-yyyy') ?? '-' }}</span>
+          <span><strong>Mobile</strong>: {{ patient()!.mobileNumber }}</span>
+          <span><strong>Email</strong>: {{ patient()!.email ?? '-' }}</span>
+          <span class="patient-info-address"><strong>Address</strong>: {{ patient()!.address ?? '-' }}</span>
+        </div>
+      </div>
+
+      <button mat-button type="button" class="patient-info-change" (click)="reset()">Change Patient</button>
     </section>
 
-    <section class="hms-card-surface patient-history-list-section">
-      @if (loading()) {
-        <mat-progress-bar mode="indeterminate" />
-      }
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
 
-      @if (!loading() && appointments().length === 0) {
-        <app-empty-state icon="history" title="No visits yet" message="This patient has no appointment history." />
-      } @else if (appointments().length > 0) {
-        <table mat-table [dataSource]="appointments()" class="patient-history-table">
-          <ng-container matColumnDef="appointmentDate">
-            <th mat-header-cell *matHeaderCellDef>Appoint Date</th>
-            <td mat-cell *matCellDef="let appointment">
-              {{ appointment.appointmentDate | date: 'dd-MM-yyyy' }} {{ appointment.slotTime }}
-            </td>
-          </ng-container>
+    @if (summary(); as data) {
+      <section class="hms-card-surface patient-info-tabs">
+        <mat-tab-group>
+          <mat-tab label="Inpatient Details">
+            <div class="patient-info-tab-body">
+              @if (data.admissions.length === 0) {
+                <app-empty-state icon="king_bed" title="No admissions yet" message="This patient has no IP admission history." />
+              } @else {
+                <table mat-table [dataSource]="data.admissions" class="patient-info-table">
+                  <ng-container matColumnDef="admissionNumber">
+                    <th mat-header-cell *matHeaderCellDef>Admission #</th>
+                    <td mat-cell *matCellDef="let admission">{{ admission.admissionNumber }}</td>
+                  </ng-container>
 
-          <ng-container matColumnDef="consultant">
-            <th mat-header-cell *matHeaderCellDef>Consultant Name</th>
-            <td mat-cell *matCellDef="let appointment">{{ appointment.consultantName }}</td>
-          </ng-container>
+                  <ng-container matColumnDef="admissionDate">
+                    <th mat-header-cell *matHeaderCellDef>Admission Date</th>
+                    <td mat-cell *matCellDef="let admission">{{ admission.admissionDate | date: 'dd-MM-yyyy' }}</td>
+                  </ng-container>
 
-          <ng-container matColumnDef="department">
-            <th mat-header-cell *matHeaderCellDef>Department</th>
-            <td mat-cell *matCellDef="let appointment">{{ appointment.departmentName }}</td>
-          </ng-container>
+                  <ng-container matColumnDef="room">
+                    <th mat-header-cell *matHeaderCellDef>Room</th>
+                    <td mat-cell *matCellDef="let admission">
+                      @if (admission.roomNumber) {
+                        {{ admission.roomNumber }} ({{ admission.roomTypeName }})
+                      } @else {
+                        Pending assignment
+                      }
+                    </td>
+                  </ng-container>
 
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let appointment">
-              <app-status-badge [label]="appointment.status" [tone]="statusTone[appointment.status]" />
-            </td>
-          </ng-container>
+                  <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let admission">
+                      <app-status-badge [label]="admission.status" [tone]="admissionStatusTone[admission.status]" />
+                    </td>
+                  </ng-container>
 
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef></th>
-            <td mat-cell *matCellDef="let appointment">
-              <button mat-stroked-button color="primary" type="button" (click)="viewDetails(appointment)">
-                View Details
-              </button>
-            </td>
-          </ng-container>
+                  <ng-container matColumnDef="advance">
+                    <th mat-header-cell *matHeaderCellDef>Advance</th>
+                    <td mat-cell *matCellDef="let admission">{{ admission.advanceAmount | number: '1.0-2' }}</td>
+                  </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-        </table>
-      }
-    </section>
+                  <ng-container matColumnDef="totalBilled">
+                    <th mat-header-cell *matHeaderCellDef>Total Billed</th>
+                    <td mat-cell *matCellDef="let admission">{{ admission.totalBilled | number: '1.0-2' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="settlement">
+                    <th mat-header-cell *matHeaderCellDef>Settlement</th>
+                    <td mat-cell *matCellDef="let admission">
+                      @if (admission.settlementAmount !== null) {
+                        {{ admission.settlementAmount >= 0 ? 'Refund: ' : 'Due: ' }}
+                        {{ (admission.settlementAmount >= 0 ? admission.settlementAmount : -admission.settlementAmount) | number: '1.0-2' }}
+                      }
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="admissionColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: admissionColumns"></tr>
+                </table>
+              }
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Appointments">
+            <div class="patient-info-tab-body">
+              @if (data.appointments.length === 0) {
+                <app-empty-state icon="event" title="No appointments yet" message="This patient has no appointment history." />
+              } @else {
+                <table mat-table [dataSource]="data.appointments" class="patient-info-table">
+                  <ng-container matColumnDef="appointmentDate">
+                    <th mat-header-cell *matHeaderCellDef>Appoint Date</th>
+                    <td mat-cell *matCellDef="let appointment">
+                      {{ appointment.appointmentDate | date: 'dd-MM-yyyy' }} {{ appointment.slotTime }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="consultant">
+                    <th mat-header-cell *matHeaderCellDef>Consultant Name</th>
+                    <td mat-cell *matCellDef="let appointment">{{ appointment.consultantName }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="department">
+                    <th mat-header-cell *matHeaderCellDef>Department</th>
+                    <td mat-cell *matCellDef="let appointment">{{ appointment.departmentName }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let appointment">
+                      <app-status-badge [label]="appointment.status" [tone]="appointmentStatusTone[appointment.status]" />
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let appointment">
+                      <button mat-stroked-button color="primary" type="button" (click)="viewAppointmentDetails(appointment)">
+                        View Details
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="appointmentColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: appointmentColumns"></tr>
+                </table>
+              }
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Investigations Done">
+            <div class="patient-info-tab-body">
+              @if (data.investigations.length === 0) {
+                <app-empty-state icon="biotech" title="No investigations yet" message="This patient has no lab requisition history." />
+              } @else {
+                <table mat-table [dataSource]="data.investigations" class="patient-info-table">
+                  <ng-container matColumnDef="requisitionDate">
+                    <th mat-header-cell *matHeaderCellDef>Date</th>
+                    <td mat-cell *matCellDef="let req">{{ req.requisitionDate | date: 'dd-MM-yyyy' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="requisitionNumber">
+                    <th mat-header-cell *matHeaderCellDef>Requisition #</th>
+                    <td mat-cell *matCellDef="let req">{{ req.requisitionNumber }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="tests">
+                    <th mat-header-cell *matHeaderCellDef>Tests</th>
+                    <td mat-cell *matCellDef="let req">{{ testNames(req) }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="amount">
+                    <th mat-header-cell *matHeaderCellDef>Amount</th>
+                    <td mat-cell *matCellDef="let req">{{ req.totalAmount | number: '1.0-2' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let req">
+                      <app-status-badge [label]="req.status" [tone]="investigationStatusTone[req.status]" />
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="investigationColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: investigationColumns"></tr>
+                </table>
+              }
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Billing Details">
+            <div class="patient-info-tab-body">
+              @if (data.billing.length === 0) {
+                <app-empty-state icon="receipt_long" title="No billing yet" message="This patient has no billing history." />
+              } @else {
+                <table mat-table [dataSource]="data.billing" class="patient-info-table">
+                  <ng-container matColumnDef="source">
+                    <th mat-header-cell *matHeaderCellDef>Source</th>
+                    <td mat-cell *matCellDef="let bill">{{ billingSourceLabel[bill.source] }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="invoiceNumber">
+                    <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+                    <td mat-cell *matCellDef="let bill">{{ bill.invoiceNumber ?? '-' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="billedDate">
+                    <th mat-header-cell *matHeaderCellDef>Date</th>
+                    <td mat-cell *matCellDef="let bill">{{ (bill.billedDate | date: 'dd-MM-yyyy') ?? '-' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="invoiced">
+                    <th mat-header-cell *matHeaderCellDef>Invoiced</th>
+                    <td mat-cell *matCellDef="let bill">{{ bill.invoicedAmount | number: '1.0-2' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="paid">
+                    <th mat-header-cell *matHeaderCellDef>Paid</th>
+                    <td mat-cell *matCellDef="let bill">{{ bill.paidAmount | number: '1.0-2' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="due">
+                    <th mat-header-cell *matHeaderCellDef>Due</th>
+                    <td mat-cell *matCellDef="let bill">{{ bill.dueAmount | number: '1.0-2' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let bill">
+                      <app-status-badge
+                        [label]="bill.cancelled ? 'Cancelled' : 'Active'"
+                        [tone]="bill.cancelled ? 'danger' : 'success'" />
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="billingColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: billingColumns"></tr>
+                </table>
+              }
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Payments Details">
+            <div class="patient-info-tab-body">
+              @if (data.payments.length === 0) {
+                <app-empty-state icon="payments" title="No payments yet" message="This patient has no payment history." />
+              } @else {
+                <table mat-table [dataSource]="data.payments" class="patient-info-table">
+                  <ng-container matColumnDef="source">
+                    <th mat-header-cell *matHeaderCellDef>Source</th>
+                    <td mat-cell *matCellDef="let payment">{{ billingSourceLabel[payment.source] }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="receiptNumber">
+                    <th mat-header-cell *matHeaderCellDef>Receipt / Invoice #</th>
+                    <td mat-cell *matCellDef="let payment">{{ payment.receiptNumber ?? '-' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="paidAt">
+                    <th mat-header-cell *matHeaderCellDef>Date</th>
+                    <td mat-cell *matCellDef="let payment">{{ (payment.paidAt | date: 'dd-MM-yyyy') ?? '-' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="amount">
+                    <th mat-header-cell *matHeaderCellDef>Amount</th>
+                    <td mat-cell *matCellDef="let payment">{{ payment.amount | number: '1.0-2' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="paymentMode">
+                    <th mat-header-cell *matHeaderCellDef>Mode</th>
+                    <td mat-cell *matCellDef="let payment">{{ payment.paymentMode ?? '-' }}</td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="paymentColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: paymentColumns"></tr>
+                </table>
+              }
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Cancelled Details">
+            <div class="patient-info-tab-body">
+              @if (cancelledRows().length === 0) {
+                <app-empty-state icon="event_busy" title="No cancellations" message="This patient has no cancelled items." />
+              } @else {
+                <table mat-table [dataSource]="cancelledRows()" class="patient-info-table">
+                  <ng-container matColumnDef="type">
+                    <th mat-header-cell *matHeaderCellDef>Type</th>
+                    <td mat-cell *matCellDef="let row">{{ row.type }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="description">
+                    <th mat-header-cell *matHeaderCellDef>Description</th>
+                    <td mat-cell *matCellDef="let row">{{ row.description }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="date">
+                    <th mat-header-cell *matHeaderCellDef>Date</th>
+                    <td mat-cell *matCellDef="let row">{{ (row.date | date: 'dd-MM-yyyy') ?? '-' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="amount">
+                    <th mat-header-cell *matHeaderCellDef>Amount</th>
+                    <td mat-cell *matCellDef="let row">{{ row.amount | number: '1.0-2' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="reason">
+                    <th mat-header-cell *matHeaderCellDef>Reason</th>
+                    <td mat-cell *matCellDef="let row">{{ row.reason ?? '-' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let row">
+                      @if (row.refundLink) {
+                        <button mat-stroked-button color="primary" type="button" (click)="goToRefund(row)">
+                          Refund / Credit Note
+                        </button>
+                      }
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="cancelledColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: cancelledColumns"></tr>
+                </table>
+              }
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Patient Files">
+            <div class="patient-info-tab-body">
+              <div class="patient-info-files-toolbar">
+                <button mat-flat-button color="primary" type="button" [disabled]="uploadingFile()" (click)="fileInput.click()">
+                  {{ uploadingFile() ? 'Uploading...' : 'Upload New File' }}
+                </button>
+                <input #fileInput type="file" hidden (change)="onFileSelected($event)" />
+                <a mat-button [routerLink]="['/patient-reports/view', patient()!.id]">Manage Files (deleted files, share)</a>
+              </div>
+
+              @if (data.files.length === 0) {
+                <app-empty-state icon="folder" title="No files yet" message="No documents have been uploaded for this patient." />
+              } @else {
+                <table mat-table [dataSource]="data.files" class="patient-info-table">
+                  <ng-container matColumnDef="fileType">
+                    <th mat-header-cell *matHeaderCellDef>Type</th>
+                    <td mat-cell *matCellDef="let file">{{ file.fileType }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="originalFileName">
+                    <th mat-header-cell *matHeaderCellDef>File Name</th>
+                    <td mat-cell *matCellDef="let file">{{ file.originalFileName }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="uploadedAt">
+                    <th mat-header-cell *matHeaderCellDef>Uploaded</th>
+                    <td mat-cell *matCellDef="let file">{{ file.uploadedAt | date: 'dd-MM-yyyy HH:mm' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="uploadedBy">
+                    <th mat-header-cell *matHeaderCellDef>Uploaded By</th>
+                    <td mat-cell *matCellDef="let file">{{ file.uploadedBy ?? '-' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="comments">
+                    <th mat-header-cell *matHeaderCellDef>Comments</th>
+                    <td mat-cell *matCellDef="let file">{{ file.comments ?? '-' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let file">
+                      <a mat-button color="primary" [href]="file.filePath" target="_blank" rel="noopener">View</a>
+                      <button mat-button color="warn" type="button" (click)="deleteFile(file)">Delete</button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="fileColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: fileColumns"></tr>
+                </table>
+              }
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </section>
+    }
   }
 </div>

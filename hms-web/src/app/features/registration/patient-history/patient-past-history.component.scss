@@ -1,26 +1,98 @@
-.patient-history-search-section,
-.patient-history-patient-section,
-.patient-history-list-section {
+.patient-info-search-section {
   padding: var(--hms-space-4) var(--hms-space-5);
   margin-bottom: var(--hms-space-3);
 }
 
-.patient-history-patient-section {
+.patient-info-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--hms-space-3);
+  align-items: flex-start;
+  gap: var(--hms-space-5);
+  padding: var(--hms-space-4) var(--hms-space-5);
+  margin-bottom: var(--hms-space-3);
 }
 
-.patient-history-patient-table {
-  width: 100%;
-  border-collapse: collapse;
+.patient-info-photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--hms-space-2);
+  flex-shrink: 0;
+}
 
-  td {
-    padding: var(--hms-space-1, 4px) var(--hms-space-2);
+.patient-info-photo-image,
+.patient-info-photo-placeholder {
+  width: 96px;
+  height: 96px;
+  border-radius: var(--hms-radius-md);
+  object-fit: cover;
+}
+
+.patient-info-photo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hms-color-surface-variant, var(--hms-color-surface));
+  color: var(--hms-color-text-muted);
+
+  mat-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
   }
 }
 
-.patient-history-table {
+.patient-info-demographics {
+  flex: 1;
+  min-width: 0;
+}
+
+.patient-info-name-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--hms-space-3);
+  flex-wrap: wrap;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.patient-info-uhid {
+  font-weight: var(--hms-font-weight-medium);
+  color: var(--hms-color-primary);
+}
+
+.patient-info-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hms-space-2) var(--hms-space-5);
+  margin-top: var(--hms-space-2);
+  color: var(--hms-color-text-muted);
+}
+
+.patient-info-address {
+  flex-basis: 100%;
+}
+
+.patient-info-change {
+  flex-shrink: 0;
+}
+
+.patient-info-tabs {
+  overflow-x: auto;
+}
+
+.patient-info-tab-body {
+  padding: var(--hms-space-4) var(--hms-space-2);
+}
+
+.patient-info-table {
   width: 100%;
+}
+
+.patient-info-files-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-3);
+  margin-bottom: var(--hms-space-3);
 }

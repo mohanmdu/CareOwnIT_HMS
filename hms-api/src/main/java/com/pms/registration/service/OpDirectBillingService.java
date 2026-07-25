@@ -87,6 +87,11 @@ public class OpDirectBillingService {
                 .orElseThrow(() -> new EntityNotFoundException("OP Direct Billing not found: " + id)));
     }
 
+    // Patient Information (OP/IP) screen's Billing Details tab.
+    public List<OpDirectBillingListEntryDto> findByPatientId(Long patientId) {
+        return repository.findByPatientIdOrderByBilledAtDesc(patientId).stream().map(this::toListEntry).toList();
+    }
+
     /** Feeds the Appointments screen's "Direct Billing" tab - same date-range convention as AppointmentService.search(). */
     public List<OpDirectBillingListEntryDto> findAll(LocalDate fromDate, LocalDate toDate) {
         Instant fromInstant = fromDate != null ? fromDate.atStartOfDay(ZoneId.systemDefault()).toInstant() : null;

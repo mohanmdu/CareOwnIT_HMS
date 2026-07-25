@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { LabRefundCandidate } from './lab-refund.model';
 import { LabRefundService } from './lab-refund.service';
@@ -29,6 +29,7 @@ export class LabRefundComponent {
   private readonly service = inject(LabRefundService);
   private readonly notification = inject(NotificationService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   invoiceNumberInput: number | null = null;
   searching = signal(false);
@@ -37,6 +38,15 @@ export class LabRefundComponent {
   formVisible = signal(false);
   confirming = signal(false);
   form: { refundAmount: number | null; reason: string } = { refundAmount: null, reason: '' };
+
+  constructor() {
+    // Deep-linked from the Patient Information (OP/IP) screen's Cancelled Details tab.
+    const invoiceNumber = Number(this.route.snapshot.queryParamMap.get('invoiceNumber'));
+    if (invoiceNumber > 0) {
+      this.invoiceNumberInput = invoiceNumber;
+      this.searchInvoice();
+    }
+  }
 
   get isValid(): boolean {
     const paid = this.candidate()?.paidAmount ?? 0;

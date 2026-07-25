@@ -59,4 +59,8 @@ public class Patient extends Auditable {
     @Enumerated(EnumType.STRING)
     @Column(name = "origin_module", nullable = false, length = 32)
     private PatientOriginModule originModule = PatientOriginModule.FRONT_OFFICE;
+
+    /** "/uploads/..." relative path from FileStorageService, same convention as Admission.photoPath - set via uploadPhoto(), null until then. */
+    @Column(name = "photo_path")
+    private String photoPath;
 }

@@ -12,6 +12,9 @@ import org.springframework.data.repository.query.Param;
 public interface OpDirectBillingRepository extends JpaRepository<OpDirectBilling, Long> {
     Optional<OpDirectBilling> findByInvoiceNumber(Long invoiceNumber);
 
+    // Patient Information (OP/IP) screen's Billing Details tab.
+    List<OpDirectBilling> findByPatientIdOrderByBilledAtDesc(Long patientId);
+
     // Seeds InvoiceNumberService's shared sequence at startup, alongside Appointment's.
     @Query("SELECT MAX(b.invoiceNumber) FROM OpDirectBilling b")
     Long findMaxInvoiceNumber();

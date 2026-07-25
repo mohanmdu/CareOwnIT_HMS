@@ -17,14 +17,24 @@ import org.springframework.stereotype.Component;
  * module if it's ever added.
  *
  * Anything under PUBLIC_PREFIXES is unauthenticated by design (the public
- * hospital website's API surface, health/info actuator endpoints, and the
- * login endpoint itself) - never gate these behind a module.
+ * hospital website's API surface, health/info actuator endpoints, the
+ * login endpoint itself, and uploaded static files) - never gate these
+ * behind a module.
+ *
+ * /uploads/ specifically: every uploaded file (consultant photos, admission
+ * photos, CMS images, patient reports) is referenced via plain <img src=...>
+ * or direct download links in both hms-web and the public hms-website -
+ * browsers never attach an Authorization header to those requests, so
+ * gating this path behind the JWT/module check would just make every one
+ * of those images silently 401 instead of rendering. Filenames are random
+ * UUIDs (effectively unguessable), the same exposure model this app has
+ * always used for these files, real auth or not.
  */
 @Component
 public class ModulePathMappings {
 
     public static final Set<String> PUBLIC_PREFIXES =
-            Set.of("/api/public/", "/api/auth/login", "/actuator/health", "/actuator/info");
+            Set.of("/api/public/", "/api/auth/login", "/actuator/health", "/actuator/info", "/uploads/");
 
     private static final Map<String, ModuleKey> PREFIX_TO_MODULE = buildTable();
 

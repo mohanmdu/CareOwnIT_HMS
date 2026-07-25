@@ -103,7 +103,7 @@ public class PublicAppointmentService {
                 null, null,
                 details.firstName(), details.lastName(), details.dateOfBirth(), details.gender(), details.age(),
                 request.mobileNumber(), details.email(), details.address(), true,
-                PatientOriginModule.WEBSITE));
+                PatientOriginModule.WEBSITE, null));
         return created.id();
     }
 

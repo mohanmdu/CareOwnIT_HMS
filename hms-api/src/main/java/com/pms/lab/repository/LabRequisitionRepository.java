@@ -13,6 +13,9 @@ import org.springframework.data.repository.query.Param;
 public interface LabRequisitionRepository extends JpaRepository<LabRequisition, Long> {
     List<LabRequisition> findByStatusOrderByRequisitionDateDesc(LabRequisitionStatus status);
 
+    // Patient Information (OP/IP) screen's Investigations Done tab - full requisition history, any status.
+    List<LabRequisition> findByPatientIdOrderByRequisitionDateDesc(Long patientId);
+
     // IP Billing ledger sync: every non-cancelled Lab/Investigations charge linked to this admission.
     List<LabRequisition> findByAdmissionIdAndStatusNotOrderByRequisitionDateAsc(Long admissionId, LabRequisitionStatus excludedStatus);
 

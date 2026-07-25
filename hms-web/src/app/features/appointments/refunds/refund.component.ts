@@ -11,6 +11,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
+import { ActivatedRoute } from '@angular/router';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { EmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
@@ -84,6 +85,7 @@ export class RefundComponent {
   private readonly consultantService = inject(ConsultantService);
   private readonly notification = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
+  private readonly route = inject(ActivatedRoute);
 
   @ViewChild('reportContent') reportContent?: ElementRef<HTMLElement>;
 
@@ -136,6 +138,13 @@ export class RefundComponent {
       next: (consultants) => this.consultants.set(consultants),
       error: () => this.notification.error('Failed to load consultants.')
     });
+
+    // Deep-linked from the Patient Information (OP/IP) screen's Cancelled Details tab.
+    const invoiceNumber = Number(this.route.snapshot.queryParamMap.get('invoiceNumber'));
+    if (invoiceNumber > 0) {
+      this.invoiceNumberInput = invoiceNumber;
+      this.searchInvoice();
+    }
   }
 
   onTabChange(index: number): void {

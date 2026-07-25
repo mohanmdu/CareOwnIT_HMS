@@ -95,6 +95,11 @@ public class AdmissionService {
         return toDto(getOrThrow(id));
     }
 
+    // Patient Information (OP/IP) screen's Inpatient Details tab.
+    public List<AdmissionDto> findByPatientId(Long patientId) {
+        return repository.findByPatientIdOrderByAdmissionDateDesc(patientId).stream().map(this::toDto).toList();
+    }
+
     @Transactional
     public AdmissionDto admit(AdmissionDto dto) {
         if (dto.roomId() == null) {

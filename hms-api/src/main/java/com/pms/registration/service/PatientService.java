@@ -1,6 +1,7 @@
 package com.pms.registration.service;
 
 import com.pms.common.EntityNotFoundException;
+import com.pms.common.FileStorageService;
 import com.pms.registration.dto.PatientAuditLogDto;
 import com.pms.registration.dto.PatientDto;
 import com.pms.registration.entity.Patient;
@@ -13,6 +14,7 @@ import java.util.List;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Replaces AdminAction.patientRegistration (see migration doc §4.1). The
@@ -34,10 +36,13 @@ public class PatientService {
 
     private final PatientRepository repository;
     private final PatientAuditLogRepository auditLogRepository;
+    private final FileStorageService fileStorageService;
 
-    public PatientService(PatientRepository repository, PatientAuditLogRepository auditLogRepository) {
+    public PatientService(
+            PatientRepository repository, PatientAuditLogRepository auditLogRepository, FileStorageService fileStorageService) {
         this.repository = repository;
         this.auditLogRepository = auditLogRepository;
+        this.fileStorageService = fileStorageService;
     }
 
     public List<PatientDto> search(String query) {
@@ -97,6 +102,14 @@ public class PatientService {
         patient.setActive(true);
         repository.save(patient);
         recordAudit("RESTORE", displayName(patient));
+    }
+
+    @Transactional
+    public PatientDto uploadPhoto(Long id, MultipartFile file) {
+        Patient patient = getOrThrow(id);
+        String photoPath = fileStorageService.store(file, "patients");
+        patient.setPhotoPath(photoPath);
+        return toDto(repository.save(patient));
     }
 
     @Transactional
@@ -166,6 +179,7 @@ public class PatientService {
                 patient.getEmail(),
                 patient.getAddress(),
                 patient.isActive(),
-                patient.getOriginModule());
+                patient.getOriginModule(),
+                patient.getPhotoPath());
     }
 }

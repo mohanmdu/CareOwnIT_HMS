@@ -25,6 +25,8 @@ export interface Patient {
   active?: boolean;
   /** Set once at creation; never changed by later edits - see PatientOriginModule. */
   originModule?: PatientOriginModule | null;
+  /** "/uploads/..." relative path, read-only - set via PatientService.uploadPhoto(), null until then. */
+  photoPath?: string | null;
 }
 
 export interface PatientAuditLogEntry {

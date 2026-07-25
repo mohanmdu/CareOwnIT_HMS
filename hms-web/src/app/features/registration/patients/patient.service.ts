@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import type { PatientSummary } from '../patient-history/patient-summary.model';
 import { Patient, PatientAuditLogEntry } from './patient.model';
 
 export type PatientInput = Omit<Patient, 'id' | 'registrationNumber'>;
@@ -18,6 +19,17 @@ export class PatientService {
 
   get(id: number): Observable<Patient> {
     return this.http.get<Patient>(`${this.baseUrl}/${id}`);
+  }
+
+  /** One-round-trip consolidated view (demographics + admissions + appointments + investigations + billing + payments + files) - backs the Patient Information (OP/IP) screen. */
+  summary(id: number): Observable<PatientSummary> {
+    return this.http.get<PatientSummary>(`${this.baseUrl}/${id}/summary`);
+  }
+
+  uploadPhoto(id: number, file: File): Observable<Patient> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<Patient>(`${this.baseUrl}/${id}/photo`, formData);
   }
 
   listInactive(): Observable<Patient[]> {

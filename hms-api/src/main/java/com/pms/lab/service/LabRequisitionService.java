@@ -177,6 +177,11 @@ public class LabRequisitionService {
         return toDto(getOrThrow(id));
     }
 
+    // Patient Information (OP/IP) screen's Investigations Done tab.
+    public List<LabRequisitionDto> findByPatientId(Long patientId) {
+        return repository.findByPatientIdOrderByRequisitionDateDesc(patientId).stream().map(this::toDto).toList();
+    }
+
     @Transactional
     public LabRequisitionDto approve(Long id, LabRequisitionApproveDto dto) {
         LabRequisition requisition = getOrThrow(id);

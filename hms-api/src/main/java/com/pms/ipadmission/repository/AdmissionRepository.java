@@ -18,6 +18,9 @@ public interface AdmissionRepository extends JpaRepository<Admission, Long> {
     // deliberately scoped to ADMITTED only, not "most recent regardless of status" like the method above.
     java.util.Optional<Admission> findFirstByPatientIdAndStatusOrderByAdmissionDateDesc(Long patientId, AdmissionStatus status);
 
+    // Patient Information (OP/IP) screen's Inpatient Details tab - full admission history, any status.
+    List<Admission> findByPatientIdOrderByAdmissionDateDesc(Long patientId);
+
     @Query("""
             SELECT a FROM Admission a
             WHERE (:fromDate IS NULL OR a.admissionDate >= :fromDate)

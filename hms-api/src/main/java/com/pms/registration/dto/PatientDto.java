@@ -20,5 +20,7 @@ public record PatientDto(
         String address,
         Boolean active,
         // Required on create (register() defaults to FRONT_OFFICE if omitted); ignored on update - see PatientService.
-        PatientOriginModule originModule) {
+        PatientOriginModule originModule,
+        // Read-only - set via the dedicated uploadPhoto() endpoint, never through register()/update().
+        String photoPath) {
 }
