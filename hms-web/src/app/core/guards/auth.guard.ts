@@ -1,7 +1,7 @@
 import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
-import { NAV_GROUPS } from '../../layout/nav-config';
+import { NAV_GROUPS, routesForModule } from '../../layout/nav-config';
 import type { ModuleKey } from '../../layout/package-config';
 
 const CHANGE_PASSWORD_ROUTE = '/change-password';
@@ -21,10 +21,20 @@ const ROUTE_TO_MODULE: Array<{ route: string; moduleKey: ModuleKey }> = NAV_GROU
  * listed one) is allowed by default - this guard is a UX nicety that hides
  * unreachable sidenav links early, not the real security boundary. The
  * backend's ModuleAuthorizationManager is what actually enforces access.
+ *
+ * Returns the matched NAV_GROUPS entry's OWN route (not the raw url, which
+ * may be a nested/parameterized sub-path) so callers can check page-level
+ * permission against exactly what the Role picker stores.
  */
-function requiredModuleFor(url: string): ModuleKey | null {
-  const match = ROUTE_TO_MODULE.find((entry) => url === entry.route || url.startsWith(`${entry.route}/`));
-  return match?.moduleKey ?? null;
+function requiredModuleFor(url: string): { route: string; moduleKey: ModuleKey } | null {
+  return ROUTE_TO_MODULE.find((entry) => url === entry.route || url.startsWith(`${entry.route}/`)) ?? null;
+}
+
+/** Mirrors getVisibleNavGroups()'s "never page-restricted" default - see package-config.ts. */
+function isRoutePermitted(matchedRoute: string, moduleKey: ModuleKey, permittedRoutes: Set<string>): boolean {
+  const modulePages = routesForModule(moduleKey);
+  const pageLevelRestricted = modulePages.some((route) => permittedRoutes.has(route));
+  return !pageLevelRestricted || permittedRoutes.has(matchedRoute);
 }
 
 export const authGuard: CanActivateFn = (_route, state) => {
@@ -41,9 +51,14 @@ export const authGuard: CanActivateFn = (_route, state) => {
     return router.parseUrl(CHANGE_PASSWORD_ROUTE);
   }
 
-  const requiredModule = requiredModuleFor(url);
-  if (requiredModule && !auth.permittedModules().has(requiredModule)) {
-    return router.parseUrl('/dashboard');
+  const match = requiredModuleFor(url);
+  if (match) {
+    if (!auth.permittedModules().has(match.moduleKey)) {
+      return router.parseUrl('/dashboard');
+    }
+    if (!isRoutePermitted(match.route, match.moduleKey, auth.permittedRoutes())) {
+      return router.parseUrl('/dashboard');
+    }
   }
 
   return true;

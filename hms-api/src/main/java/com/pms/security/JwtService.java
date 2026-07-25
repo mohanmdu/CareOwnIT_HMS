@@ -33,10 +33,15 @@ public class JwtService {
         Instant now = Instant.now();
         Instant expiry = now.plus(expirationMinutes, ChronoUnit.MINUTES);
         List<String> modules = user.getRole().getPermittedModules().stream().map(ModuleKey::key).toList();
+        List<String> routes = List.copyOf(user.getRole().getPermittedRoutes());
         return Jwts.builder()
                 .subject(user.getUsername())
                 .claim("roleName", user.getRole().getName())
                 .claim("modules", modules)
+                .claim("routes", routes)
+                // null removes the claim entirely (jjwt JwtBuilder semantics) rather than serializing a literal null -
+                // most roles have no override, so this keeps their tokens clean.
+                .claim("defaultRoute", user.getRole().getDefaultRoute())
                 .claim("mustChangePassword", user.isMustChangePassword())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiry))

@@ -10,18 +10,54 @@
 
       <fieldset class="role-permission-picker">
         <legend>Modules visible to this role</legend>
-        <div class="role-permission-grid">
+        <div class="role-permission-list">
           @for (option of permissionOptions; track option.moduleKey) {
-            <mat-checkbox
-              [checked]="isChecked(option.moduleKey)"
-              (change)="toggleModule(option.moduleKey, $event.checked)"
-            >
-              {{ option.label }}
-            </mat-checkbox>
+            <div class="role-permission-module">
+              <div class="role-permission-module-row">
+                <mat-checkbox [checked]="isModuleChecked(option.moduleKey)" (change)="toggleModule(option, $event.checked)">
+                  {{ option.label }}
+                </mat-checkbox>
+                @if (option.pages.length > 1) {
+                  <button
+                    mat-icon-button
+                    type="button"
+                    class="role-permission-expand-toggle"
+                    (click)="toggleExpand(option.moduleKey)"
+                    [attr.aria-expanded]="isExpanded(option.moduleKey)"
+                    [attr.aria-label]="(isExpanded(option.moduleKey) ? 'Collapse' : 'Expand') + ' ' + option.label + ' pages'"
+                  >
+                    <mat-icon aria-hidden="true">{{ isExpanded(option.moduleKey) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                  </button>
+                }
+              </div>
+
+              @if (option.pages.length > 1 && isExpanded(option.moduleKey)) {
+                <div class="role-permission-pages">
+                  @for (page of option.pages; track page.route) {
+                    <mat-checkbox [checked]="isPageChecked(page.route)" (change)="togglePage(page.route, $event.checked)">
+                      {{ page.label }}
+                    </mat-checkbox>
+                  }
+                </div>
+              }
+            </div>
           }
         </div>
-        <p class="role-permission-hint">Dashboard is always available to every role.</p>
+        <p class="role-permission-hint">
+          Dashboard is always available to every role. Expand a module to restrict it to specific pages.
+        </p>
       </fieldset>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="role-default-route-field">
+        <mat-label>Default page after login</mat-label>
+        <mat-select name="defaultRoute" [(ngModel)]="form.defaultRoute">
+          <mat-option [value]="null">Dashboard (default)</mat-option>
+          @for (page of availableLandingPages(); track page.route) {
+            <mat-option [value]="page.route">{{ page.label }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint>Only pages this role can currently reach are offered.</mat-hint>
+      </mat-form-field>
 
       <div class="role-form-submit">
         <button mat-flat-button color="primary" type="submit" [disabled]="!isValid || saving()">

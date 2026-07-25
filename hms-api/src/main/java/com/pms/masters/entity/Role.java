@@ -52,4 +52,38 @@ public class Role extends Auditable {
     @Column(name = "module_key")
     @Enumerated(EnumType.STRING)
     private Set<ModuleKey> permittedModules = new HashSet<>();
+
+    /**
+     * Individual sidenav pages (NavItem.route) this role can see, WITHIN an
+     * already-permitted module - a finer-grained restriction layered on top
+     * of permittedModules, not a replacement for it. Opaque route strings
+     * (e.g. "/registration/patients"), owned and validated by the frontend's
+     * NAV_GROUPS, not this backend - see role-list.component.ts.
+     *
+     * Frontend-only enforcement by design (see the Role & User Management
+     * page-level-permissions decision): this backend never reads this set
+     * for authorization, only stores and returns it. Empty means "no
+     * page-level restriction recorded for any module yet" - the frontend
+     * treats an already-granted module with zero routes recorded here as
+     * fully open (today's behavior), so every role created before this field
+     * existed keeps working unchanged with no migration backfill needed.
+     */
+    @ElementCollection
+    @CollectionTable(name = "role_route_permission", joinColumns = @JoinColumn(name = "role_id"))
+    @Column(name = "route", length = 255)
+    private Set<String> permittedRoutes = new HashSet<>();
+
+    /**
+     * Where a user with this role lands right after login, instead of the
+     * default '/dashboard' - e.g. a front-desk-only "Patient" role that
+     * should go straight to the booking screen. Null means "use the default
+     * dashboard", not an error - most roles have no reason to override this.
+     * Opaque frontend route string, same ownership model as permittedRoutes.
+     * If this ever points at a page the role no longer has access to (e.g.
+     * after a later edit prunes it), the frontend route guard's own
+     * always-granted '/dashboard' fallback recovers gracefully - see
+     * auth.guard.ts.
+     */
+    @Column(name = "default_route")
+    private String defaultRoute;
 }

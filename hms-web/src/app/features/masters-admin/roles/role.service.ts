@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Role } from './role.model';
 
-export type RoleInput = Pick<Role, 'name' | 'permittedModules'>;
+export type RoleInput = Pick<Role, 'name' | 'permittedModules' | 'permittedRoutes' | 'defaultRoute'>;
 
 @Injectable({ providedIn: 'root' })
 export class RoleService {

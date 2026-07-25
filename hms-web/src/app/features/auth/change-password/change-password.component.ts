@@ -44,7 +44,7 @@ export class ChangePasswordComponent {
     this.auth.changePassword(this.currentPassword, this.newPassword).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.router.navigateByUrl('/dashboard');
+        this.router.navigateByUrl(this.auth.defaultRoute() ?? '/dashboard');
       },
       error: (error) => {
         this.submitting.set(false);

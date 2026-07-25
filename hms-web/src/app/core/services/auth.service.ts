@@ -11,6 +11,8 @@ interface DecodedToken {
   sub: string;
   roleName: string;
   modules: ModuleKey[];
+  routes: string[];
+  defaultRoute: string | null;
   mustChangePassword: boolean;
   exp: number;
 }
@@ -42,6 +44,9 @@ export class AuthService {
   readonly currentUsername = computed(() => this.decoded()?.sub ?? null);
   readonly roleName = computed(() => this.decoded()?.roleName ?? null);
   readonly permittedModules = computed<Set<ModuleKey>>(() => new Set(this.decoded()?.modules ?? []));
+  readonly permittedRoutes = computed<Set<string>>(() => new Set(this.decoded()?.routes ?? []));
+  /** Where this role lands right after login - see Role.defaultRoute. Null means the default '/dashboard'. */
+  readonly defaultRoute = computed(() => this.decoded()?.defaultRoute ?? null);
   readonly mustChangePassword = computed(() => this.decoded()?.mustChangePassword ?? false);
 
   isAuthenticated(): boolean {

@@ -44,6 +44,19 @@ export interface NavGroup {
  * intentionally left out rather than stubbed - see moduleKey/package-config.ts
  * for how this list is filtered per package tier.
  */
+/** All NavItem routes whose effective moduleKey (item override, or its group's) equals the given key - used for the Role permission picker's per-module submenu, and for "has this module's page-level access ever been restricted" checks (see package-config.ts / auth.guard.ts). */
+export function routesForModule(moduleKey: ModuleKey): string[] {
+  const routes: string[] = [];
+  for (const group of NAV_GROUPS) {
+    for (const item of group.items) {
+      if ((item.moduleKey ?? group.moduleKey) === moduleKey) {
+        routes.push(item.route);
+      }
+    }
+  }
+  return routes;
+}
+
 export const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Overview',

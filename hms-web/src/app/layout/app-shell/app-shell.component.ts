@@ -51,7 +51,7 @@ export class AppShellComponent {
   private readonly clinicSettingsService = inject(ClinicSettingsService);
 
   /** Recomputes if the signed-in user's role permissions ever change without a full page reload (e.g. after an admin edits their role and they re-authenticate). */
-  readonly navGroups = computed(() => getVisibleNavGroups(this.auth.permittedModules()));
+  readonly navGroups = computed(() => getVisibleNavGroups(this.auth.permittedModules(), this.auth.permittedRoutes()));
 
   // Footer only renders when a client has actually set custom footer text -
   // ThemeService already applies header/footer colors at bootstrap regardless,

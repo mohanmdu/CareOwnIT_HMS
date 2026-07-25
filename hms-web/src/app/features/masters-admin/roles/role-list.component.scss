@@ -8,7 +8,8 @@
   gap: var(--hms-space-4);
 }
 
-.role-name-field {
+.role-name-field,
+.role-default-route-field {
   max-width: 360px;
   width: 100%;
 }
@@ -27,10 +28,36 @@
   }
 }
 
-.role-permission-grid {
+.role-permission-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-1);
+}
+
+.role-permission-module {
+  border-bottom: 1px solid var(--hms-color-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.role-permission-module-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hms-space-2);
+}
+
+.role-permission-expand-toggle {
+  flex-shrink: 0;
+}
+
+.role-permission-pages {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: var(--hms-space-2) var(--hms-space-4);
+  gap: var(--hms-space-1) var(--hms-space-4);
+  padding: 0 0 var(--hms-space-3) var(--hms-space-6);
 }
 
 .role-permission-hint {
@@ -61,18 +88,28 @@
   gap: var(--hms-space-3);
 }
 
+// table-layout: fixed so the actions column's width is actually respected -
+// with the default "auto" layout, browsers redistribute leftover table width
+// across columns by a content-weighted heuristic that ignores a plain
+// `width: 0` hint (confirmed by inspecting rendered column widths: the
+// actions column absorbed almost all the free space instead of shrinking to
+// its two buttons). Fixed layout makes column widths deterministic: name,
+// modules and status share the remainder equally, actions gets just enough
+// for "Edit" + "Deactivate" side by side.
 .role-table {
   width: 100%;
+  table-layout: fixed;
 }
 
 .role-actions-header {
-  width: 0;
+  width: 210px;
   white-space: nowrap;
 }
 
 .role-actions-cell {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: var(--hms-space-2);
   white-space: nowrap;
 }

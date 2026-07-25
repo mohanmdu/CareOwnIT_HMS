@@ -37,7 +37,7 @@ export class LoginComponent {
     this.auth.login(this.username, this.password).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.router.navigateByUrl(this.auth.mustChangePassword() ? '/change-password' : '/dashboard');
+        this.router.navigateByUrl(this.auth.mustChangePassword() ? '/change-password' : (this.auth.defaultRoute() ?? '/dashboard'));
       },
       error: () => {
         this.submitting.set(false);

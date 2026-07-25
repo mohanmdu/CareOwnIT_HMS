@@ -38,6 +38,8 @@ public class RoleService {
         role.setName(dto.name());
         role.setActive(true);
         role.setPermittedModules(toModuleKeys(dto.permittedModules()));
+        role.setPermittedRoutes(toRoutes(dto.permittedRoutes()));
+        role.setDefaultRoute(blankToNull(dto.defaultRoute()));
         return toDto(repository.save(role));
     }
 
@@ -46,6 +48,8 @@ public class RoleService {
         Role role = getOrThrow(id);
         role.setName(dto.name());
         role.setPermittedModules(toModuleKeys(dto.permittedModules()));
+        role.setPermittedRoutes(toRoutes(dto.permittedRoutes()));
+        role.setDefaultRoute(blankToNull(dto.defaultRoute()));
         return toDto(repository.save(role));
     }
 
@@ -80,8 +84,19 @@ public class RoleService {
         return modules;
     }
 
+    /** Opaque pass-through - see Role.permittedRoutes for why this backend doesn't validate against a canonical route list. */
+    private Set<String> toRoutes(List<String> routes) {
+        return routes == null ? new HashSet<>() : new HashSet<>(routes);
+    }
+
+    private String blankToNull(String value) {
+        return (value == null || value.isBlank()) ? null : value;
+    }
+
     private RoleDto toDto(Role role) {
         List<String> permittedModules = role.getPermittedModules().stream().map(ModuleKey::key).toList();
-        return new RoleDto(role.getId(), role.getName(), role.isActive(), permittedModules);
+        List<String> permittedRoutes = List.copyOf(role.getPermittedRoutes());
+        return new RoleDto(
+                role.getId(), role.getName(), role.isActive(), permittedModules, permittedRoutes, role.getDefaultRoute());
     }
 }

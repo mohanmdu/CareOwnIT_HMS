@@ -1,5 +1,5 @@
 import { environment } from '../../environments/environment';
-import { NavGroup, NAV_GROUPS } from './nav-config';
+import { NavGroup, NAV_GROUPS, routesForModule } from './nav-config';
 
 /** One entry per NavGroup in nav-config.ts - keep these in sync. */
 export type ModuleKey =
@@ -88,11 +88,32 @@ export function activeModuleKeys(): ModuleKey[] {
  * intersection of the deployment's package tier and the role's permissions,
  * so a role can never see a module the deployment isn't even licensed for,
  * and a license upgrade can never surface a module the role wasn't granted.
+ * @param permittedRoutes the signed-in user's role-permitted individual
+ * pages, layered on top of permittedModules (see Role.permittedRoutes on the
+ * backend). A module with zero of its own routes present in this set is
+ * treated as "never page-restricted" and stays fully open - only once at
+ * least one of a module's routes appears here does that module's page list
+ * get pruned to just the routes present. This keeps every role that predates
+ * page-level permissions working unchanged with no data migration.
  */
-export function getVisibleNavGroups(permittedModules?: Set<ModuleKey>): NavGroup[] {
+export function getVisibleNavGroups(permittedModules?: Set<ModuleKey>, permittedRoutes?: Set<string>): NavGroup[] {
   const tierEnabled = new Set(activeModuleKeys());
   const enabled = permittedModules ? new Set([...tierEnabled].filter((key) => permittedModules.has(key))) : tierEnabled;
   return NAV_GROUPS.filter((group) => enabled.has(group.moduleKey))
-    .map((group) => ({ ...group, items: group.items.filter((item) => enabled.has(item.moduleKey ?? group.moduleKey)) }))
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => {
+        const key = item.moduleKey ?? group.moduleKey;
+        if (!enabled.has(key)) {
+          return false;
+        }
+        if (!permittedRoutes) {
+          return true;
+        }
+        const modulePages = routesForModule(key);
+        const pageLevelRestricted = modulePages.some((route) => permittedRoutes.has(route));
+        return !pageLevelRestricted || permittedRoutes.has(item.route);
+      })
+    }))
     .filter((group) => group.items.length > 0);
 }

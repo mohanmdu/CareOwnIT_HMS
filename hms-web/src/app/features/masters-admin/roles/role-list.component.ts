@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { NAV_GROUPS } from '../../../layout/nav-config';
 import { activeModuleKeys, ModuleKey } from '../../../layout/package-config';
@@ -20,13 +21,19 @@ import { StatusBadgeComponent } from '../../../shared/ui/status-badge/status-bad
 import { Role } from './role.model';
 import { RoleService } from './role.service';
 
-interface ModulePermissionOption {
-  moduleKey: ModuleKey;
+interface ModulePermissionPage {
+  route: string;
   label: string;
 }
 
+interface ModulePermissionOption {
+  moduleKey: ModuleKey;
+  label: string;
+  pages: ModulePermissionPage[];
+}
+
 /**
- * One checkbox per distinct NAV_GROUPS module, in sidenav order, filtered to
+ * One entry per distinct NAV_GROUPS module, in sidenav order, filtered to
  * the deployment's active package tier - deliberately finer-grained than the
  * OP/IP/Pharmacy/Lab/... vocabulary from the original ask, since that's
  * trivially expressed as checking the relevant group(s) and avoids inventing
@@ -35,8 +42,13 @@ interface ModulePermissionOption {
  * 'overview' is excluded - implicitly granted to every role, since a role
  * with no landing page would strand a user immediately after login. A group
  * whose items carry their own moduleKey override (only Overview today, for
- * Cashier/CEO Dashboard) yields one checkbox per distinct override key
- * instead of one for the whole group, so those stay independently grantable.
+ * Cashier/CEO Dashboard) yields one entry per distinct override key instead
+ * of one for the whole group, so those stay independently grantable.
+ *
+ * Each entry also carries its individual pages, for the expandable per-page
+ * submenu - a module with only one page renders as a plain checkbox (no
+ * expand arrow, nothing to narrow down), mirroring how the sidenav itself
+ * renders a single-item group as a flat link instead of an accordion.
  */
 function buildPermissionOptions(): ModulePermissionOption[] {
   const tierEnabled = new Set(activeModuleKeys());
@@ -51,17 +63,21 @@ function buildPermissionOptions(): ModulePermissionOption[] {
       }
       seen.add(key);
       const label = key === group.moduleKey ? group.label : (group.items.find((item) => item.moduleKey === key)?.label ?? key);
-      options.push({ moduleKey: key, label });
+      const pages = group.items
+        .filter((item) => (item.moduleKey ?? group.moduleKey) === key)
+        .map((item) => ({ route: item.route, label: item.label }));
+      options.push({ moduleKey: key, label, pages });
     }
   }
   return options;
 }
 
 /**
- * Roles: name + which HMS modules the role can see/access (see the Role &
- * User Management design). Custom screen rather than the generic
- * MasterCrudComponent used by Departments/Specializations - the permission
- * picker below the name field doesn't fit that shared shape.
+ * Roles: name + which HMS modules (and, per module, which individual pages)
+ * the role can see/access (see the Role & User Management design). Custom
+ * screen rather than the generic MasterCrudComponent used by
+ * Departments/Specializations - the permission picker below the name field
+ * doesn't fit that shared shape.
  */
 @Component({
   selector: 'app-role-list',
@@ -75,6 +91,7 @@ function buildPermissionOptions(): ModulePermissionOption[] {
     MatInputModule,
     MatCheckboxModule,
     MatProgressBarModule,
+    MatSelectModule,
     MatPaginatorModule,
     PageHeaderComponent,
     EmptyStateComponent,
@@ -96,14 +113,17 @@ export class RoleListComponent {
   loading = signal(false);
   saving = signal(false);
   editingRole = signal<Role | null>(null);
+  expandedModules = signal<Set<ModuleKey>>(new Set());
 
   searchTerm = signal('');
   filteredRoles = computed(() => this.filterBySearch(this.roles()));
   pagination = new TablePagination(this.filteredRoles);
 
-  form: { name: string; permittedModules: Set<ModuleKey> } = {
+  form: { name: string; permittedModules: Set<ModuleKey>; permittedRoutes: Set<string>; defaultRoute: string | null } = {
     name: '',
-    permittedModules: new Set()
+    permittedModules: new Set(),
+    permittedRoutes: new Set(),
+    defaultRoute: null
   };
 
   constructor() {
@@ -138,16 +158,76 @@ export class RoleListComponent {
     return roles.filter((role) => role.name.toLowerCase().includes(term));
   }
 
-  isChecked(moduleKey: ModuleKey): boolean {
+  isModuleChecked(moduleKey: ModuleKey): boolean {
     return this.form.permittedModules.has(moduleKey);
   }
 
-  toggleModule(moduleKey: ModuleKey, checked: boolean): void {
+  isPageChecked(route: string): boolean {
+    return this.form.permittedRoutes.has(route);
+  }
+
+  isExpanded(moduleKey: ModuleKey): boolean {
+    return this.expandedModules().has(moduleKey);
+  }
+
+  toggleExpand(moduleKey: ModuleKey): void {
+    this.expandedModules.update((current) => {
+      const next = new Set(current);
+      if (next.has(moduleKey)) {
+        next.delete(moduleKey);
+      } else {
+        next.add(moduleKey);
+      }
+      return next;
+    });
+  }
+
+  /** Checking a module grants all of its pages as a convenience bulk-action; unchecking withdraws all of them. Individual pages can then be pruned without affecting the module's own on/off state. */
+  toggleModule(option: ModulePermissionOption, checked: boolean): void {
     if (checked) {
-      this.form.permittedModules.add(moduleKey);
+      this.form.permittedModules.add(option.moduleKey);
+      for (const page of option.pages) {
+        this.form.permittedRoutes.add(page.route);
+      }
     } else {
-      this.form.permittedModules.delete(moduleKey);
+      this.form.permittedModules.delete(option.moduleKey);
+      for (const page of option.pages) {
+        this.form.permittedRoutes.delete(page.route);
+      }
     }
+  }
+
+  togglePage(route: string, checked: boolean): void {
+    if (checked) {
+      this.form.permittedRoutes.add(route);
+    } else {
+      this.form.permittedRoutes.delete(route);
+    }
+  }
+
+  /**
+   * Candidate pages for "default page after login" - only pages the role
+   * being edited can actually reach right now, using the same "a module
+   * with no page-level restriction recorded is fully open" rule as the
+   * sidenav/route guard (see package-config.ts). A plain method, not a
+   * computed signal - form.permittedModules/permittedRoutes are mutated
+   * Sets on a plain object, not signals, so this needs to re-run on every
+   * change-detection pass the same way isModuleChecked()/isPageChecked() do.
+   */
+  availableLandingPages(): { route: string; label: string }[] {
+    const pages: { route: string; label: string }[] = [];
+    for (const option of this.permissionOptions) {
+      if (!this.form.permittedModules.has(option.moduleKey)) {
+        continue;
+      }
+      const pageLevelRestricted = option.pages.some((page) => this.form.permittedRoutes.has(page.route));
+      for (const page of option.pages) {
+        if (!pageLevelRestricted || this.form.permittedRoutes.has(page.route)) {
+          pages.push({ route: page.route, label: `${option.label} – ${page.label}` });
+        }
+      }
+    }
+    return pages;
   }
 
   /**
@@ -172,7 +252,9 @@ export class RoleListComponent {
     this.editingRole.set(role);
     this.form = {
       name: role.name,
-      permittedModules: new Set(role.permittedModules)
+      permittedModules: new Set(role.permittedModules),
+      permittedRoutes: new Set(role.permittedRoutes),
+      defaultRoute: role.defaultRoute
     };
   }
 
@@ -188,7 +270,9 @@ export class RoleListComponent {
     this.saving.set(true);
     const input = {
       name: this.form.name.trim(),
-      permittedModules: [...this.form.permittedModules]
+      permittedModules: [...this.form.permittedModules],
+      permittedRoutes: [...this.form.permittedRoutes],
+      defaultRoute: this.form.defaultRoute
     };
     const editing = this.editingRole();
     const save$ = editing?.id ? this.service.update(editing.id, input) : this.service.create(input);
@@ -208,7 +292,7 @@ export class RoleListComponent {
   }
 
   private resetForm(): void {
-    this.form = { name: '', permittedModules: new Set() };
+    this.form = { name: '', permittedModules: new Set(), permittedRoutes: new Set(), defaultRoute: null };
   }
 
   deactivate(role: Role): void {
