@@ -1,9 +1,186 @@
-<app-page-header title="Book an Appointment" subtitle="Schedule a visit with one of our specialists." />
+<app-page-header title="Book an Appointment" subtitle="Choose a doctor, pick a time, and confirm - no login required." />
 
 <div class="container section book-appointment-section">
-  <p>
-    Appointments are scheduled through our patient booking system. Click below to search for a doctor or department
-    and pick a time that works for you.
-  </p>
-  <a [href]="bookingUrl" class="btn btn-primary" target="_blank" rel="noopener">Go to Booking</a>
+  <ol class="booking-steps" aria-label="Booking progress">
+    <li [class.active]="step() === 1" [class.done]="step() > 1">1. Doctor</li>
+    <li [class.active]="step() === 2" [class.done]="step() > 2">2. Date &amp; Time</li>
+    <li [class.active]="step() === 3" [class.done]="step() > 3">3. Your Details</li>
+    <li [class.active]="step() === 4">4. Confirmed</li>
+  </ol>
+
+  @if (step() === 1) {
+    <div class="card booking-card">
+      <label class="field-label" for="department">Department</label>
+      <select id="department" class="field-input" [(ngModel)]="selectedDepartmentId" (ngModelChange)="onDepartmentChange()">
+        <option [ngValue]="null">Select a department...</option>
+        @for (department of departments(); track department.id) {
+          <option [ngValue]="department.id">{{ department.name }}</option>
+        }
+      </select>
+
+      @if (selectedDepartmentId != null) {
+        @if (consultants().length === 0) {
+          <p class="empty-state">No doctors available in this department right now.</p>
+        } @else {
+          <div class="doctor-list">
+            @for (consultant of consultants(); track consultant.id) {
+              <button type="button" class="doctor-tile" (click)="selectConsultant(consultant)">
+                <span class="doctor-name">{{ consultant.name }}</span>
+                @if (consultant.specializationName) {
+                  <span class="doctor-specialization">{{ consultant.specializationName }}</span>
+                }
+              </button>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+
+  @if (step() === 2 && selectedConsultant(); as consultant) {
+    <div class="card booking-card">
+      <button type="button" class="link-back" (click)="backToStep(1)">&larr; Choose a different doctor</button>
+      <h3>{{ consultant.name }}</h3>
+
+      <label class="field-label" for="appointment-date">Date</label>
+      <input
+        id="appointment-date"
+        type="date"
+        class="field-input"
+        [min]="minDate"
+        [(ngModel)]="selectedDate"
+        (ngModelChange)="onDateChange()"
+      />
+
+      @if (loadingSlots()) {
+        <p>Loading available times...</p>
+      } @else if (slots().length === 0) {
+        <p class="empty-state">No slots available on this date - try another date.</p>
+      } @else {
+        <div class="slot-grid">
+          @for (slot of slots(); track slot.time) {
+            <button
+              type="button"
+              class="slot-tile"
+              [class.selected]="selectedSlot() === slot"
+              [disabled]="slot.status !== 'AVAILABLE'"
+              (click)="selectSlot(slot)"
+            >
+              {{ slot.time.slice(0, 5) }}
+              @if (slot.status === 'BOOKED') {
+                <span class="slot-status">Booked</span>
+              } @else if (slot.status === 'PAST') {
+                <span class="slot-status">Past</span>
+              }
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if (step() === 3 && selectedConsultant(); as consultant) {
+    <div class="card booking-card">
+      <button type="button" class="link-back" (click)="backToStep(2)">&larr; Choose a different time</button>
+      <h3>Your Details</h3>
+      <p class="section-subtitle-inline">
+        {{ consultant.name }} &middot; {{ selectedDate }} &middot; {{ selectedSlot()?.time?.slice(0, 5) }}
+      </p>
+
+      @if (lookupResults() === null) {
+        <label class="field-label" for="mobile-number">Mobile Number</label>
+        <input
+          id="mobile-number"
+          type="tel"
+          class="field-input"
+          inputmode="numeric"
+          maxlength="10"
+          placeholder="10-digit mobile number"
+          [(ngModel)]="mobileNumber"
+        />
+        <button type="button" class="btn btn-primary" [disabled]="searchingPatient()" (click)="searchByMobile()">
+          {{ searchingPatient() ? 'Searching...' : 'Continue' }}
+        </button>
+      } @else {
+        <p class="mobile-confirm">
+          Mobile: <strong>{{ mobileNumber }}</strong>
+          <button type="button" class="link-back" (click)="changeMobileNumber()">Change</button>
+        </p>
+
+        @if (lookupResults()!.length > 0 && !showNewPatientForm()) {
+          <p class="field-label">Is this you?</p>
+          <div class="patient-list">
+            @for (patient of lookupResults(); track patient.patientId) {
+              <button
+                type="button"
+                class="patient-tile"
+                [class.selected]="selectedPatientId() === patient.patientId"
+                (click)="selectExistingPatient(patient.patientId)"
+              >
+                <span class="patient-name">{{ patient.name }}</span>
+                <span class="patient-meta">
+                  @if (patient.gender) {
+                    {{ patient.gender }}
+                  }
+                  @if (patient.age) {
+                    &middot; {{ patient.age }} yrs
+                  }
+                </span>
+              </button>
+            }
+          </div>
+          <button type="button" class="link-back" (click)="addNewPatientInstead()">None of these - add a new patient</button>
+        }
+
+        @if (showNewPatientForm()) {
+          <div class="new-patient-form">
+            <p class="field-label">New Patient Details</p>
+            <label class="field-label" for="first-name">First Name</label>
+            <input id="first-name" type="text" class="field-input" [(ngModel)]="newPatient.firstName" required />
+
+            <label class="field-label" for="last-name">Last Name</label>
+            <input id="last-name" type="text" class="field-input" [(ngModel)]="newPatient.lastName" />
+
+            <label class="field-label" for="gender">Gender</label>
+            <select id="gender" class="field-input" [(ngModel)]="newPatient.gender">
+              <option [ngValue]="null">Select...</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+
+            <label class="field-label" for="age">Age</label>
+            <input id="age" type="number" class="field-input" min="0" max="120" [(ngModel)]="newPatient.age" />
+
+            <label class="field-label" for="email">Email (optional)</label>
+            <input id="email" type="email" class="field-input" [(ngModel)]="newPatient.email" />
+
+            <label class="field-label" for="address">Address (optional)</label>
+            <input id="address" type="text" class="field-input" [(ngModel)]="newPatient.address" />
+          </div>
+        }
+
+        @if (errorMessage()) {
+          <p class="booking-error" role="alert">{{ errorMessage() }}</p>
+        }
+
+        @if (selectedPatientId() != null || showNewPatientForm()) {
+          <button type="button" class="btn btn-primary" [disabled]="!canConfirmBooking || submitting()" (click)="confirmBooking()">
+            {{ submitting() ? 'Booking...' : 'Confirm Appointment' }}
+          </button>
+        }
+      }
+    </div>
+  }
+
+  @if (step() === 4 && bookingResult(); as result) {
+    <div class="card booking-card booking-confirmation">
+      <h3>Appointment Confirmed</h3>
+      <p>
+        <strong>{{ result.patientName }}</strong> is booked with <strong>{{ result.consultantName }}</strong>
+        on <strong>{{ result.date }}</strong> at <strong>{{ result.slotTime.slice(0, 5) }}</strong>.
+      </p>
+      <button type="button" class="btn btn-outline" (click)="startOver()">Book Another Appointment</button>
+    </div>
+  }
 </div>

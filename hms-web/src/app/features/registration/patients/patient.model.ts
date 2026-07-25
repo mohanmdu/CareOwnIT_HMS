@@ -1,4 +1,6 @@
-export type PatientOriginModule = 'FRONT_OFFICE' | 'OP_APPOINTMENT' | 'IP_ADMISSION' | 'PHARMACY' | 'LAB' | 'INSURANCE';
+// 'WEBSITE' is deliberately excluded from PATIENT_ORIGIN_MODULE_OPTIONS below - it's only ever
+// set programmatically by the public booking flow, never a choice staff make when registering someone in person.
+export type PatientOriginModule = 'FRONT_OFFICE' | 'OP_APPOINTMENT' | 'IP_ADMISSION' | 'PHARMACY' | 'LAB' | 'INSURANCE' | 'WEBSITE';
 
 export const PATIENT_ORIGIN_MODULE_OPTIONS: { value: PatientOriginModule; label: string }[] = [
   { value: 'FRONT_OFFICE', label: 'Front Office / Reception' },

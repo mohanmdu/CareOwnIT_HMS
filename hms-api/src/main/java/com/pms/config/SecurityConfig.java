@@ -68,11 +68,20 @@ public class SecurityConfig {
         response.getWriter().write("{\"status\":" + status + ",\"message\":\"" + message + "\"}");
     }
 
-    // Dev-only: allows the Angular dev server (localhost:4200) to call this API
-    // directly. Tighten to the real deployed origin(s) outside local development.
+    // Dev-only: allows either Angular dev server (hms-web, hms-website) to
+    // call this API directly, whichever port it actually lands on. A fixed
+    // origin list doesn't work here - when hms-web already holds 4200, the
+    // Angular/Vite dev server for hms-website falls back to a random free
+    // port instead of a predictable second one, so an allowlist of specific
+    // ports is a losing game. setAllowedOriginPatterns (not
+    // setAllowedOrigins) is required to combine a wildcard with
+    // allowCredentials(true) - Spring rejects a literal "*" origin under
+    // credentialed CORS, but a pattern is evaluated per-request instead of
+    // matched statically, so it's allowed. Tighten to the real deployed
+    // origin(s) outside local development.
     private CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);

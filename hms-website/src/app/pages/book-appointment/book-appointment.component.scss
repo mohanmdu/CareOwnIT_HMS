@@ -1,4 +1,175 @@
 .book-appointment-section {
   max-width: 640px;
+}
+
+.booking-steps {
+  display: flex;
+  list-style: none;
+  gap: var(--space-3);
+  padding: 0;
+  margin: 0 0 var(--space-5);
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  flex-wrap: wrap;
+
+  li {
+    padding-bottom: var(--space-2);
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  li.active {
+    color: var(--theme-primary);
+    font-weight: 600;
+    border-bottom-color: var(--theme-primary);
+  }
+
+  li.done {
+    color: var(--color-text);
+  }
+}
+
+.booking-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.field-label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: calc(var(--space-1) * -1);
+}
+
+.field-input {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--color-text);
+  background: var(--color-bg);
+
+  &:focus {
+    outline: 2px solid var(--theme-primary);
+    outline-offset: 1px;
+  }
+}
+
+.link-back {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--theme-primary);
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.doctor-list,
+.patient-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+
+.doctor-tile,
+.patient-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  text-align: left;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  cursor: pointer;
+  font-family: inherit;
+
+  &:hover {
+    border-color: var(--theme-primary);
+  }
+
+  &.selected {
+    border-color: var(--theme-primary);
+    background: var(--color-surface);
+  }
+}
+
+.doctor-name,
+.patient-name {
+  font-weight: 600;
+}
+
+.doctor-specialization,
+.patient-meta {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--space-2);
+}
+
+.slot-tile {
+  padding: 0.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+
+  &:hover:not(:disabled) {
+    border-color: var(--theme-primary);
+  }
+
+  &.selected {
+    border-color: var(--theme-primary);
+    background: var(--theme-primary);
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.slot-status {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.section-subtitle-inline {
+  color: var(--color-text-muted);
+  margin: calc(var(--space-3) * -1) 0 0;
+}
+
+.mobile-confirm {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.new-patient-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.booking-error {
+  color: #b3261e;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.booking-confirmation {
   text-align: center;
 }

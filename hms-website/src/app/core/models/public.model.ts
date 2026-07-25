@@ -119,3 +119,50 @@ export interface PublicCareerOpening {
   description: string | null;
   applyEmail: string | null;
 }
+
+export type AppointmentSession = 'MORNING' | 'AFTERNOON' | 'EVENING' | 'NIGHT';
+export type SlotStatus = 'AVAILABLE' | 'PAST' | 'BOOKED';
+
+/** Deliberately has no patient fields - the backend strips who booked a slot before this ever reaches an anonymous visitor. */
+export interface PublicSlot {
+  date: string;
+  time: string;
+  session: AppointmentSession;
+  status: SlotStatus;
+}
+
+/** Deliberately minimal - "knows the mobile number" is a weak proof of identity, so this never carries mobile/email/address/DOB. */
+export interface PatientLookupResult {
+  patientId: number;
+  name: string;
+  age: number | null;
+  gender: string | null;
+}
+
+export interface NewPatientDetails {
+  firstName: string;
+  lastName?: string | null;
+  dateOfBirth?: string | null;
+  gender?: string | null;
+  age?: number | null;
+  email?: string | null;
+  address?: string | null;
+}
+
+/** Either existingPatientId or newPatient must be set, never both - see PublicAppointmentService.book() on the backend. */
+export interface PublicBookingRequest {
+  mobileNumber: string;
+  existingPatientId?: number | null;
+  newPatient?: NewPatientDetails | null;
+  consultantId: number;
+  date: string;
+  slotTime: string;
+}
+
+export interface PublicBookingResult {
+  appointmentId: number;
+  patientName: string;
+  consultantName: string;
+  date: string;
+  slotTime: string;
+}

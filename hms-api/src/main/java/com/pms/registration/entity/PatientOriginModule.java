@@ -13,5 +13,6 @@ public enum PatientOriginModule {
     IP_ADMISSION,
     PHARMACY,
     LAB,
-    INSURANCE
+    INSURANCE,
+    WEBSITE
 }
