@@ -65,7 +65,14 @@
   width: 100%;
 }
 
+.role-actions-header {
+  width: 0;
+  white-space: nowrap;
+}
+
 .role-actions-cell {
   display: flex;
+  justify-content: flex-end;
   gap: var(--hms-space-2);
+  white-space: nowrap;
 }

@@ -150,11 +150,18 @@ export class RoleListComponent {
     }
   }
 
+  /**
+   * Counts only the modules the admin can actually configure (excludes
+   * 'overview', which every role has regardless of what's picked) so this
+   * never shows a numerator larger than the denominator - see
+   * buildPermissionOptions().
+   */
   modulesSummary(role: Role): string {
-    if (role.permittedModules.length === 0) {
+    const configurable = role.permittedModules.filter((key) => key !== 'overview').length;
+    if (configurable === 0) {
       return 'No modules assigned';
     }
-    return `${role.permittedModules.length} of ${this.permissionOptions.length} modules`;
+    return `${configurable} of ${this.permissionOptions.length} modules`;
   }
 
   get isValid(): boolean {
