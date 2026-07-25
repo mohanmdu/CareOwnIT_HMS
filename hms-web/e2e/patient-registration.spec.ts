@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 /**
  * Tier 2: registers a real patient via the UI (unique name/mobile per run,

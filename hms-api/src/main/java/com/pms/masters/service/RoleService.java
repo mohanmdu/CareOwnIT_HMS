@@ -2,9 +2,12 @@ package com.pms.masters.service;
 
 import com.pms.common.EntityNotFoundException;
 import com.pms.masters.dto.RoleDto;
+import com.pms.masters.entity.ModuleKey;
 import com.pms.masters.entity.Role;
 import com.pms.masters.repository.RoleRepository;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +37,7 @@ public class RoleService {
         Role role = new Role();
         role.setName(dto.name());
         role.setActive(true);
+        role.setPermittedModules(toModuleKeys(dto.permittedModules()));
         return toDto(repository.save(role));
     }
 
@@ -41,6 +45,7 @@ public class RoleService {
     public RoleDto update(Long id, RoleDto dto) {
         Role role = getOrThrow(id);
         role.setName(dto.name());
+        role.setPermittedModules(toModuleKeys(dto.permittedModules()));
         return toDto(repository.save(role));
     }
 
@@ -55,7 +60,28 @@ public class RoleService {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Role not found: " + id));
     }
 
+    /**
+     * Dashboard (ModuleKey.OVERVIEW) is always granted, regardless of what
+     * the caller submits - the Role screen deliberately shows no checkbox
+     * for it (see role-list.component.ts), since a role with no landing page
+     * would strand its users immediately after login in an unresolvable
+     * redirect loop (every route requires a module, and there'd be nowhere
+     * left to redirect to). Enforced here, the one place every persisted
+     * Role's permittedModules passes through, rather than in the
+     * authorization/guard layers - those just read whatever this set
+     * contains.
+     */
+    private Set<ModuleKey> toModuleKeys(List<String> keys) {
+        Set<ModuleKey> modules = new HashSet<>();
+        if (keys != null) {
+            keys.stream().map(ModuleKey::fromKey).forEach(modules::add);
+        }
+        modules.add(ModuleKey.OVERVIEW);
+        return modules;
+    }
+
     private RoleDto toDto(Role role) {
-        return new RoleDto(role.getId(), role.getName(), role.isActive());
+        List<String> permittedModules = role.getPermittedModules().stream().map(ModuleKey::key).toList();
+        return new RoleDto(role.getId(), role.getName(), role.isActive(), permittedModules);
     }
 }

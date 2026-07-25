@@ -8,40 +8,47 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-change-password',
   standalone: true,
   imports: [FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule],
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  templateUrl: './change-password.component.html',
+  styleUrl: './change-password.component.scss'
 })
-export class LoginComponent {
+export class ChangePasswordComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  username = '';
-  password = '';
-  hidePassword = signal(true);
+  readonly forced = this.auth.mustChangePassword();
+
+  currentPassword = '';
+  newPassword = '';
+  confirmPassword = '';
+  hidePasswords = signal(true);
   submitting = signal(false);
   errorMessage = signal<string | null>(null);
 
   togglePasswordVisibility(): void {
-    this.hidePassword.update((hidden) => !hidden);
+    this.hidePasswords.update((hidden) => !hidden);
   }
 
-  login(): void {
+  submit(): void {
     if (this.submitting()) {
+      return;
+    }
+    if (this.newPassword !== this.confirmPassword) {
+      this.errorMessage.set('New password and confirmation do not match.');
       return;
     }
     this.errorMessage.set(null);
     this.submitting.set(true);
-    this.auth.login(this.username, this.password).subscribe({
+    this.auth.changePassword(this.currentPassword, this.newPassword).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.router.navigateByUrl(this.auth.mustChangePassword() ? '/change-password' : '/dashboard');
+        this.router.navigateByUrl('/dashboard');
       },
-      error: () => {
+      error: (error) => {
         this.submitting.set(false);
-        this.errorMessage.set('Incorrect username or password.');
+        this.errorMessage.set(error.error?.message ?? 'Could not change password - check your current password and try again.');
       }
     });
   }

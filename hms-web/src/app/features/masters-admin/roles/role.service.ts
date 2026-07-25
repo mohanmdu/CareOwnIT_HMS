@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Role } from './role.model';
 
+export type RoleInput = Pick<Role, 'name' | 'permittedModules'>;
+
 @Injectable({ providedIn: 'root' })
 export class RoleService {
   private readonly http = inject(HttpClient);
@@ -13,8 +15,12 @@ export class RoleService {
     return this.http.get<Role[]>(this.baseUrl);
   }
 
-  create(role: Pick<Role, 'name'>): Observable<Role> {
-    return this.http.post<Role>(this.baseUrl, { name: role.name });
+  create(role: RoleInput): Observable<Role> {
+    return this.http.post<Role>(this.baseUrl, role);
+  }
+
+  update(id: number, role: RoleInput): Observable<Role> {
+    return this.http.put<Role>(`${this.baseUrl}/${id}`, role);
   }
 
   deactivate(id: number): Observable<void> {

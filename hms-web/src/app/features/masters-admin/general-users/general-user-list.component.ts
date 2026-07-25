@@ -12,6 +12,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog.service';
 import { NotificationService } from '../../../shared/services/notification.service';
+import { PromptDialogService } from '../../../shared/services/prompt-dialog.service';
 import { TablePagination } from '../../../shared/table/table-pagination';
 import { TableSearchComponent } from '../../../shared/table/table-search.component';
 import { EmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
@@ -22,10 +23,11 @@ import { GeneralUser } from './general-user.model';
 import { GeneralUserService } from './general-user.service';
 
 /**
- * General Users: an admin-facing directory of who has system access and
- * their Role - not a login credential (see SecurityConfig; auth is a single
- * hardcoded dev-user today). One inline add/edit form + two tabs
- * (Active / De-Activated), mirroring Departments/Consultants.
+ * General Users: an admin-facing directory of who has system access, their
+ * Role, and their real login credentials (username + password, set on
+ * create; reset via the Reset Password action) - see com.pms.security on the
+ * backend. One inline add/edit form + two tabs (Active / De-Activated),
+ * mirroring Departments/Consultants.
  */
 @Component({
   selector: 'app-general-user-list',
@@ -54,9 +56,10 @@ export class GeneralUserListComponent {
   private readonly roleService = inject(RoleService);
   private readonly notification = inject(NotificationService);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly promptDialog = inject(PromptDialogService);
 
-  readonly activeColumns = ['sno', 'name', 'userId', 'role', 'fromDate', 'createdBy', 'deactivate', 'edit'];
-  readonly inactiveColumns = ['sno', 'name', 'userId', 'role', 'fromDate', 'toDate', 'activate'];
+  readonly activeColumns = ['sno', 'name', 'username', 'role', 'fromDate', 'createdBy', 'resetPassword', 'deactivate', 'edit'];
+  readonly inactiveColumns = ['sno', 'name', 'username', 'role', 'fromDate', 'toDate', 'activate'];
 
   activeUsers = signal<GeneralUser[]>([]);
   inactiveUsers = signal<GeneralUser[]>([]);
@@ -77,7 +80,9 @@ export class GeneralUserListComponent {
     name: '',
     mobileNumber: '',
     roleId: null as number | null,
-    email: ''
+    email: '',
+    username: '',
+    initialPassword: ''
   };
 
   constructor() {
@@ -146,7 +151,9 @@ export class GeneralUserListComponent {
       name: user.name,
       mobileNumber: user.mobileNumber,
       roleId: user.roleId,
-      email: user.email ?? ''
+      email: user.email ?? '',
+      username: user.username,
+      initialPassword: ''
     };
   }
 
@@ -161,9 +168,12 @@ export class GeneralUserListComponent {
   }
 
   get isValid(): boolean {
-    return (
-      this.form.name.trim().length > 0 && /^\d{10}$/.test(this.form.mobileNumber) && !!this.form.roleId
-    );
+    const baseValid =
+      this.form.name.trim().length > 0 &&
+      /^\d{10}$/.test(this.form.mobileNumber) &&
+      !!this.form.roleId &&
+      this.form.username.trim().length > 0;
+    return this.editingUser() ? baseValid : baseValid && this.form.initialPassword.trim().length > 0;
   }
 
   submit(): void {
@@ -171,14 +181,17 @@ export class GeneralUserListComponent {
       return;
     }
     this.saving.set(true);
-    const input = {
+    const profile = {
       name: this.form.name.trim(),
       mobileNumber: this.form.mobileNumber.trim(),
       roleId: this.form.roleId!,
-      email: this.form.email.trim() || null
+      email: this.form.email.trim() || null,
+      username: this.form.username.trim()
     };
     const editing = this.editingUser();
-    const save$ = editing?.id ? this.service.update(editing.id, input) : this.service.create(input);
+    const save$ = editing?.id
+      ? this.service.update(editing.id, profile)
+      : this.service.create({ ...profile, initialPassword: this.form.initialPassword });
     save$.subscribe({
       next: () => {
         this.saving.set(false);
@@ -195,7 +208,29 @@ export class GeneralUserListComponent {
   }
 
   private resetForm(): void {
-    this.form = { name: '', mobileNumber: '', roleId: null, email: '' };
+    this.form = { name: '', mobileNumber: '', roleId: null, email: '', username: '', initialPassword: '' };
+  }
+
+  resetPassword(user: GeneralUser): void {
+    if (user.id === null) {
+      return;
+    }
+    this.promptDialog
+      .prompt({
+        title: `Reset password for ${user.name}?`,
+        message: 'They will be required to choose a new password the next time they sign in.',
+        fields: [{ key: 'newPassword', label: 'New Password', required: true }],
+        confirmLabel: 'Reset Password'
+      })
+      .subscribe((values) => {
+        if (!values || user.id === null) {
+          return;
+        }
+        this.service.resetPassword(user.id, String(values['newPassword'])).subscribe({
+          next: () => this.notification.success('Password reset.'),
+          error: (err) => this.notification.error(err.error?.message ?? 'Failed to reset password.')
+        });
+      });
   }
 
   deactivate(user: GeneralUser): void {

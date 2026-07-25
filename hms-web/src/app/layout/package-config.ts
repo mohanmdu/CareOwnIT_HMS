@@ -67,7 +67,8 @@ export const PACKAGES: Record<PackageTier, ModuleKey[]> = {
   ]
 };
 
-function activeModuleKeys(): ModuleKey[] {
+/** Exported for the Role permission picker (see roles/role-permission-picker), which must only offer checkboxes for modules the deployment is actually licensed for. */
+export function activeModuleKeys(): ModuleKey[] {
   const tier = (environment as { activePackage?: PackageTier }).activePackage ?? 'PREMIUM';
   return PACKAGES[tier] ?? PACKAGES.PREMIUM;
 }
@@ -79,9 +80,18 @@ function activeModuleKeys(): ModuleKey[] {
  * (e.g. Overview, which mixes an always-on Dashboard with a PREMIUM-only
  * Cashier Module) is filtered per item instead, so the group still shows
  * with just its enabled items rather than being all-or-nothing.
+ *
+ * @param permittedModules the signed-in user's role-permitted modules. When
+ * omitted, every package-tier module is treated as permitted (today's
+ * behavior, unchanged) - callers that haven't wired up AuthService yet don't
+ * need to change. When provided, the effective visible set is the
+ * intersection of the deployment's package tier and the role's permissions,
+ * so a role can never see a module the deployment isn't even licensed for,
+ * and a license upgrade can never surface a module the role wasn't granted.
  */
-export function getVisibleNavGroups(): NavGroup[] {
-  const enabled = new Set(activeModuleKeys());
+export function getVisibleNavGroups(permittedModules?: Set<ModuleKey>): NavGroup[] {
+  const tierEnabled = new Set(activeModuleKeys());
+  const enabled = permittedModules ? new Set([...tierEnabled].filter((key) => permittedModules.has(key))) : tierEnabled;
   return NAV_GROUPS.filter((group) => enabled.has(group.moduleKey))
     .map((group) => ({ ...group, items: group.items.filter((item) => enabled.has(item.moduleKey ?? group.moduleKey)) }))
     .filter((group) => group.items.length > 0);

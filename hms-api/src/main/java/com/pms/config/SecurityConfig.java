@@ -1,38 +1,34 @@
 package com.pms.config;
 
+import com.pms.security.JwtAuthenticationFilter;
+import com.pms.security.JwtService;
+import com.pms.security.ModuleAuthorizationManager;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
- * Interim security setup for local development. Replaces the legacy app's
- * plaintext-password / infinite-session-timeout auth (see migration doc R5, R9)
- * with stateless sessions + hashed passwords. Swap the in-memory user store
- * and add a JWT filter here per the migration plan's Phase 1 auth task -
- * this is a starting point, not the final auth design.
+ * Real authentication (JWT, see com.pms.security) - replaces the interim
+ * single-hardcoded-dev-user/permitAll setup this class used to have. Every
+ * non-public request is authorized by ModuleAuthorizationManager, which
+ * checks the requesting user's JWT-derived module authorities against
+ * ModulePathMappings' {apiPrefix -> ModuleKey} table - centralized, rather
+ * than @PreAuthorize sprinkled across 79 controllers.
  *
- * Auth enforcement is currently DISABLED (permitAll, no httpBasic challenge)
- * to unblock local frontend testing - see chat history 2026-07-09. The
- * passwordEncoder/userDetailsService beans below are left in place so
- * re-enabling is a one-line revert: swap permitAll() back to
- * .requestMatchers("/actuator/health", "/actuator/info", "/api/public/**").permitAll()
- * .anyRequest().authenticated(), and restore .httpBasic(basic -> {}).
- * Do this before any environment other than a single developer's machine.
- * NOTE: /api/public/** (the public hospital website's API surface, see
- * com.pms.website) must stay permitAll() even after that revert - it is
- * deliberately unauthenticated, not an oversight.
+ * Anonymous authentication is deliberately left enabled (Spring Security's
+ * default) - it's what makes ExceptionTranslationFilter route "no/invalid
+ * token" to authenticationEntryPoint (401) rather than accessDeniedHandler
+ * (403), which is reserved for "authenticated but lacking this module."
  */
 @Configuration
 @EnableWebSecurity
@@ -44,23 +40,32 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(
-            org.springframework.core.env.Environment env, PasswordEncoder encoder) {
-        String user = env.getProperty("app.security.dev-user", "admin");
-        String password = env.getProperty("app.security.dev-password", "admin");
-        return new InMemoryUserDetailsManager(
-                User.withUsername(user).password(encoder.encode(password)).roles("ADMIN").build());
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtService jwtService) {
+        return new JwtAuthenticationFilter(jwtService);
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter, ModuleAuthorizationManager moduleAuthorizationManager)
+            throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/public/**").permitAll()
-                        .anyRequest().permitAll());
+                .authorizeHttpRequests(auth -> auth.anyRequest().access(moduleAuthorizationManager))
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> writeJsonError(
+                                response, 401, "Authentication required."))
+                        .accessDeniedHandler((request, response, accessDeniedException) -> writeJsonError(
+                                response, 403, "You don't have access to this module.")));
         return http.build();
+    }
+
+    private void writeJsonError(jakarta.servlet.http.HttpServletResponse response, int status, String message)
+            throws java.io.IOException {
+        response.setStatus(status);
+        response.setContentType("application/json");
+        response.getWriter().write("{\"status\":" + status + ",\"message\":\"" + message + "\"}");
     }
 
     // Dev-only: allows the Angular dev server (localhost:4200) to call this API

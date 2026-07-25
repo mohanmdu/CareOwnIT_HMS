@@ -1,12 +1,19 @@
 package com.pms.masters.entity;
 
 import com.pms.common.Auditable;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -32,4 +39,17 @@ public class Role extends Auditable {
 
     @Column(nullable = false)
     private boolean active = true;
+
+    /**
+     * Which sidenav groups (NAV_GROUPS in nav-config.ts) this role can see -
+     * intersected with the deployment's package tier at nav-render time (a
+     * BASIC-tier deployment never shows Pharmacy regardless of this set).
+     * Empty is a legitimate "not configured yet" state, not an error - see
+     * ModuleAuthorizationManager for how this gates actual API access.
+     */
+    @ElementCollection
+    @CollectionTable(name = "role_module_permission", joinColumns = @JoinColumn(name = "role_id"))
+    @Column(name = "module_key")
+    @Enumerated(EnumType.STRING)
+    private Set<ModuleKey> permittedModules = new HashSet<>();
 }

@@ -1,5 +1,5 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
@@ -50,7 +50,8 @@ export class AppShellComponent {
   private readonly router = inject(Router);
   private readonly clinicSettingsService = inject(ClinicSettingsService);
 
-  readonly navGroups = getVisibleNavGroups();
+  /** Recomputes if the signed-in user's role permissions ever change without a full page reload (e.g. after an admin edits their role and they re-authenticate). */
+  readonly navGroups = computed(() => getVisibleNavGroups(this.auth.permittedModules()));
 
   // Footer only renders when a client has actually set custom footer text -
   // ThemeService already applies header/footer colors at bootstrap regardless,
@@ -91,7 +92,7 @@ export class AppShellComponent {
     // inside a collapsed section.
     effect(() => {
       const url = this.currentUrl();
-      const activeGroup = this.navGroups.find(
+      const activeGroup = this.navGroups().find(
         (group) => group.items.length > 1 && group.items.some((item) => routeMatches(url, item.route))
       );
       if (activeGroup) {

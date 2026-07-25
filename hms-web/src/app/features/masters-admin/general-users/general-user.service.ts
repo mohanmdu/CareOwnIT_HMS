@@ -4,7 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { GeneralUser, GeneralUserAuditLogEntry } from './general-user.model';
 
-export type GeneralUserInput = Pick<GeneralUser, 'name' | 'mobileNumber' | 'email' | 'roleId'>;
+export type GeneralUserProfileInput = Pick<GeneralUser, 'name' | 'mobileNumber' | 'email' | 'roleId' | 'username'>;
+export type GeneralUserCreateInput = GeneralUserProfileInput & { initialPassword: string };
 
 @Injectable({ providedIn: 'root' })
 export class GeneralUserService {
@@ -20,12 +21,17 @@ export class GeneralUserService {
     return this.http.get<GeneralUser[]>(`${this.baseUrl}/inactive`);
   }
 
-  create(user: GeneralUserInput): Observable<GeneralUser> {
+  create(user: GeneralUserCreateInput): Observable<GeneralUser> {
     return this.http.post<GeneralUser>(this.baseUrl, user);
   }
 
-  update(id: number, user: GeneralUserInput): Observable<GeneralUser> {
+  update(id: number, user: GeneralUserProfileInput): Observable<GeneralUser> {
     return this.http.put<GeneralUser>(`${this.baseUrl}/${id}`, user);
+  }
+
+  /** Admin-initiated reset (e.g. the user forgot their password) - forces the user to pick a new one at next login. */
+  resetPassword(id: number, newPassword: string): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${id}/reset-password`, { newPassword });
   }
 
   deactivate(id: number): Observable<void> {

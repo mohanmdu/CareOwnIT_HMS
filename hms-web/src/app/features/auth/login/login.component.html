@@ -35,7 +35,13 @@
         </button>
       </mat-form-field>
 
-      <button mat-flat-button color="primary" type="submit" class="login-submit">Sign in</button>
+      @if (errorMessage()) {
+        <p class="login-error" role="alert">{{ errorMessage() }}</p>
+      }
+
+      <button mat-flat-button color="primary" type="submit" class="login-submit" [disabled]="submitting()">
+        {{ submitting() ? 'Signing in…' : 'Sign in' }}
+      </button>
     </form>
   </section>
 </div>

@@ -5,6 +5,7 @@ import com.pms.masters.dto.GeneralUserDto;
 import com.pms.masters.service.GeneralUserService;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,6 +49,12 @@ public class GeneralUserController {
     @PutMapping("/{id}")
     public GeneralUserDto update(@PathVariable Long id, @Valid @RequestBody GeneralUserDto dto) {
         return service.update(id, dto);
+    }
+
+    @PatchMapping("/{id}/reset-password")
+    public ResponseEntity<Void> resetPassword(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        service.resetPassword(id, body.get("newPassword"));
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/deactivate")

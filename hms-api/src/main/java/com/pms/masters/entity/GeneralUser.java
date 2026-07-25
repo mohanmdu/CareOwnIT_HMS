@@ -16,9 +16,9 @@ import lombok.Setter;
 
 /**
  * Admin-facing directory of who has system access and their Role - a
- * "General Users Master" record, not a login credential. Auth is currently a
- * single hardcoded dev-user (see SecurityConfig); this entity intentionally
- * carries no password, matching the legacy screen it replaces.
+ * "General Users Master" record that also doubles as the login credential
+ * since V73 (username/passwordHash/mustChangePassword). Real authentication
+ * (see com.pms.security.LoginService) looks this entity up by username.
  */
 @Entity
 @Table(name = "general_user")
@@ -46,4 +46,14 @@ public class GeneralUser extends Auditable {
 
     @Column(nullable = false)
     private boolean active = true;
+
+    @Column(nullable = false, unique = true)
+    private String username;
+
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
+
+    /** True right after an admin creates the account or resets its password - cleared the moment the user changes it themselves. Enforced server-side by ModuleAuthorizationManager, not just a frontend redirect. */
+    @Column(name = "must_change_password", nullable = false)
+    private boolean mustChangePassword = true;
 }

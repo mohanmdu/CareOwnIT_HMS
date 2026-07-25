@@ -13,7 +13,7 @@
     </div>
 
     <mat-nav-list class="shell-nav-list">
-      @for (group of navGroups; track group.label) {
+      @for (group of navGroups(); track group.label) {
         @if (group.items.length === 1) {
           <a
             mat-list-item

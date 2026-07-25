@@ -1,1 +1,93 @@
-<app-master-crud [config]="config" />
+<div class="hms-page">
+  <app-page-header title="Roles" subtitle="System roles, and which HMS modules each role can see and access." />
+
+  <section class="hms-card-surface role-form">
+    <form class="role-form-grid" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="role-name-field">
+        <mat-label>Role Name</mat-label>
+        <input matInput name="name" [(ngModel)]="form.name" required />
+      </mat-form-field>
+
+      <fieldset class="role-permission-picker">
+        <legend>Modules visible to this role</legend>
+        <div class="role-permission-grid">
+          @for (option of permissionOptions; track option.moduleKey) {
+            <mat-checkbox
+              [checked]="isChecked(option.moduleKey)"
+              (change)="toggleModule(option.moduleKey, $event.checked)"
+            >
+              {{ option.label }}
+            </mat-checkbox>
+          }
+        </div>
+        <p class="role-permission-hint">Dashboard is always available to every role.</p>
+      </fieldset>
+
+      <div class="role-form-submit">
+        <button mat-flat-button color="primary" type="submit" [disabled]="!isValid || saving()">
+          {{ editingRole() ? 'Update' : 'Submit' }}
+        </button>
+        @if (editingRole()) {
+          <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
+        }
+      </div>
+    </form>
+  </section>
+
+  <section class="hms-card-surface role-list">
+    @if (roles().length > 0) {
+      <app-table-search placeholder="Search roles..." [value]="searchTerm()" (valueChange)="onSearch($event)" class="role-search" />
+    }
+
+    <div class="role-list-body">
+      @if (loading()) {
+        <mat-progress-bar mode="indeterminate" />
+      }
+
+      @if (!loading() && roles().length === 0) {
+        <app-empty-state icon="admin_panel_settings" title="No roles yet" message="Add the first role above." />
+      } @else if (filteredRoles().length === 0) {
+        <app-empty-state icon="search_off" title="No matches" message="No roles match your search." />
+      } @else if (filteredRoles().length > 0) {
+        <table mat-table [dataSource]="pagination.page()" class="role-table">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let role">{{ role.name }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="modules">
+            <th mat-header-cell *matHeaderCellDef>Modules</th>
+            <td mat-cell *matCellDef="let role">{{ modulesSummary(role) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let role">
+              <app-status-badge [label]="role.active ? 'Active' : 'Inactive'" [tone]="role.active ? 'success' : 'neutral'" />
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="role-actions-header"></th>
+            <td mat-cell *matCellDef="let role" class="role-actions-cell">
+              <button mat-stroked-button type="button" (click)="editRole(role)">Edit</button>
+              @if (role.active) {
+                <button mat-stroked-button color="warn" type="button" (click)="deactivate(role)">Deactivate</button>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns"></tr>
+        </table>
+        <mat-paginator
+          [length]="pagination.length()"
+          [pageIndex]="pagination.pageIndex()"
+          [pageSize]="pagination.pageSize()"
+          [pageSizeOptions]="[5, 10, 25, 50]"
+          (page)="pagination.onPage($event)"
+        />
+      }
+    </div>
+  </section>
+</div>

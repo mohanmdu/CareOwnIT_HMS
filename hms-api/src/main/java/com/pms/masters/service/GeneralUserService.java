@@ -13,13 +13,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Create/deactivate/restore are written to GeneralUserAuditLog (mirroring
  * DepartmentService/ConsultantService) so the list screen can show who
- * created and who deactivated each user.
+ * created and who deactivated each user. Since V73, this is also where real
+ * login credentials are created/reset - see applyFields() vs resetPassword()
+ * for why password changes are a separate, deliberate action rather than
+ * folded into the general update() path (mirrors the same reasoning as
+ * IpBillingCategoryService.update() vs updateRevenueBucket() from the CEO
+ * dashboard work - a plain profile edit must never silently reset a
+ * sensitive field the caller didn't mean to touch).
  */
 @Service
 @Transactional(readOnly = true)
@@ -29,18 +36,22 @@ public class GeneralUserService {
     private static final String UPDATE = "UPDATE";
     private static final String DEACTIVATE = "DEACTIVATE";
     private static final String RESTORE = "RESTORE";
+    private static final String RESET_PASSWORD = "RESET_PASSWORD";
 
     private final GeneralUserRepository repository;
     private final RoleRepository roleRepository;
     private final GeneralUserAuditLogRepository auditLogRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public GeneralUserService(
             GeneralUserRepository repository,
             RoleRepository roleRepository,
-            GeneralUserAuditLogRepository auditLogRepository) {
+            GeneralUserAuditLogRepository auditLogRepository,
+            PasswordEncoder passwordEncoder) {
         this.repository = repository;
         this.roleRepository = roleRepository;
         this.auditLogRepository = auditLogRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<GeneralUserDto> findActive() {
@@ -64,9 +75,17 @@ public class GeneralUserService {
 
     @Transactional
     public GeneralUserDto create(GeneralUserDto dto) {
+        if (dto.initialPassword() == null || dto.initialPassword().isBlank()) {
+            throw new IllegalArgumentException("An initial password is required to create a login.");
+        }
+        if (repository.existsByUsernameIgnoreCase(dto.username())) {
+            throw new IllegalArgumentException("Username already taken: " + dto.username());
+        }
         GeneralUser user = new GeneralUser();
         applyFields(user, dto);
         user.setActive(true);
+        user.setPasswordHash(passwordEncoder.encode(dto.initialPassword()));
+        user.setMustChangePassword(true);
         GeneralUser saved = repository.save(user);
         recordAudit(saved, CREATE);
         return findById(saved.getId());
@@ -75,10 +94,26 @@ public class GeneralUserService {
     @Transactional
     public GeneralUserDto update(Long id, GeneralUserDto dto) {
         GeneralUser user = getOrThrow(id);
+        if (!user.getUsername().equalsIgnoreCase(dto.username()) && repository.existsByUsernameIgnoreCase(dto.username())) {
+            throw new IllegalArgumentException("Username already taken: " + dto.username());
+        }
         applyFields(user, dto);
         GeneralUser saved = repository.save(user);
         recordAudit(saved, UPDATE);
         return findById(saved.getId());
+    }
+
+    /** Admin-initiated reset (e.g. the user forgot their password) - deliberately separate from update() so a plain profile edit never silently touches credentials. */
+    @Transactional
+    public void resetPassword(Long id, String newPassword) {
+        if (newPassword == null || newPassword.isBlank()) {
+            throw new IllegalArgumentException("New password must not be blank.");
+        }
+        GeneralUser user = getOrThrow(id);
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setMustChangePassword(true);
+        repository.save(user);
+        recordAudit(user, RESET_PASSWORD);
     }
 
     @Transactional
@@ -104,6 +139,7 @@ public class GeneralUserService {
         user.setMobileNumber(dto.mobileNumber());
         user.setEmail(dto.email());
         user.setRole(role);
+        user.setUsername(dto.username());
     }
 
     private void recordAudit(GeneralUser user, String operation) {
@@ -144,6 +180,9 @@ public class GeneralUserService {
                 user.getRole().getId(),
                 user.getRole().getName(),
                 user.isActive(),
+                user.getUsername(),
+                null,
+                user.isMustChangePassword(),
                 user.getCreatedAt(),
                 created != null ? created.getPerformedBy() : null,
                 deactivated != null ? deactivated.getPerformedAt() : null,

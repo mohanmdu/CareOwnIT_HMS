@@ -6,6 +6,8 @@ export interface GeneralUser {
   roleId: number;
   roleName: string | null;
   active: boolean;
+  username: string;
+  mustChangePassword: boolean;
   createdAt: string | null;
   createdBy: string | null;
   deactivatedAt: string | null;

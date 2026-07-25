@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 /**
  * Tier 2 flagship test: exercises the entire GRN/stock-ledger/billing/return
