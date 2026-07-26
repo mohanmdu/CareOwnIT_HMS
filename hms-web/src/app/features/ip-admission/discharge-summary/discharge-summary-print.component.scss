@@ -66,21 +66,7 @@
 }
 
 .dsp-drug-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--hms-font-size-sm);
   margin: var(--hms-space-3) 0;
-
-  th,
-  td {
-    border: 1px solid #999;
-    padding: var(--hms-space-2);
-    text-align: left;
-  }
-
-  th {
-    background: #f0f0f0;
-  }
 }
 
 .dsp-emergency {

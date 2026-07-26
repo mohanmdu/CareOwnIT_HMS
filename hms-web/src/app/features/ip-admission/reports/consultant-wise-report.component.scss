@@ -21,35 +21,17 @@
 }
 
 .cwr-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--hms-font-size-sm);
-
-  th,
-  td {
-    padding: var(--hms-space-2) var(--hms-space-3);
-    text-align: left;
-  }
-
   td:last-child,
   th:last-child {
     text-align: right;
   }
-
-  thead th {
-    background: var(--hms-color-primary, #14707a);
-    color: #fff;
-    font-weight: 600;
-  }
-
-  tbody td {
-    border-bottom: 1px solid var(--hms-color-border, #e0e0e0);
-  }
 }
 
 .cwr-total-row {
-  font-weight: 700;
-  background: var(--hms-color-surface-alt, #f0f0f0);
+  // !important needed: the shared .hms-table zebra-stripe rule (tbody tr:nth-child(even))
+  // outranks this on specificity if the total row lands on an even position.
+  font-weight: var(--hms-font-weight-bold);
+  background: var(--hms-color-surface-alt, #f0f0f0) !important;
 
   td {
     border-bottom: none !important;

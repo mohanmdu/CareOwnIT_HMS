@@ -136,24 +136,6 @@
   overflow-x: auto;
 }
 
-.dsf-drug-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--hms-font-size-sm);
-
-  th,
-  td {
-    padding: var(--hms-space-2);
-    border: 1px solid var(--hms-color-border, #e0e0e0);
-    text-align: left;
-  }
-
-  thead th {
-    background: #e65100;
-    color: #fff;
-  }
-}
-
 .dsf-drug-new-row {
   background: var(--hms-color-surface-alt, #f7f7f7);
 }

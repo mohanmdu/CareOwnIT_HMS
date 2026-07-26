@@ -85,34 +85,14 @@
 }
 
 .ar2-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--hms-font-size-sm);
-
   th,
   td {
-    padding: var(--hms-space-2) var(--hms-space-3);
-    text-align: left;
     white-space: nowrap;
   }
 
   td:nth-child(n + 8),
   th:nth-child(n + 8) {
     text-align: right;
-  }
-
-  thead th {
-    background: #37474f;
-    color: #fff;
-    font-weight: 600;
-  }
-
-  tbody td {
-    border-bottom: 1px solid var(--hms-color-border, #e0e0e0);
-  }
-
-  tbody tr:nth-child(even) {
-    background: var(--hms-color-surface-alt, #f7f7f7);
   }
 }
 

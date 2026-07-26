@@ -72,7 +72,7 @@
 
           @if (buffer().length > 0) {
             <div class="ip-billing-table-wrap">
-              <table class="ip-billing-table">
+              <table class="ip-billing-table hms-table">
                 <thead>
                   <tr>
                     <th>Category</th>
@@ -114,7 +114,7 @@
           <h2 class="ip-billing-ledger-title">Billing</h2>
           @if (ledger(); as ledger) {
             <div class="ip-billing-table-wrap">
-              <table class="ip-billing-table ip-billing-ledger-table">
+              <table class="ip-billing-table ip-billing-ledger-table hms-table">
                 <thead>
                   <tr>
                     <th>Invoices</th>
@@ -148,7 +148,7 @@
                       <tr class="ip-billing-breakdown-row">
                         <td colspan="5">
                           @if (row.category === 'Ward/Bed Charges') {
-                            <table class="ip-billing-table ip-billing-breakdown-table">
+                            <table class="ip-billing-table ip-billing-breakdown-table hms-table">
                               <thead>
                                 <tr>
                                   <th>Ward &amp; Room No</th>
@@ -167,7 +167,7 @@
                               </tbody>
                             </table>
                           } @else if (row.category === 'Lab & Investigation Charges') {
-                            <table class="ip-billing-table ip-billing-breakdown-table">
+                            <table class="ip-billing-table ip-billing-breakdown-table hms-table">
                               <thead>
                                 <tr>
                                   <th>Category</th>
@@ -190,7 +190,7 @@
                               </tbody>
                             </table>
                           } @else {
-                            <table class="ip-billing-table ip-billing-breakdown-table">
+                            <table class="ip-billing-table ip-billing-breakdown-table hms-table">
                               <thead>
                                 <tr>
                                   <th>Component</th>
@@ -267,7 +267,7 @@
             <p class="ip-billing-empty">No payments recorded yet.</p>
           } @else {
             <div class="ip-billing-table-wrap">
-              <table class="ip-billing-table">
+              <table class="ip-billing-table hms-table">
                 <thead>
                   <tr>
                     <th>S.No</th>
@@ -319,7 +319,7 @@
               <p class="ip-billing-empty">No insurance claims raised yet.</p>
             } @else {
               <div class="ip-billing-table-wrap">
-                <table class="ip-billing-table">
+                <table class="ip-billing-table hms-table">
                   <thead>
                     <tr>
                       <th>S.No</th>
