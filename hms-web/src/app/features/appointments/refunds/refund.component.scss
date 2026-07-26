@@ -21,16 +21,7 @@
 }
 
 .refund-invoice-table {
-  width: 100%;
-  border-collapse: collapse;
   margin-bottom: var(--hms-space-4);
-
-  th,
-  td {
-    text-align: left;
-    padding: var(--hms-space-2);
-    border-bottom: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
-  }
 }
 
 .refund-already-refunded {

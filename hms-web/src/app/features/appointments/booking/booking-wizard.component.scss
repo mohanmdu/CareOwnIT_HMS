@@ -198,18 +198,6 @@
   margin: var(--hms-space-2) 0;
 }
 
-.booking-booked-table {
-  width: 100%;
-  border-collapse: collapse;
-
-  th,
-  td {
-    text-align: left;
-    padding: var(--hms-space-2);
-    border-bottom: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.1));
-  }
-}
-
 .booking-booked-actions {
   display: flex;
   gap: var(--hms-space-2);
