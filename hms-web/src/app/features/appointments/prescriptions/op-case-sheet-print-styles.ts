@@ -49,6 +49,9 @@ export const OP_CASE_SHEET_PRINT_STYLES = `
     padding: 4px 8px;
     text-align: left;
   }
+  .case-sheet-items-table th {
+    font-weight: 700;
+  }
   .case-sheet-field-row {
     display: flex;
     gap: 24px;

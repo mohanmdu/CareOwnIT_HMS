@@ -49,6 +49,9 @@ export const SALES_RETURN_PRINT_STYLES = `
     padding: 3px 4px;
     text-align: left;
   }
+  .return-slip-items-table th {
+    font-weight: 700;
+  }
   .return-slip-items-table th:last-child,
   .return-slip-items-table td:last-child {
     text-align: right;

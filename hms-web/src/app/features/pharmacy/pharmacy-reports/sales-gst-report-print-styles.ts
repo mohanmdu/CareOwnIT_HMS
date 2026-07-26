@@ -1,3 +1,5 @@
+import { PRINT_TABLE_HEADER_CSS } from '../../../shared/print/print-style-tokens';
+
 export const SALES_GST_REPORT_PRINT_STYLES = `
   body {
     font-family: Arial, Helvetica, sans-serif;
@@ -21,6 +23,6 @@ export const SALES_GST_REPORT_PRINT_STYLES = `
     white-space: nowrap;
   }
   th {
-    background: #f2f2f2;
+    ${PRINT_TABLE_HEADER_CSS}
   }
 `;

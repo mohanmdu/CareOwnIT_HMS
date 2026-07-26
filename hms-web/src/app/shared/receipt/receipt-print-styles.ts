@@ -1,3 +1,5 @@
+import { PRINT_TABLE_HEADER_CSS } from '../print/print-style-tokens';
+
 /**
  * Plain CSS for a receipt printed via a standalone popup window (see
  * AppointmentBillingDialogComponent.print() / RefundReceiptDialogComponent.print()).
@@ -52,6 +54,9 @@ export const RECEIPT_PRINT_STYLES = `
   .receipt-items-table td {
     text-align: left;
     padding: 8px;
+  }
+  .receipt-items-table th {
+    ${PRINT_TABLE_HEADER_CSS}
   }
   .receipt-items-table th:last-child,
   .receipt-items-table td:last-child {

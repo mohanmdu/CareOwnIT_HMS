@@ -1,3 +1,5 @@
+import { PRINT_TABLE_HEADER_CSS } from '../../../shared/print/print-style-tokens';
+
 /**
  * Plain CSS for the Sales Return Report printed via a standalone popup
  * window, same pattern as sales-report.component's siblings and
@@ -25,6 +27,6 @@ export const SALES_RETURN_REPORT_PRINT_STYLES = `
     white-space: nowrap;
   }
   th {
-    background: #f2f2f2;
+    ${PRINT_TABLE_HEADER_CSS}
   }
 `;

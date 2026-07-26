@@ -1,3 +1,5 @@
+import { PRINT_TABLE_HEADER_CSS } from '../../../shared/print/print-style-tokens';
+
 /**
  * A4 Purchase Return Receipt layout - spacious letterhead-style print,
  * distinct from the Dot Matrix format's monospace/bordered look.
@@ -49,7 +51,7 @@ export const PURCHASE_RETURN_PRINT_STYLES_A4 = `
     text-align: left;
   }
   .purchase-return-items-table th {
-    background: #f2f2f2;
+    ${PRINT_TABLE_HEADER_CSS}
   }
   .purchase-return-items-table th:last-child,
   .purchase-return-items-table td:last-child {

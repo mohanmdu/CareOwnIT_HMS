@@ -49,6 +49,9 @@ export const PHARMACY_BILL_PRINT_STYLES = `
     padding: 3px 4px;
     text-align: left;
   }
+  .bill-items-table th {
+    font-weight: 700;
+  }
   .bill-items-table th:last-child,
   .bill-items-table td:last-child {
     text-align: right;

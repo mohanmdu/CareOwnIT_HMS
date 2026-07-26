@@ -1,3 +1,5 @@
+import { PRINT_TABLE_HEADER_CSS } from '../../../shared/print/print-style-tokens';
+
 /**
  * Plain CSS for the Refund Report printed via a standalone popup window
  * (see RefundReportComponent.print()) - same pattern as
@@ -25,7 +27,7 @@ export const REFUND_REPORT_PRINT_STYLES = `
     white-space: nowrap;
   }
   th {
-    background: #f2f2f2;
+    ${PRINT_TABLE_HEADER_CSS}
   }
   .refund-report-summary {
     display: flex;

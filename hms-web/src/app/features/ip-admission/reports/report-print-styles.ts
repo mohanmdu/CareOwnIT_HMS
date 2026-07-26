@@ -1,3 +1,5 @@
+import { PRINT_TABLE_HEADER_CSS } from '../../../shared/print/print-style-tokens';
+
 /**
  * Plain CSS for the Consultant Wise Report printed via a standalone popup
  * window (see ConsultantWiseReportComponent.print()) - same reasoning as
@@ -28,8 +30,7 @@ export const REPORT_PRINT_STYLES = `
     text-align: right;
   }
   th {
-    background: #14707a;
-    color: #fff;
+    ${PRINT_TABLE_HEADER_CSS}
   }
   .cwr-total-row,
   tfoot tr {
