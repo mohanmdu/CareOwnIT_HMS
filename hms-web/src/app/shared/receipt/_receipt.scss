@@ -43,6 +43,10 @@
   font-size: 0.9rem;
 }
 
+// Same visual recipe as .hms-table (see styles/_tables.scss) - kept as its
+// own copy rather than requiring every one of this partial's ~10 consumers
+// to add a second class name, since .receipt-items-table is already a
+// uniquely-scoped selector shared app-wide via this one partial.
 .receipt-items-table {
   width: 100%;
   border-collapse: collapse;
@@ -51,7 +55,14 @@
   th,
   td {
     text-align: left;
-    padding: var(--hms-space-2);
+    padding: var(--hms-space-2) var(--hms-space-3);
+    border-bottom: 1px solid var(--hms-color-border);
+  }
+
+  thead th {
+    background: var(--hms-color-primary);
+    color: var(--hms-color-on-primary);
+    font-weight: var(--hms-font-weight-bold);
   }
 
   th:last-child,
@@ -61,8 +72,12 @@
 }
 
 .receipt-total-row {
-  font-weight: 600;
-  border-top: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+  font-weight: var(--hms-font-weight-bold);
+  border-top: 2px solid var(--hms-color-border-strong);
+
+  td {
+    border-bottom: none;
+  }
 }
 
 .receipt-words,

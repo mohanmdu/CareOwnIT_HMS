@@ -38,6 +38,12 @@
   white-space: nowrap;
 }
 
+.availability-table thead th {
+  background: var(--hms-color-primary);
+  color: var(--hms-color-on-primary);
+  font-weight: var(--hms-font-weight-bold);
+}
+
 .availability-day-header,
 .availability-day-cell {
   text-align: left;
