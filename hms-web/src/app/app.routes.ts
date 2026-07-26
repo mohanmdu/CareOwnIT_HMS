@@ -703,6 +703,11 @@ export const routes: Routes = [
           import('./features/cashier/advance-receipt.component').then((m) => m.AdvanceReceiptComponent)
       },
       {
+        path: 'cashier/reports/collection',
+        loadComponent: () =>
+          import('./features/cashier/collection-report/collection-report.component').then((m) => m.CollectionReportComponent)
+      },
+      {
         path: 'insurance/pre-authorization',
         loadComponent: () =>
           import('./features/insurance/pre-authorization/pre-authorization-worklist.component').then(

@@ -1,0 +1,274 @@
+<div class="hms-page">
+  <app-page-header title="Collection Report" subtitle="Every collection across the hospital, from every module, in one view." />
+
+  <section class="hms-card-surface cr-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>From</mat-label>
+      <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>To</mat-label>
+      <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cr-filter-field">
+      <mat-label>Bill Type</mat-label>
+      <mat-select [(ngModel)]="billType">
+        <mat-option [value]="null">All</mat-option>
+        <mat-option value="OP">OP</mat-option>
+        <mat-option value="IP">IP</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cr-filter-field">
+      <mat-label>Collection Type</mat-label>
+      <mat-select [(ngModel)]="collectionType">
+        <mat-option [value]="null">All</mat-option>
+        @for (type of collectionTypes; track type) {
+          <mat-option [value]="type">{{ collectionTypeLabels[type] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cr-filter-field">
+      <mat-label>Payment Mode</mat-label>
+      <mat-select [(ngModel)]="paymentMode">
+        <mat-option [value]="null">All</mat-option>
+        @for (mode of paymentModeOptions; track mode) {
+          <mat-option [value]="mode">{{ mode }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cr-filter-field">
+      <mat-label>Department</mat-label>
+      <mat-select [(ngModel)]="departmentId">
+        <mat-option [value]="null">All</mat-option>
+        @for (department of departments(); track department.id) {
+          <mat-option [value]="department.id">{{ department.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cr-filter-field">
+      <mat-label>Consultant</mat-label>
+      <mat-select [(ngModel)]="consultantId">
+        <mat-option [value]="null">All</mat-option>
+        @for (consultant of consultants(); track consultant.id) {
+          <mat-option [value]="consultant.id">{{ consultant.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cr-filter-field">
+      <mat-label>User</mat-label>
+      <mat-select [(ngModel)]="username">
+        <mat-option [value]="null">All</mat-option>
+        @for (user of users(); track user.username) {
+          <mat-option [value]="user.username">{{ user.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <div class="cr-filter-actions">
+      <button mat-flat-button color="primary" type="button" (click)="search()">Search</button>
+      <button mat-button type="button" (click)="resetFilters()">Reset</button>
+      <button mat-stroked-button type="button" [disabled]="sortedRows().length === 0" (click)="print()">
+        <mat-icon aria-hidden="true">print</mat-icon>
+        Print
+      </button>
+      <button mat-stroked-button type="button" [disabled]="sortedRows().length === 0" (click)="export()">
+        <mat-icon aria-hidden="true">file_download</mat-icon>
+        Export CSV
+      </button>
+    </div>
+  </section>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (report(); as data) {
+    <section class="hms-card-surface cr-results">
+      @if (data.rows.length === 0) {
+        <app-empty-state icon="summarize" title="No collections found" message="No collections were recorded for this date range." />
+      } @else {
+        <div class="cr-toolbar">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cr-search-field">
+            <mat-label>Search Patient / UHID</mat-label>
+            <input matInput [ngModel]="patientSearch()" (ngModelChange)="onPatientSearchChange($event)" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cr-search-field">
+            <mat-label>Search Bill #</mat-label>
+            <input matInput [ngModel]="billNumberSearch()" (ngModelChange)="onBillNumberSearchChange($event)" />
+          </mat-form-field>
+
+          <div class="cr-show-entries">
+            <span>Show</span>
+            <select class="cr-inline-select" [ngModel]="pagination.pageSize()" (ngModelChange)="onPageSizeChange($event)">
+              @for (size of pageSizeOptions; track size) {
+                <option [ngValue]="size">{{ size }}</option>
+              }
+            </select>
+            <span>entries</span>
+          </div>
+        </div>
+
+        @if (filteredRows().length === 0) {
+          <app-empty-state icon="search_off" title="No matching rows" message="No rows match this Patient/UHID or Bill Number search." />
+        } @else {
+          <table mat-table matSort (matSortChange)="onSortChange($event)" [dataSource]="pagination.page()" class="cr-table">
+            <ng-container matColumnDef="collectionType">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+              <td mat-cell *matCellDef="let row">{{ collectionTypeLabels[row.collectionType] }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="billType">
+              <th mat-header-cell *matHeaderCellDef>Bill Type</th>
+              <td mat-cell *matCellDef="let row">{{ row.billType }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="patientName">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Patient</th>
+              <td mat-cell *matCellDef="let row">{{ row.patientName }} ({{ row.patientUhid }})</td>
+            </ng-container>
+
+            <ng-container matColumnDef="billNumber">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Bill #</th>
+              <td mat-cell *matCellDef="let row">{{ row.billNumber ?? '-' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="billedAt">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+              <td mat-cell *matCellDef="let row">{{ (row.billedAt | date: 'dd-MM-yyyy HH:mm') ?? '-' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="paymentMode">
+              <th mat-header-cell *matHeaderCellDef>Mode</th>
+              <td mat-cell *matCellDef="let row">{{ row.paymentMode ?? '-' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="consultantName">
+              <th mat-header-cell *matHeaderCellDef>Consultant</th>
+              <td mat-cell *matCellDef="let row">{{ row.consultantName ?? '-' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="departmentName">
+              <th mat-header-cell *matHeaderCellDef>Department</th>
+              <td mat-cell *matCellDef="let row">{{ row.departmentName ?? '-' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="billedBy">
+              <th mat-header-cell *matHeaderCellDef>Created By</th>
+              <td mat-cell *matCellDef="let row">{{ row.billedByDisplayName ?? row.billedByUsername ?? '-' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="invoiceAmount">
+              <th mat-header-cell *matHeaderCellDef>Invoiced</th>
+              <td mat-cell *matCellDef="let row">{{ row.invoiceAmount | number: '1.0-2' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="discountAmount">
+              <th mat-header-cell *matHeaderCellDef>Discount</th>
+              <td mat-cell *matCellDef="let row">{{ row.discountAmount | number: '1.0-2' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="doctorReferralAmount">
+              <th mat-header-cell *matHeaderCellDef>Doctor Referral</th>
+              <td mat-cell *matCellDef="let row">{{ row.doctorReferralAmount | number: '1.0-2' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="receiptAmount">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Collected</th>
+              <td mat-cell *matCellDef="let row">{{ row.receiptAmount | number: '1.0-2' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="refundAmount">
+              <th mat-header-cell *matHeaderCellDef>Refund</th>
+              <td mat-cell *matCellDef="let row">{{ row.refundAmount | number: '1.0-2' }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columns"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns"></tr>
+          </table>
+
+          <div class="cr-pagination-footer">
+            <span class="cr-pagination-summary">Showing {{ rangeStart() }} to {{ rangeEnd() }} of {{ pagination.length() }} entries</span>
+            <div class="cr-pagination-controls">
+              <button type="button" [disabled]="pagination.pageIndex() === 0" (click)="previousPage()">Previous</button>
+              @for (page of pageNumbers(); track page) {
+                <button type="button" [class.cr-page-active]="pagination.pageIndex() + 1 === page" (click)="goToPage(page)">
+                  {{ page }}
+                </button>
+              }
+              <button type="button" [disabled]="pagination.pageIndex() + 1 >= totalPages()" (click)="nextPage()">Next</button>
+            </div>
+          </div>
+        }
+
+        <div class="cr-totals">
+          <span><strong>{{ filteredRows().length }}</strong> transactions</span>
+          <span>Invoiced: <strong>{{ displayedTotals().invoiceAmount | number: '1.0-2' }}</strong></span>
+          <span>Discount: <strong>{{ displayedTotals().discountAmount | number: '1.0-2' }}</strong></span>
+          <span>Doctor Referral: <strong>{{ displayedTotals().doctorReferralAmount | number: '1.0-2' }}</strong></span>
+          <span>Collected: <strong>{{ displayedTotals().receiptAmount | number: '1.0-2' }}</strong></span>
+          <span>Refund: <strong>{{ displayedTotals().refundAmount | number: '1.0-2' }}</strong></span>
+          <span class="cr-grand-total">Net Collection: <strong>{{ displayedTotals().totalCollectionAmount | number: '1.0-2' }}</strong></span>
+        </div>
+      }
+    </section>
+
+    <section class="hms-card-surface cr-results">
+      <h2 class="cr-summary-title">User-wise Collection Summary</h2>
+      @if (displayedUserSummary().length === 0) {
+        <app-empty-state icon="groups" title="No collections found" message="No collections were recorded for this date range." />
+      } @else {
+        <table mat-table [dataSource]="displayedUserSummary()" class="cr-table">
+          <ng-container matColumnDef="displayName">
+            <th mat-header-cell *matHeaderCellDef>User</th>
+            <td mat-cell *matCellDef="let row">{{ row.displayName ?? row.username ?? 'Unknown' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="transactionCount">
+            <th mat-header-cell *matHeaderCellDef>Transactions</th>
+            <td mat-cell *matCellDef="let row">{{ row.transactionCount }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="invoiceAmount">
+            <th mat-header-cell *matHeaderCellDef>Invoiced</th>
+            <td mat-cell *matCellDef="let row">{{ row.invoiceAmount | number: '1.0-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="discountAmount">
+            <th mat-header-cell *matHeaderCellDef>Discount</th>
+            <td mat-cell *matCellDef="let row">{{ row.discountAmount | number: '1.0-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="receiptAmount">
+            <th mat-header-cell *matHeaderCellDef>Collected</th>
+            <td mat-cell *matCellDef="let row">{{ row.receiptAmount | number: '1.0-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="refundAmount">
+            <th mat-header-cell *matHeaderCellDef>Refund</th>
+            <td mat-cell *matCellDef="let row">{{ row.refundAmount | number: '1.0-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="netCollectionAmount">
+            <th mat-header-cell *matHeaderCellDef>Net Collection</th>
+            <td mat-cell *matCellDef="let row">{{ row.netCollectionAmount | number: '1.0-2' }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="userSummaryColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: userSummaryColumns"></tr>
+        </table>
+      }
+    </section>
+  }
+</div>

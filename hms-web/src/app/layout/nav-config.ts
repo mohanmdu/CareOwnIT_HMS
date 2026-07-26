@@ -31,11 +31,11 @@ export interface NavGroup {
  * Codes right after Lab & Investigations, Billing right after IP Billing
  * Master.
  *
- * Overview bundles Dashboard and Cashier Module together (both are
- * metrics-only landing screens, per the user's 2026-07-24 follow-up) rather
- * than each being its own top-level entry - its Cashier Module item carries
- * an explicit moduleKey override since Overview itself is always-on but
- * Cashier is a PREMIUM-tier feature (see package-config.ts).
+ * Cashier Module was originally a single item bundled inside Overview (both
+ * were metrics-only landing screens); it became its own top-level group,
+ * right after Overview, once it grew a third screen (Collection Report) -
+ * a group with more than one real screen reads better as its own
+ * collapsible section than a bundled Overview item.
  *
  * A group with exactly one item renders as a flat, non-collapsible link in
  * the shell rather than a single-child accordion - see AppShellComponent.
@@ -64,8 +64,17 @@ export const NAV_GROUPS: NavGroup[] = [
     icon: 'dashboard',
     items: [
       { label: 'Dashboard', route: '/dashboard', icon: 'dashboard' },
-      { label: 'CEO/MD Dashboard', route: '/ceo-dashboard', icon: 'insights', moduleKey: 'ceo-dashboard' },
-      { label: 'Cashier Module', route: '/cashier/dashboard', icon: 'point_of_sale', moduleKey: 'cashier' }
+      { label: 'CEO/MD Dashboard', route: '/ceo-dashboard', icon: 'insights', moduleKey: 'ceo-dashboard' }
+    ]
+  },
+  {
+    label: 'Cashier Module',
+    moduleKey: 'cashier',
+    icon: 'point_of_sale',
+    items: [
+      { label: 'Dashboard', route: '/cashier/dashboard', icon: 'dashboard' },
+      { label: 'IP Approvals', route: '/cashier/ip-approvals', icon: 'fact_check' },
+      { label: 'Collection Report', route: '/cashier/reports/collection', icon: 'summarize' }
     ]
   },
   {
