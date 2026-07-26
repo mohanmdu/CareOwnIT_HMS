@@ -7,20 +7,8 @@
 }
 
 .iaq-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--hms-font-size-sm);
-
   th,
   td {
-    padding: var(--hms-space-2) var(--hms-space-3);
-    text-align: left;
-    border-bottom: 1px solid var(--hms-color-border, #e0e0e0);
     white-space: nowrap;
-  }
-
-  th {
-    font-weight: 600;
-    color: var(--hms-color-text-muted);
   }
 }

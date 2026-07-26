@@ -29,30 +29,13 @@
 }
 
 .iaq-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--hms-font-size-sm);
-
   th,
   td {
-    padding: var(--hms-space-3);
-    text-align: left;
     vertical-align: top;
-    border-bottom: 1px solid var(--hms-color-border, #e0e0e0);
   }
 
   thead th {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    background: var(--hms-color-primary, #1565c0);
-    color: #fff;
-    font-weight: 600;
     white-space: nowrap;
-  }
-
-  tbody tr:not(.iaq-panel-row):nth-child(odd) {
-    background: var(--hms-color-surface-alt, #f7f7f7);
   }
 }
 
@@ -63,7 +46,9 @@
 }
 
 .iaq-panel-row td {
-  background: #fff;
+  // !important needed: the shared .hms-table zebra-stripe rule (tbody tr:nth-child(even))
+  // outranks this on specificity, and the inserted panel row shifts row parity below it.
+  background: var(--hms-color-surface) !important;
   padding: var(--hms-space-4);
 }
 
