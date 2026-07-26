@@ -69,20 +69,7 @@
 }
 
 .lte-summary-table {
-  border-collapse: collapse;
-  font-size: var(--hms-font-size-sm);
   max-width: 400px;
-
-  th,
-  td {
-    border: 1px solid var(--hms-color-border, #e0e0e0);
-    padding: var(--hms-space-1) var(--hms-space-2);
-    text-align: left;
-  }
-
-  th {
-    background: var(--hms-color-surface-alt, #e3e8ee);
-  }
 }
 
 .lte-results-wrap {
@@ -90,27 +77,17 @@
 }
 
 .lte-results-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--hms-font-size-sm);
-
   th,
   td {
-    border: 1px solid var(--hms-color-border, #e0e0e0);
-    padding: var(--hms-space-2);
-    text-align: left;
     vertical-align: top;
-  }
-
-  th {
-    background: var(--hms-color-surface-alt, #e3e8ee);
-    font-weight: 700;
   }
 }
 
 .lte-group-header-row td {
-  background: #dcedc8;
-  font-weight: 700;
+  // !important needed: the shared .hms-table zebra-stripe rule (tbody tr:nth-child(even))
+  // outranks this on specificity if a group row lands on an even position.
+  background: #dcedc8 !important;
+  font-weight: var(--hms-font-weight-bold);
   text-decoration: underline;
 }
 

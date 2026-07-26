@@ -50,27 +50,14 @@
 }
 
 .ltp-table {
-  width: 100%;
-  border-collapse: collapse;
   margin-top: var(--hms-space-2);
-  font-size: var(--hms-font-size-sm);
-
-  th,
-  td {
-    border: 1px solid var(--hms-color-border, #e0e0e0);
-    padding: var(--hms-space-2);
-    text-align: left;
-  }
-
-  th {
-    background: #e65100;
-    color: #fff;
-  }
 }
 
 .ltp-group-row td {
-  background: var(--hms-color-surface-alt, #f0f0f0);
-  font-weight: 700;
+  // !important needed: the shared .hms-table zebra-stripe rule (tbody tr:nth-child(even))
+  // outranks this on specificity if a group row lands on an even position.
+  background: var(--hms-color-surface-alt, #f0f0f0) !important;
+  font-weight: var(--hms-font-weight-bold);
   text-decoration: underline;
 }
 

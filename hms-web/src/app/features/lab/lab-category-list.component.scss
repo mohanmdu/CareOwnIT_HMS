@@ -109,29 +109,15 @@
 }
 
 .lcat-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--hms-font-size-sm);
-
   th,
   td {
-    padding: var(--hms-space-2) var(--hms-space-3);
-    text-align: left;
     white-space: nowrap;
-    border-bottom: 1px solid var(--hms-color-border, #e0e0e0);
   }
 
   thead th {
     position: sticky;
     top: 0;
     z-index: 1;
-    background: var(--hms-color-primary, #1565c0);
-    color: #fff;
-    font-weight: 600;
-  }
-
-  tbody tr:nth-child(even) {
-    background: var(--hms-color-surface-alt, #f7f7f7);
   }
 }
 

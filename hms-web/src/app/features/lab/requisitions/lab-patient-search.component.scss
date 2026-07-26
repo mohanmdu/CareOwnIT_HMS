@@ -80,25 +80,8 @@
 }
 
 .lps-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--hms-font-size-sm);
-
   th,
   td {
-    padding: var(--hms-space-2) var(--hms-space-3);
-    text-align: left;
     white-space: nowrap;
-    border-bottom: 1px solid var(--hms-color-border, #e0e0e0);
-  }
-
-  thead th {
-    background: #e65100;
-    color: #fff;
-    font-weight: 600;
-  }
-
-  tbody tr:nth-child(even) {
-    background: var(--hms-color-surface-alt, #f7f7f7);
   }
 }
