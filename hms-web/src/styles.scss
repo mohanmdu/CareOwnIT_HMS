@@ -7,16 +7,10 @@
 @use 'styles/theme' as hms-theme;
 @use 'styles/tokens';
 @use 'styles/base';
+@use 'styles/tables';
 
 html {
   @include mat.core();
   @include mat.all-component-themes(hms-theme.$hms-theme);
   color-scheme: light;
-}
-
-// Material's default density is comfortable for touch UIs; a hospital
-// back-office runs on mouse/keyboard with a lot of tabular data, so a couple
-// of components are nudged tighter without going all the way to density -2.
-.mat-mdc-table {
-  font-family: var(--hms-font-family);
 }

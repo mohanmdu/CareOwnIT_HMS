@@ -1,0 +1,119 @@
+// Single global reskin for every Angular Material mat-table AND every
+// hand-rolled plain <table class="hms-table"> in the app, so both consume
+// the identical --hms-color-* recipe from one place rather than each
+// screen inventing its own header/row/border treatment.
+//
+// Material tables use its own --mat-table-* custom properties where
+// Material exposes one (background, header text color/weight, row text
+// color, border color/width - confirmed against the installed
+// @angular/material package). Material exposes no token for header ROW
+// background fill, alternating-row striping, or hover state - none of
+// those are a Material feature at all - so those three are set via the
+// stable .mat-mdc-* structural classes directly instead.
+
+// ---- Recipe constants, referenced by both rule blocks below so the two
+// rule-sets can't drift out of sync with each other or with future palette
+// changes. ----
+$hms-table-header-bg: var(--hms-color-primary);
+$hms-table-header-fg: var(--hms-color-on-primary);
+$hms-table-row-bg: var(--hms-color-surface);
+$hms-table-row-alt-bg: var(--hms-color-surface-alt);
+$hms-table-row-hover-bg: var(--hms-color-surface-sunken);
+$hms-table-border: var(--hms-color-border);
+$hms-table-text: var(--hms-color-text);
+
+// =========================================================================
+// Angular Material mat-table
+//
+// !important throughout this block: Sass requires @use statements at the
+// top of styles.scss, before the html{} block that calls
+// mat.all-component-themes() - so Material's own generated theme CSS always
+// ends up LAST in the compiled stylesheet's source order, regardless of
+// this partial's @use position, and wins on equal specificity without it.
+// Same root cause and same fix as the header icon-button color override in
+// app-shell.component.scss earlier this session.
+// =========================================================================
+.mat-mdc-table {
+  font-family: var(--hms-font-family);
+  --mat-table-background-color: #{$hms-table-row-bg} !important;
+  --mat-table-row-item-label-text-color: #{$hms-table-text} !important;
+  --mat-table-row-item-outline-color: #{$hms-table-border} !important;
+  --mat-table-row-item-outline-width: 1px !important;
+  --mat-table-header-headline-color: #{$hms-table-header-fg} !important;
+  --mat-table-header-headline-weight: var(--hms-font-weight-bold) !important;
+}
+
+// Material exposes no token for header ROW background (header-cell CSS is
+// literally `background: inherit`), so the fill has to go on the row itself.
+.mat-mdc-header-row {
+  background-color: #{$hms-table-header-bg} !important;
+}
+
+// Zebra striping: no Material token or feature for this at all - direct
+// nth-child on the real <tr>. <thead>/<tbody> are separate parents, so this
+// only ever counts among body rows, never the header row.
+.mat-mdc-row:nth-child(even) {
+  background-color: #{$hms-table-row-alt-bg} !important;
+}
+
+// Declared after the stripe rule above (same selector specificity - class +
+// pseudo-class on both) so hover visibly wins over the alternating-row
+// background on tie; reordering these two rules would silently break that.
+.mat-mdc-row:hover {
+  background-color: #{$hms-table-row-hover-bg} !important;
+}
+
+// Defensive pill-shape pin for row-action buttons (Approve/Cancel/Select/
+// Delete-style), scoped to grid body cells only - never header cells, never
+// page-level buttons elsewhere. This app's M3 theme already renders every
+// mat-flat-button/mat-stroked-button/mat-raised-button as a fully-rounded
+// pill by default (M3's corner-full shape token, 9999px, applies app-wide
+// with no override anywhere) - this rule guards against that default ever
+// changing later, it isn't a visual change today. Icon buttons are excluded
+// since they're already circular and this rule would be a no-op on them.
+.mat-mdc-cell .mat-mdc-button-base:not(.mat-mdc-icon-button) {
+  border-radius: var(--hms-radius-full);
+}
+
+// =========================================================================
+// .hms-table - same recipe, expressed for plain hand-rolled <table> markup
+// (migrated screen-by-screen; see the Data Grid standardization plan).
+// Cannot share literal selectors with the block above (different DOM/class
+// contract), but reads the same $hms-table-* recipe constants above, so a
+// future palette change made once here updates both patterns at once.
+// =========================================================================
+.hms-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: $hms-table-row-bg;
+  color: $hms-table-text;
+  font-size: var(--hms-font-size-sm);
+
+  th,
+  td {
+    padding: var(--hms-space-2) var(--hms-space-3);
+    text-align: left;
+    border-bottom: 1px solid $hms-table-border;
+  }
+
+  // :first-child, not a bare `thead th` - some screens have a second thead
+  // row for inline per-column filter inputs, which must not get the header
+  // fill (it would paint text-input boxes blue-on-blue).
+  thead tr:first-child th {
+    background: $hms-table-header-bg;
+    color: $hms-table-header-fg;
+    font-weight: var(--hms-font-weight-bold);
+  }
+
+  tbody tr:nth-child(even) {
+    background: $hms-table-row-alt-bg;
+  }
+
+  tbody tr:hover {
+    background: $hms-table-row-hover-bg;
+  }
+
+  tbody .mat-mdc-button-base:not(.mat-mdc-icon-button) {
+    border-radius: var(--hms-radius-full);
+  }
+}
