@@ -153,6 +153,16 @@
   // look) when a client hasn't customized it.
   background-color: var(--hms-header-bg) !important;
   color: var(--hms-color-on-primary) !important;
+
+  // The menu/account icon buttons don't pick up the toolbar's own color
+  // override above (Material's MDC icon-button sets its own icon-color
+  // custom property, which wins over an inherited `color`) - force both so
+  // they stay white against the branded header background.
+  .mat-mdc-icon-button {
+    color: var(--hms-color-on-primary) !important;
+    --mdc-icon-button-icon-color: var(--hms-color-on-primary);
+    --mat-icon-button-state-layer-color: var(--hms-color-on-primary);
+  }
 }
 
 .shell-footer {
