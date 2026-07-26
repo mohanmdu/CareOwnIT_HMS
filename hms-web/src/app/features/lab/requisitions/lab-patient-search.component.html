@@ -3,7 +3,29 @@
     <h1 class="lps-title">Lab/Investigations</h1>
     <mat-form-field appearance="outline" subscriptSizing="dynamic" class="lps-search-field">
       <mat-label>Patient UHID</mat-label>
-      <input matInput [(ngModel)]="searchQuery" (keyup.enter)="search('lab')" placeholder="Enter the UHID, name, or mobile number" />
+      <input
+        matInput
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onQueryChange()"
+        (keyup.enter)="search('lab')"
+        [matAutocomplete]="uhidAuto"
+        placeholder="Enter the UHID, name, or mobile number"
+      />
+      <mat-autocomplete #uhidAuto="matAutocomplete" (optionSelected)="onSuggestionSelected($event)">
+        @if (searchQuery.trim()) {
+          @for (patient of suggestions(); track patient.id) {
+            <mat-option [value]="patient" class="lps-option">
+              <div class="lps-option-row">
+                <span class="lps-option-uhid">{{ patient.registrationNumber }}</span>
+                <span class="lps-option-name">{{ patient.firstName }} {{ patient.lastName }}</span>
+                <span class="lps-option-mobile">{{ patient.mobileNumber }}</span>
+              </div>
+            </mat-option>
+          } @empty {
+            <mat-option disabled>No matching patients</mat-option>
+          }
+        }
+      </mat-autocomplete>
     </mat-form-field>
     <div class="lps-buttons">
       <button mat-flat-button color="primary" class="lps-lab-btn" type="button" (click)="search('lab')">Lab</button>

@@ -25,6 +25,26 @@
   max-width: 420px;
 }
 
+.lps-option {
+  height: auto !important;
+  line-height: normal !important;
+  padding-top: var(--hms-space-2, 8px);
+  padding-bottom: var(--hms-space-2, 8px);
+}
+
+.lps-option-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: var(--hms-space-2, 8px);
+  width: 100%;
+  font-size: 0.85rem;
+}
+
+.lps-option-uhid {
+  font-weight: 600;
+  color: var(--hms-color-primary, #1565c0);
+}
+
 .lps-buttons {
   display: flex;
   gap: var(--hms-space-2);
