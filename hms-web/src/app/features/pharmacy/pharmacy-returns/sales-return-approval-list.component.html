@@ -29,7 +29,7 @@
       @if (!loading() && entries().length === 0) {
         <app-empty-state icon="assignment_return" title="No pending returns" message="Sales returns awaiting approval will appear here." />
       } @else if (entries().length > 0) {
-        <table class="approval-list-table">
+        <table class="approval-list-table hms-table">
           <thead>
             <tr>
               <th>S.No</th>

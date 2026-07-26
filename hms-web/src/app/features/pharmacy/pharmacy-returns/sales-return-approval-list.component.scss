@@ -15,20 +15,9 @@
 }
 
 .approval-list-table {
-  width: 100%;
-  border-collapse: collapse;
-
   th,
   td {
-    text-align: left;
-    padding: var(--hms-space-3) var(--hms-space-4);
-    border-bottom: 1px solid var(--hms-color-border);
     white-space: nowrap;
-  }
-
-  th {
-    color: var(--hms-color-text-muted);
-    font-weight: var(--hms-font-weight-medium);
   }
 }
 

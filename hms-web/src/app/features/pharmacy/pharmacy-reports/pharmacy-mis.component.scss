@@ -43,36 +43,6 @@
   overflow-x: auto;
 }
 
-.mis-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85rem;
-
-  th,
-  td {
-    border-bottom: 1px solid #e5e7eb;
-    padding: var(--hms-space-2);
-    text-align: left;
-  }
-
-  tbody tr:nth-child(even) {
-    background: #f9fafb;
-  }
-}
-
-.mis-table-fast th,
-.mis-table-slow th {
-  background: #0284c7;
-  color: #fff;
-  font-weight: 700;
-}
-
-.mis-table-non-moving th {
-  background: var(--hms-color-surface-alt, #e2e8f0);
-  color: #1b1f24;
-  font-weight: 700;
-}
-
 .mis-actions {
   display: flex;
   justify-content: center;

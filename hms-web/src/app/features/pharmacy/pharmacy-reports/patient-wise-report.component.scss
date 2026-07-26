@@ -15,27 +15,25 @@
 }
 
 .pwr-bill-table,
-.pwr-item-table,
+.pwr-item-table {
+  margin-bottom: var(--hms-space-4);
+
+  tfoot td {
+    font-weight: var(--hms-font-weight-bold);
+    border-top: 2px solid var(--hms-color-border-strong);
+  }
+}
+
 .pwr-profile-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: var(--hms-font-size-sm);
   margin-bottom: var(--hms-space-4);
 
-  th,
   td {
     border: 1px solid var(--hms-color-border, #ddd);
     padding: var(--hms-space-2);
     text-align: left;
-  }
-
-  th {
-    background: var(--hms-color-surface-alt, #f2f2f2);
-  }
-
-  tfoot td {
-    font-weight: 600;
-    background: var(--hms-color-surface-alt, #fdf0e6);
   }
 }
 

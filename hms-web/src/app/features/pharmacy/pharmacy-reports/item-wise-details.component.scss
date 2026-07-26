@@ -15,24 +15,14 @@
 }
 
 .iwd-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85rem;
-
   th,
   td {
-    border: 1px solid var(--hms-color-border, #ddd);
-    padding: var(--hms-space-2);
-    text-align: left;
     white-space: nowrap;
   }
 
-  th {
-    background: var(--hms-color-surface-alt, #f2f2f2);
-  }
-
   tfoot td {
-    font-weight: 600;
+    font-weight: var(--hms-font-weight-bold);
+    border-top: 2px solid var(--hms-color-border-strong);
   }
 }
 

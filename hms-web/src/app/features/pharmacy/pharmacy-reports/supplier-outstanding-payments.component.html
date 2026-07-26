@@ -7,7 +7,7 @@
     <app-empty-state icon="payments" title="Nothing outstanding" message="No approved GRNs currently have a balance owed." />
   } @else {
     <div class="sop-table-wrap">
-      <table class="sop-vendor-table">
+      <table class="sop-vendor-table hms-table">
         <thead>
           <tr>
             <th>S.No</th>
@@ -43,7 +43,7 @@
             @if (isVendorExpanded(vendor)) {
               <tr>
                 <td colspan="8" class="sop-nested-cell">
-                  <table class="sop-invoice-table">
+                  <table class="sop-invoice-table hms-table">
                     <thead>
                       <tr>
                         <th></th>
@@ -92,7 +92,7 @@
                               @if (historyFor(invoice).length === 0) {
                                 <div class="sop-no-history">No Payments has Done</div>
                               } @else {
-                                <table class="sop-history-table">
+                                <table class="sop-history-table hms-table">
                                   <thead>
                                     <tr>
                                       <th>S.No</th>

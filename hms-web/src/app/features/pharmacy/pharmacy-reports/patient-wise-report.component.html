@@ -41,7 +41,7 @@
         @if (bills().length === 0) {
           <app-empty-state icon="receipt_long" title="No bills" message="Search for a patient by UHID/IPID or Name/Mobile to see their bills." />
         } @else {
-          <table class="pwr-bill-table">
+          <table class="pwr-bill-table hms-table">
             <thead>
               <tr>
                 <th>S.No</th>
@@ -116,7 +116,7 @@
             </table>
 
             <h3>Medical Items</h3>
-            <table class="pwr-item-table">
+            <table class="pwr-item-table hms-table">
               <thead>
                 <tr>
                   <th>S.No</th>
@@ -152,7 +152,7 @@
             </table>
 
             <h3>Non Medical Items</h3>
-            <table class="pwr-item-table">
+            <table class="pwr-item-table hms-table">
               <thead>
                 <tr>
                   <th>S.No</th>

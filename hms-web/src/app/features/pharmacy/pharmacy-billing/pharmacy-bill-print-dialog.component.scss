@@ -48,17 +48,8 @@
 }
 
 .bill-items-table {
-  width: 100%;
   min-width: 640px;
-  border-collapse: collapse;
   margin-top: var(--hms-space-2);
-
-  th,
-  td {
-    border: 1px solid var(--hms-color-border, #ccc);
-    padding: 3px 6px;
-    text-align: left;
-  }
 
   th:last-child,
   td:last-child {
