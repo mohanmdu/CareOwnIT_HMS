@@ -43,7 +43,6 @@ interface StatusTab {
 const STATUS_TABS: StatusTab[] = [
   { label: 'All', status: null },
   { label: 'Pending', status: 'BOOKED' },
-  { label: 'Confirmed', status: 'CONFIRMED' },
   { label: 'Cancelled', status: 'CANCELLED' },
   { label: 'Completed', status: 'COMPLETED' },
   { label: 'Direct Billing', status: null, directBilling: true }
