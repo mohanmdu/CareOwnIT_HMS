@@ -135,3 +135,21 @@ button:focus-visible,
   --mdc-snackbar-supporting-text-color: var(--hms-color-on-primary);
   --mat-snack-bar-button-color: var(--hms-color-on-primary);
 }
+
+// Gives color="accent" buttons (MatButton always applies class="mat-accent"
+// to the host element regardless of whether Material's own compiled theme
+// has anything for it - this app's M3 theme only configures primary/tertiary
+// palettes, so .mat-accent was otherwise a no-op) a real, distinct look tied
+// to ClinicSettings.themeSecondaryColor (ThemeService). !important is needed
+// because ThemeService's primary-color override is a non-important inline
+// style on documentElement.style, which otherwise wins regardless of any
+// class selector's specificity - same root cause/fix as styles/_tables.scss.
+.mat-accent {
+  --mdc-filled-button-container-color: var(--hms-color-secondary) !important;
+  --mdc-outlined-button-label-text-color: var(--hms-color-secondary) !important;
+  --mdc-protected-button-label-text-color: var(--hms-color-secondary) !important;
+  --mdc-text-button-label-text-color: var(--hms-color-secondary) !important;
+  --mat-outlined-button-state-layer-color: var(--hms-color-secondary) !important;
+  --mat-protected-button-state-layer-color: var(--hms-color-secondary) !important;
+  --mat-text-button-state-layer-color: var(--hms-color-secondary) !important;
+}

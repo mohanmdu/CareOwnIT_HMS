@@ -16,6 +16,8 @@ import {
   CornerRadiusStyle,
   DEFAULT_THEME_SETTINGS,
   FONT_FAMILY_OPTIONS,
+  FONT_SIZE_SCALE_OPTIONS,
+  FontSizeScale,
   THEME_MODE_OPTIONS,
   ThemeMode
 } from './clinic-settings.model';
@@ -47,6 +49,7 @@ export class ClinicSettingsListComponent {
   readonly themeModeOptions = THEME_MODE_OPTIONS;
   readonly cornerRadiusStyleOptions = CORNER_RADIUS_STYLE_OPTIONS;
   readonly fontFamilyOptions = FONT_FAMILY_OPTIONS;
+  readonly fontSizeScaleOptions = FONT_SIZE_SCALE_OPTIONS;
 
   loading = signal(true);
   saving = signal(false);
@@ -78,7 +81,16 @@ export class ClinicSettingsListComponent {
     cornerRadiusStyle: 'ROUNDED' as CornerRadiusStyle,
     headerBackgroundColor: '',
     footerBackgroundColor: '',
-    footerText: ''
+    footerText: '',
+    menuBackgroundColor: '',
+    menuTextColor: '',
+    menuActiveBackgroundColor: '',
+    menuActiveTextColor: '',
+    menuHoverBackgroundColor: '',
+    menuIconColor: '',
+    menuChevronColor: '',
+    menuHoverTextColor: '',
+    fontSizeScale: 'COMFORTABLE' as FontSizeScale
   };
 
   constructor() {
@@ -107,7 +119,16 @@ export class ClinicSettingsListComponent {
           cornerRadiusStyle: settings.cornerRadiusStyle,
           headerBackgroundColor: settings.headerBackgroundColor ?? '',
           footerBackgroundColor: settings.footerBackgroundColor ?? '',
-          footerText: settings.footerText ?? ''
+          footerText: settings.footerText ?? '',
+          menuBackgroundColor: settings.menuBackgroundColor ?? '',
+          menuTextColor: settings.menuTextColor ?? '',
+          menuActiveBackgroundColor: settings.menuActiveBackgroundColor ?? '',
+          menuActiveTextColor: settings.menuActiveTextColor ?? '',
+          menuHoverBackgroundColor: settings.menuHoverBackgroundColor ?? '',
+          menuIconColor: settings.menuIconColor ?? '',
+          menuChevronColor: settings.menuChevronColor ?? '',
+          menuHoverTextColor: settings.menuHoverTextColor ?? '',
+          fontSizeScale: settings.fontSizeScale
         };
         this.logoUrl.set(settings.logoUrl);
         this.faviconUrl.set(settings.faviconUrl);
@@ -192,7 +213,16 @@ export class ClinicSettingsListComponent {
       cornerRadiusStyle: this.form.cornerRadiusStyle,
       themeMode: this.form.themeMode,
       headerBackgroundColor: this.form.headerBackgroundColor || null,
-      footerBackgroundColor: this.form.footerBackgroundColor || null
+      footerBackgroundColor: this.form.footerBackgroundColor || null,
+      menuBackgroundColor: this.form.menuBackgroundColor || null,
+      menuTextColor: this.form.menuTextColor || null,
+      menuActiveBackgroundColor: this.form.menuActiveBackgroundColor || null,
+      menuActiveTextColor: this.form.menuActiveTextColor || null,
+      menuHoverBackgroundColor: this.form.menuHoverBackgroundColor || null,
+      menuIconColor: this.form.menuIconColor || null,
+      menuChevronColor: this.form.menuChevronColor || null,
+      menuHoverTextColor: this.form.menuHoverTextColor || null,
+      fontSizeScale: this.form.fontSizeScale
     });
   }
 
@@ -219,6 +249,15 @@ export class ClinicSettingsListComponent {
         this.form.headerBackgroundColor = DEFAULT_THEME_SETTINGS.headerBackgroundColor ?? '';
         this.form.footerBackgroundColor = DEFAULT_THEME_SETTINGS.footerBackgroundColor ?? '';
         this.form.footerText = DEFAULT_THEME_SETTINGS.footerText ?? '';
+        this.form.menuBackgroundColor = DEFAULT_THEME_SETTINGS.menuBackgroundColor ?? '';
+        this.form.menuTextColor = DEFAULT_THEME_SETTINGS.menuTextColor ?? '';
+        this.form.menuActiveBackgroundColor = DEFAULT_THEME_SETTINGS.menuActiveBackgroundColor ?? '';
+        this.form.menuActiveTextColor = DEFAULT_THEME_SETTINGS.menuActiveTextColor ?? '';
+        this.form.menuHoverBackgroundColor = DEFAULT_THEME_SETTINGS.menuHoverBackgroundColor ?? '';
+        this.form.menuIconColor = DEFAULT_THEME_SETTINGS.menuIconColor ?? '';
+        this.form.menuChevronColor = DEFAULT_THEME_SETTINGS.menuChevronColor ?? '';
+        this.form.menuHoverTextColor = DEFAULT_THEME_SETTINGS.menuHoverTextColor ?? '';
+        this.form.fontSizeScale = DEFAULT_THEME_SETTINGS.fontSizeScale;
         this.previewTheme();
 
         this.saving.set(true);
@@ -260,7 +299,16 @@ export class ClinicSettingsListComponent {
       cornerRadiusStyle: this.form.cornerRadiusStyle,
       headerBackgroundColor: this.form.headerBackgroundColor.trim() || null,
       footerBackgroundColor: this.form.footerBackgroundColor.trim() || null,
-      footerText: this.form.footerText.trim() || null
+      footerText: this.form.footerText.trim() || null,
+      menuBackgroundColor: this.form.menuBackgroundColor.trim() || null,
+      menuTextColor: this.form.menuTextColor.trim() || null,
+      menuActiveBackgroundColor: this.form.menuActiveBackgroundColor.trim() || null,
+      menuActiveTextColor: this.form.menuActiveTextColor.trim() || null,
+      menuHoverBackgroundColor: this.form.menuHoverBackgroundColor.trim() || null,
+      menuIconColor: this.form.menuIconColor.trim() || null,
+      menuChevronColor: this.form.menuChevronColor.trim() || null,
+      menuHoverTextColor: this.form.menuHoverTextColor.trim() || null,
+      fontSizeScale: this.form.fontSizeScale
     };
   }
 }

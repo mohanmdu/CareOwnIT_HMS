@@ -93,6 +93,14 @@
               <mat-option [value]="option.value">{{ option.label }}</mat-option>
             }
           </mat-select>
+          @switch (form.themeMode) {
+            @case ('CUSTOM') {
+              <mat-hint>Light appearance as a base - use the colors, font, and menu settings below for full branding.</mat-hint>
+            }
+            @case ('AUTO') {
+              <mat-hint>Follows the visitor's device setting; your brand colors still apply either way.</mat-hint>
+            }
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
@@ -103,6 +111,7 @@
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Theme secondary color</mat-label>
           <input matInput type="color" name="themeSecondaryColor" [(ngModel)]="form.themeSecondaryColor" (change)="previewTheme()" />
+          <mat-hint>Used for secondary/accent-style buttons</mat-hint>
         </mat-form-field>
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
@@ -114,6 +123,15 @@
           <mat-label>Font family</mat-label>
           <mat-select name="fontFamily" [(ngModel)]="form.fontFamily" (selectionChange)="previewTheme()">
             @for (option of fontFamilyOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Font size</mat-label>
+          <mat-select name="fontSizeScale" [(ngModel)]="form.fontSizeScale" (selectionChange)="previewTheme()">
+            @for (option of fontSizeScaleOptions; track option.value) {
               <mat-option [value]="option.value">{{ option.label }}</mat-option>
             }
           </mat-select>
@@ -136,6 +154,58 @@
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Footer background color</mat-label>
           <input matInput type="color" name="footerBackgroundColor" [(ngModel)]="form.footerBackgroundColor" (change)="previewTheme()" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Menu background color</mat-label>
+          <input matInput type="color" name="menuBackgroundColor" [(ngModel)]="form.menuBackgroundColor" (change)="previewTheme()" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Menu text color</mat-label>
+          <input matInput type="color" name="menuTextColor" [(ngModel)]="form.menuTextColor" (change)="previewTheme()" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Menu active background color</mat-label>
+          <input
+            matInput
+            type="color"
+            name="menuActiveBackgroundColor"
+            [(ngModel)]="form.menuActiveBackgroundColor"
+            (change)="previewTheme()"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Menu active text color</mat-label>
+          <input matInput type="color" name="menuActiveTextColor" [(ngModel)]="form.menuActiveTextColor" (change)="previewTheme()" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Menu hover background color</mat-label>
+          <input
+            matInput
+            type="color"
+            name="menuHoverBackgroundColor"
+            [(ngModel)]="form.menuHoverBackgroundColor"
+            (change)="previewTheme()"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Menu hover text color</mat-label>
+          <input matInput type="color" name="menuHoverTextColor" [(ngModel)]="form.menuHoverTextColor" (change)="previewTheme()" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Menu icon color</mat-label>
+          <input matInput type="color" name="menuIconColor" [(ngModel)]="form.menuIconColor" (change)="previewTheme()" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Expand/collapse icon color</mat-label>
+          <input matInput type="color" name="menuChevronColor" [(ngModel)]="form.menuChevronColor" (change)="previewTheme()" />
         </mat-form-field>
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="clinic-address-field">

@@ -5,6 +5,7 @@ import com.pms.common.FileStorageService;
 import com.pms.settings.dto.ClinicSettingsDto;
 import com.pms.settings.entity.ClinicSettings;
 import com.pms.settings.entity.CornerRadiusStyle;
+import com.pms.settings.entity.FontSizeScale;
 import com.pms.settings.entity.ThemeMode;
 import com.pms.settings.repository.ClinicSettingsRepository;
 import org.springframework.cache.annotation.CacheEvict;
@@ -65,6 +66,15 @@ public class ClinicSettingsService {
         settings.setHeaderBackgroundColor(dto.headerBackgroundColor());
         settings.setFooterBackgroundColor(dto.footerBackgroundColor());
         settings.setFooterText(dto.footerText());
+        settings.setMenuBackgroundColor(dto.menuBackgroundColor());
+        settings.setMenuTextColor(dto.menuTextColor());
+        settings.setMenuActiveBackgroundColor(dto.menuActiveBackgroundColor());
+        settings.setMenuActiveTextColor(dto.menuActiveTextColor());
+        settings.setMenuHoverBackgroundColor(dto.menuHoverBackgroundColor());
+        settings.setMenuIconColor(dto.menuIconColor());
+        settings.setMenuChevronColor(dto.menuChevronColor());
+        settings.setMenuHoverTextColor(dto.menuHoverTextColor());
+        settings.setFontSizeScale(dto.fontSizeScale() != null ? dto.fontSizeScale() : FontSizeScale.COMFORTABLE);
         return toDto(repository.save(settings));
     }
 
@@ -115,6 +125,15 @@ public class ClinicSettingsService {
                 settings.getCornerRadiusStyle(),
                 settings.getHeaderBackgroundColor(),
                 settings.getFooterBackgroundColor(),
-                settings.getFooterText());
+                settings.getFooterText(),
+                settings.getMenuBackgroundColor(),
+                settings.getMenuTextColor(),
+                settings.getMenuActiveBackgroundColor(),
+                settings.getMenuActiveTextColor(),
+                settings.getMenuHoverBackgroundColor(),
+                settings.getMenuIconColor(),
+                settings.getMenuChevronColor(),
+                settings.getMenuHoverTextColor(),
+                settings.getFontSizeScale());
     }
 }

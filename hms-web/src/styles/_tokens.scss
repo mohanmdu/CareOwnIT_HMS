@@ -20,6 +20,9 @@
   --hms-color-tertiary-container: #dcf3ef;
   --hms-color-on-tertiary-container: #0a5950;
 
+  --hms-color-secondary: #6a4fb0;
+  --hms-color-on-secondary: #ffffff;
+
   --hms-color-success: #1e8e3e;
   --hms-color-success-container: #e6f4ea;
   --hms-color-on-success-container: #0f5223;
@@ -73,6 +76,9 @@
     --hms-color-tertiary-container: #0f3d37;
     --hms-color-on-tertiary-container: #b8ece3;
 
+    --hms-color-secondary: #b39ddb;
+    --hms-color-on-secondary: #2a1a4a;
+
     --hms-color-success: #6cc98a;
     --hms-color-success-container: #123821;
     --hms-color-on-success-container: #bfe8cd;
@@ -118,6 +124,9 @@
   --hms-color-tertiary-container: #0f3d37;
   --hms-color-on-tertiary-container: #b8ece3;
 
+  --hms-color-secondary: #b39ddb;
+  --hms-color-on-secondary: #2a1a4a;
+
   --hms-color-success: #6cc98a;
   --hms-color-success-container: #123821;
   --hms-color-on-success-container: #bfe8cd;
@@ -160,6 +169,9 @@
   --hms-color-tertiary-container: #dcf3ef;
   --hms-color-on-tertiary-container: #0a5950;
 
+  --hms-color-secondary: #6a4fb0;
+  --hms-color-on-secondary: #ffffff;
+
   --hms-color-success: #1e8e3e;
   --hms-color-success-container: #e6f4ea;
   --hms-color-on-success-container: #0f5223;
@@ -195,13 +207,19 @@
 :root {
   // ---- Typography --------------------------------------------------------
   --hms-font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-  --hms-font-size-xs: 0.75rem; // 12px
-  --hms-font-size-sm: 0.8125rem; // 13px
-  --hms-font-size-md: 0.875rem; // 14px
-  --hms-font-size-lg: 1rem; // 16px
-  --hms-font-size-xl: 1.25rem; // 20px
-  --hms-font-size-2xl: 1.5rem; // 24px
-  --hms-font-size-3xl: 2rem; // 32px
+  // Multiplier applied to every --hms-font-size-* below - ClinicSettings.fontSizeScale
+  // (ThemeService) sets this at runtime; default 1 reproduces the literal values in
+  // the comments exactly, so an unconfigured deployment sees zero change. Deliberately
+  // NOT applied to --hms-space-* (also rem-based) - scaling type size shouldn't also
+  // resize layout spacing/padding, a much bigger, unrequested visual change.
+  --hms-font-scale: 1;
+  --hms-font-size-xs: calc(0.75rem * var(--hms-font-scale)); // 12px
+  --hms-font-size-sm: calc(0.8125rem * var(--hms-font-scale)); // 13px
+  --hms-font-size-md: calc(0.875rem * var(--hms-font-scale)); // 14px
+  --hms-font-size-lg: calc(1rem * var(--hms-font-scale)); // 16px
+  --hms-font-size-xl: calc(1.25rem * var(--hms-font-scale)); // 20px
+  --hms-font-size-2xl: calc(1.5rem * var(--hms-font-scale)); // 24px
+  --hms-font-size-3xl: calc(2rem * var(--hms-font-scale)); // 32px
   --hms-font-weight-regular: 400;
   --hms-font-weight-medium: 500;
   --hms-font-weight-semibold: 600;
@@ -243,6 +261,26 @@
   // sets them, so a deployment with no customization looks unchanged.
   --hms-header-bg: var(--hms-color-primary);
   --hms-footer-bg: var(--hms-color-surface-alt);
+
+  // ---- Sidenav / menu (ClinicSettings.menu*Color, ThemeService) ----------
+  // No blanket default declared here (see app-shell.component.scss for the
+  // exact per-element fallback each of these falls back to when unset) -
+  // today's actual colors already differ slightly per element (e.g. the
+  // active icon vs. the active label), so a single default would either be
+  // wrong somewhere or require inventing more tokens. ThemeService sets
+  // these only when an admin has configured them; otherwise it removes the
+  // property, letting each call site's own var(--hms-menu-x, <fallback>)
+  // reproduce today's exact look with zero customization. Deliberately NOT
+  // applied to the Data Grid/Table header color (styles/_tables.scss),
+  // which stays tied to the general brand --hms-color-primary.
+  //   --hms-menu-bg              sidenav container background
+  //   --hms-menu-text            base (non-active) nav item label text
+  //   --hms-menu-active-bg       active/selected item background
+  //   --hms-menu-active-text     active/selected item label/icon text
+  //   --hms-menu-hover-bg        hover background (leaf items + group headers)
+  //   --hms-menu-hover-text      hover text (falls back through --hms-menu-text)
+  //   --hms-menu-icon            base (non-active) nav item/group icon
+  //   --hms-menu-chevron         group header expand/collapse chevron icon
 
   // ---- Motion --------------------------------------------------------
   --hms-transition-fast: 120ms ease;

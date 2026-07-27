@@ -29,6 +29,15 @@ export type ClinicSettingsInput = Pick<
   | 'headerBackgroundColor'
   | 'footerBackgroundColor'
   | 'footerText'
+  | 'menuBackgroundColor'
+  | 'menuTextColor'
+  | 'menuActiveBackgroundColor'
+  | 'menuActiveTextColor'
+  | 'menuHoverBackgroundColor'
+  | 'menuIconColor'
+  | 'menuChevronColor'
+  | 'menuHoverTextColor'
+  | 'fontSizeScale'
 >;
 
 /**

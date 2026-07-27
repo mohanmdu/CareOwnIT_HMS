@@ -5,6 +5,7 @@
 .shell-sidenav {
   width: var(--hms-shell-sidenav-width);
   border-right: 1px solid var(--hms-color-border);
+  background-color: var(--hms-menu-bg, var(--hms-color-surface));
 
   // Smooth, subtle scrolling when the group list is taller than the viewport.
   overflow-y: auto;
@@ -41,12 +42,36 @@
   padding-bottom: var(--hms-space-3);
 }
 
+// Base (non-active) leaf nav item text/icon + hover - previously relied
+// entirely on Material's defaults, now also configurable via
+// ClinicSettings.menu*Color (ThemeService).
+.shell-nav-list a.mat-mdc-list-item {
+  --mdc-list-list-item-label-text-color: var(--hms-menu-text, var(--hms-color-text));
+  --mdc-list-list-item-leading-icon-color: var(--hms-menu-icon, var(--hms-color-text-muted));
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--hms-menu-hover-bg, var(--hms-color-surface-alt));
+
+    // The label text lives in MatListItem's own internal template
+    // (.mdc-list-item__primary-text), which doesn't carry this component's
+    // view-encapsulation attribute - a plain descendant selector can never
+    // match it, hence ::ng-deep (already used elsewhere in this app for the
+    // same reason). !important because Material's own compiled theme sets
+    // this same property closer to that span, which otherwise wins by DOM
+    // proximity regardless of this selector's specificity.
+    ::ng-deep .mdc-list-item__primary-text {
+      color: var(--hms-menu-hover-text, var(--hms-menu-text, var(--hms-color-text))) !important;
+    }
+  }
+}
+
 .shell-nav-active {
-  background: var(--hms-color-primary-container);
-  color: var(--hms-color-on-primary-container);
+  background: var(--hms-menu-active-bg, var(--hms-color-primary-container));
+  color: var(--hms-menu-active-text, var(--hms-color-on-primary-container));
 
   mat-icon {
-    color: var(--hms-color-primary);
+    color: var(--hms-menu-active-text, var(--hms-color-primary));
   }
 }
 
@@ -66,7 +91,7 @@
   padding: var(--hms-space-3) var(--hms-space-3);
   border: none;
   background: transparent;
-  color: var(--hms-color-text);
+  color: var(--hms-menu-text, var(--hms-color-text));
   font: inherit;
   font-size: var(--hms-font-size-md);
   font-weight: var(--hms-font-weight-medium);
@@ -76,7 +101,8 @@
   transition: background-color var(--hms-transition-fast);
 
   &:hover {
-    background: var(--hms-color-surface-alt);
+    background: var(--hms-menu-hover-bg, var(--hms-color-surface-alt));
+    color: var(--hms-menu-hover-text, var(--hms-menu-text, var(--hms-color-text)));
   }
 
   &:focus-visible {
@@ -86,16 +112,16 @@
 }
 
 .shell-nav-group-header-active {
-  color: var(--hms-color-primary);
+  color: var(--hms-menu-active-text, var(--hms-color-primary));
 
   .shell-nav-group-icon {
-    color: var(--hms-color-primary);
+    color: var(--hms-menu-active-text, var(--hms-color-primary));
   }
 }
 
 .shell-nav-group-icon {
   flex-shrink: 0;
-  color: var(--hms-color-text-muted);
+  color: var(--hms-menu-icon, var(--hms-color-text-muted));
 }
 
 // Wraps to a second line rather than ellipsis-truncating - several group
@@ -112,7 +138,7 @@
 
 .shell-nav-chevron {
   flex-shrink: 0;
-  color: var(--hms-color-text-muted);
+  color: var(--hms-menu-chevron, var(--hms-color-text-muted));
   transition: transform var(--hms-transition-base);
 }
 

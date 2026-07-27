@@ -102,4 +102,32 @@ public class ClinicSettings {
 
     @Column(name = "footer_text", length = 500)
     private String footerText;
+
+    @Column(name = "menu_background_color", length = 9)
+    private String menuBackgroundColor;
+
+    @Column(name = "menu_text_color", length = 9)
+    private String menuTextColor;
+
+    @Column(name = "menu_active_background_color", length = 9)
+    private String menuActiveBackgroundColor;
+
+    @Column(name = "menu_active_text_color", length = 9)
+    private String menuActiveTextColor;
+
+    @Column(name = "menu_hover_background_color", length = 9)
+    private String menuHoverBackgroundColor;
+
+    @Column(name = "menu_icon_color", length = 9)
+    private String menuIconColor;
+
+    @Column(name = "menu_chevron_color", length = 9)
+    private String menuChevronColor;
+
+    @Column(name = "menu_hover_text_color", length = 9)
+    private String menuHoverTextColor;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "font_size_scale", nullable = false, length = 16)
+    private FontSizeScale fontSizeScale = FontSizeScale.COMFORTABLE;
 }

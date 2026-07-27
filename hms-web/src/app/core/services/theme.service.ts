@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { catchError, of } from 'rxjs';
 import { ClinicSettingsService } from '../../features/masters-admin/clinic-settings/clinic-settings.service';
-import { CornerRadiusStyle, ThemeMode } from '../../features/masters-admin/clinic-settings/clinic-settings.model';
+import { CornerRadiusStyle, FontSizeScale, ThemeMode } from '../../features/masters-admin/clinic-settings/clinic-settings.model';
 
 export interface ThemeSettings {
   themePrimaryColor?: string | null;
@@ -12,6 +12,15 @@ export interface ThemeSettings {
   themeMode?: ThemeMode;
   headerBackgroundColor?: string | null;
   footerBackgroundColor?: string | null;
+  menuBackgroundColor?: string | null;
+  menuTextColor?: string | null;
+  menuActiveBackgroundColor?: string | null;
+  menuActiveTextColor?: string | null;
+  menuHoverBackgroundColor?: string | null;
+  menuIconColor?: string | null;
+  menuChevronColor?: string | null;
+  menuHoverTextColor?: string | null;
+  fontSizeScale?: FontSizeScale;
 }
 
 /**
@@ -89,6 +98,12 @@ const CORNER_RADIUS_MAP: Record<CornerRadiusStyle, { sm: string; md: string; lg:
   PILL: { sm: '999px', md: '999px', lg: '999px' }
 };
 
+const FONT_SCALE_MAP: Record<FontSizeScale, string> = {
+  COMPACT: '0.9',
+  COMFORTABLE: '1',
+  SPACIOUS: '1.1'
+};
+
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly clinicSettingsService = inject(ClinicSettingsService);
@@ -129,6 +144,11 @@ export class ThemeService {
     } else {
       root.removeProperty('--hms-color-tertiary');
     }
+    if (settings.themeSecondaryColor) {
+      root.setProperty('--hms-color-secondary', settings.themeSecondaryColor);
+    } else {
+      root.removeProperty('--hms-color-secondary');
+    }
     if (settings.fontFamily) {
       root.setProperty('--hms-font-family', settings.fontFamily);
     } else {
@@ -144,11 +164,53 @@ export class ThemeService {
     } else {
       root.removeProperty('--hms-footer-bg');
     }
+    if (settings.menuBackgroundColor) {
+      root.setProperty('--hms-menu-bg', settings.menuBackgroundColor);
+    } else {
+      root.removeProperty('--hms-menu-bg');
+    }
+    if (settings.menuTextColor) {
+      root.setProperty('--hms-menu-text', settings.menuTextColor);
+    } else {
+      root.removeProperty('--hms-menu-text');
+    }
+    if (settings.menuActiveBackgroundColor) {
+      root.setProperty('--hms-menu-active-bg', settings.menuActiveBackgroundColor);
+    } else {
+      root.removeProperty('--hms-menu-active-bg');
+    }
+    if (settings.menuActiveTextColor) {
+      root.setProperty('--hms-menu-active-text', settings.menuActiveTextColor);
+    } else {
+      root.removeProperty('--hms-menu-active-text');
+    }
+    if (settings.menuHoverBackgroundColor) {
+      root.setProperty('--hms-menu-hover-bg', settings.menuHoverBackgroundColor);
+    } else {
+      root.removeProperty('--hms-menu-hover-bg');
+    }
+    if (settings.menuIconColor) {
+      root.setProperty('--hms-menu-icon', settings.menuIconColor);
+    } else {
+      root.removeProperty('--hms-menu-icon');
+    }
+    if (settings.menuChevronColor) {
+      root.setProperty('--hms-menu-chevron', settings.menuChevronColor);
+    } else {
+      root.removeProperty('--hms-menu-chevron');
+    }
+    if (settings.menuHoverTextColor) {
+      root.setProperty('--hms-menu-hover-text', settings.menuHoverTextColor);
+    } else {
+      root.removeProperty('--hms-menu-hover-text');
+    }
 
     const radii = CORNER_RADIUS_MAP[settings.cornerRadiusStyle ?? 'ROUNDED'];
     root.setProperty('--hms-radius-sm', radii.sm);
     root.setProperty('--hms-radius-md', radii.md);
     root.setProperty('--hms-radius-lg', radii.lg);
+
+    root.setProperty('--hms-font-scale', FONT_SCALE_MAP[settings.fontSizeScale ?? 'COMFORTABLE']);
 
     this.applyThemeMode(settings.themeMode);
   }

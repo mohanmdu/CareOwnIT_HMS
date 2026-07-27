@@ -1,10 +1,11 @@
 export type ThemeMode = 'LIGHT' | 'DARK' | 'CUSTOM' | 'AUTO';
 export type CornerRadiusStyle = 'SQUARE' | 'ROUNDED' | 'PILL';
+export type FontSizeScale = 'COMPACT' | 'COMFORTABLE' | 'SPACIOUS';
 
 export const THEME_MODE_OPTIONS: { value: ThemeMode; label: string }[] = [
   { value: 'LIGHT', label: 'Light' },
   { value: 'DARK', label: 'Dark' },
-  { value: 'CUSTOM', label: 'Custom' },
+  { value: 'CUSTOM', label: 'Custom (full branding)' },
   { value: 'AUTO', label: 'Follow system' }
 ];
 
@@ -12,6 +13,12 @@ export const CORNER_RADIUS_STYLE_OPTIONS: { value: CornerRadiusStyle; label: str
   { value: 'SQUARE', label: 'Square' },
   { value: 'ROUNDED', label: 'Rounded' },
   { value: 'PILL', label: 'Pill' }
+];
+
+export const FONT_SIZE_SCALE_OPTIONS: { value: FontSizeScale; label: string }[] = [
+  { value: 'COMPACT', label: 'Compact' },
+  { value: 'COMFORTABLE', label: 'Comfortable (default)' },
+  { value: 'SPACIOUS', label: 'Spacious' }
 ];
 
 /** Curated allowlist, not free text - see ThemeService for why. */
@@ -41,6 +48,15 @@ export const DEFAULT_THEME_SETTINGS: Pick<
   | 'headerBackgroundColor'
   | 'footerBackgroundColor'
   | 'footerText'
+  | 'menuBackgroundColor'
+  | 'menuTextColor'
+  | 'menuActiveBackgroundColor'
+  | 'menuActiveTextColor'
+  | 'menuHoverBackgroundColor'
+  | 'menuIconColor'
+  | 'menuChevronColor'
+  | 'menuHoverTextColor'
+  | 'fontSizeScale'
 > = {
   themeMode: 'LIGHT',
   themePrimaryColor: null,
@@ -50,7 +66,16 @@ export const DEFAULT_THEME_SETTINGS: Pick<
   cornerRadiusStyle: 'ROUNDED',
   headerBackgroundColor: null,
   footerBackgroundColor: null,
-  footerText: null
+  footerText: null,
+  menuBackgroundColor: null,
+  menuTextColor: null,
+  menuActiveBackgroundColor: null,
+  menuActiveTextColor: null,
+  menuHoverBackgroundColor: null,
+  menuIconColor: null,
+  menuChevronColor: null,
+  menuHoverTextColor: null,
+  fontSizeScale: 'COMFORTABLE'
 };
 
 export interface ClinicSettings {
@@ -79,4 +104,13 @@ export interface ClinicSettings {
   headerBackgroundColor: string | null;
   footerBackgroundColor: string | null;
   footerText: string | null;
+  menuBackgroundColor: string | null;
+  menuTextColor: string | null;
+  menuActiveBackgroundColor: string | null;
+  menuActiveTextColor: string | null;
+  menuHoverBackgroundColor: string | null;
+  menuIconColor: string | null;
+  menuChevronColor: string | null;
+  menuHoverTextColor: string | null;
+  fontSizeScale: FontSizeScale;
 }
