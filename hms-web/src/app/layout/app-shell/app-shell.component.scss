@@ -75,8 +75,12 @@
   }
 }
 
+// Top-level nav entries (single-item flat links + group toggles) read as
+// "main menu" - deliberately bolder than the nested submenu items below, per
+// ClinicSettings menu customization: a sighted-at-a-glance hierarchy cue, not
+// just indentation.
 .shell-nav-flat-link {
-  font-weight: var(--hms-font-weight-medium);
+  font-weight: var(--hms-font-weight-semibold);
 }
 
 // A group header toggles its panel below it - visually similar weight to a
@@ -94,7 +98,7 @@
   color: var(--hms-menu-text, var(--hms-color-text));
   font: inherit;
   font-size: var(--hms-font-size-md);
-  font-weight: var(--hms-font-weight-medium);
+  font-weight: var(--hms-font-weight-semibold);
   text-align: left;
   cursor: pointer;
   border-radius: var(--hms-radius-md);
@@ -158,6 +162,17 @@
 
 .shell-nav-group-panel-expanded {
   grid-template-rows: 1fr;
+}
+
+// Submenu items (nested inside an expanded group panel) read lighter and
+// slightly smaller than the semibold "main menu" entries above them - the
+// typographic half of the hierarchy cue (indentation via padding is the
+// other half). Deliberately does NOT touch .shell-nav-flat-link (top-level
+// single-item links, which are also <a mat-list-item> but belong to the
+// "main menu" tier).
+.shell-nav-group-panel a.mat-mdc-list-item {
+  --mdc-list-list-item-label-text-weight: var(--hms-font-weight-regular);
+  --mdc-list-list-item-label-text-size: var(--hms-font-size-sm);
 }
 
 .shell-nav-group-panel-inner {
