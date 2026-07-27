@@ -339,25 +339,6 @@ export const routes: Routes = [
           )
       },
       {
-        path: 'billing/catalog',
-        loadComponent: () =>
-          import('./features/billing-receipts/items/billing-catalog.component').then(
-            (m) => m.BillingCatalogComponent
-          )
-      },
-      {
-        path: 'billing/invoices/new',
-        loadComponent: () =>
-          import('./features/billing-receipts/invoices/invoice-create.component').then(
-            (m) => m.InvoiceCreateComponent
-          )
-      },
-      {
-        path: 'billing/invoices',
-        loadComponent: () =>
-          import('./features/billing-receipts/invoices/invoice-list.component').then((m) => m.InvoiceListComponent)
-      },
-      {
         path: 'lab/masters/categories',
         loadComponent: () => import('./features/lab/lab-category-list.component').then((m) => m.LabCategoryListComponent)
       },

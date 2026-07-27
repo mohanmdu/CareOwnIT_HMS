@@ -1,8 +1,5 @@
 package com.pms.registration.service;
 
-import com.pms.billing.dto.InvoiceDto;
-import com.pms.billing.entity.InvoiceStatus;
-import com.pms.billing.service.InvoiceService;
 import com.pms.ipadmission.dto.AdmissionDto;
 import com.pms.ipadmission.service.AdmissionService;
 import com.pms.ipbilling.dto.IpPaymentDto;
@@ -29,9 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
  * order - fields land as each step's backend piece is done, starting with
  * patient + appointments here.
  *
- * Billing unifies three genuinely separate sources (OP Invoice, OP Direct
- * Billing, IP Billing) into one BillingSummaryItem shape per source
- * discriminator - see the Patient Information plan's decision 2. IP billing
+ * Billing unifies two genuinely separate sources (OP Direct Billing, IP
+ * Billing) into one BillingSummaryItem shape per source discriminator - see
+ * the Patient Information plan's decision 2. IP billing
  * has no per-patient query of its own since it's admission-scoped, so it's
  * resolved from the patient's own admissions (already fetched above) rather
  * than a new repository method.
@@ -44,7 +41,6 @@ public class PatientSummaryService {
     private final AppointmentService appointmentService;
     private final AdmissionService admissionService;
     private final LabRequisitionService labRequisitionService;
-    private final InvoiceService invoiceService;
     private final OpDirectBillingService opDirectBillingService;
     private final IpBillingService ipBillingService;
     private final PatientReportService patientReportService;
@@ -54,7 +50,6 @@ public class PatientSummaryService {
             AppointmentService appointmentService,
             AdmissionService admissionService,
             LabRequisitionService labRequisitionService,
-            InvoiceService invoiceService,
             OpDirectBillingService opDirectBillingService,
             IpBillingService ipBillingService,
             PatientReportService patientReportService) {
@@ -62,7 +57,6 @@ public class PatientSummaryService {
         this.appointmentService = appointmentService;
         this.admissionService = admissionService;
         this.labRequisitionService = labRequisitionService;
-        this.invoiceService = invoiceService;
         this.opDirectBillingService = opDirectBillingService;
         this.ipBillingService = ipBillingService;
         this.patientReportService = patientReportService;
@@ -84,24 +78,6 @@ public class PatientSummaryService {
 
     private List<BillingSummaryItem> billing(Long patientId, List<AdmissionDto> admissions) {
         List<BillingSummaryItem> items = new ArrayList<>();
-
-        for (InvoiceDto invoice : invoiceService.findByPatientId(patientId)) {
-            boolean cancelled = invoice.status() == InvoiceStatus.CANCELLED || invoice.status() == InvoiceStatus.REFUNDED;
-            boolean paid = invoice.status() == InvoiceStatus.PAID || invoice.status() == InvoiceStatus.REFUNDED;
-            double total = invoice.totalAmount() != null ? invoice.totalAmount() : 0;
-            items.add(new BillingSummaryItem(
-                    BillingSource.OP_INVOICE,
-                    invoice.id(),
-                    invoice.invoiceNumber(),
-                    invoice.createdAt() != null ? invoice.createdAt().atZone(ZoneId.systemDefault()).toLocalDate() : null,
-                    total,
-                    paid ? total : 0,
-                    0.0,
-                    paid || cancelled ? 0.0 : total,
-                    cancelled,
-                    invoice.cancellationReason(),
-                    false));
-        }
 
         for (OpDirectBillingListEntryDto billing : opDirectBillingService.findByPatientId(patientId)) {
             double total = billing.totalAmount() != null ? billing.totalAmount() : 0;
@@ -144,19 +120,6 @@ public class PatientSummaryService {
 
     private List<PaymentSummaryItem> payments(Long patientId, List<AdmissionDto> admissions) {
         List<PaymentSummaryItem> items = new ArrayList<>();
-
-        for (InvoiceDto invoice : invoiceService.findByPatientId(patientId)) {
-            if (invoice.status() != InvoiceStatus.PAID && invoice.status() != InvoiceStatus.REFUNDED) {
-                continue;
-            }
-            items.add(new PaymentSummaryItem(
-                    BillingSource.OP_INVOICE,
-                    invoice.id(),
-                    invoice.invoiceNumber(),
-                    invoice.createdAt(),
-                    invoice.totalAmount(),
-                    null));
-        }
 
         for (OpDirectBillingListEntryDto billing : opDirectBillingService.findByPatientId(patientId)) {
             items.add(new PaymentSummaryItem(

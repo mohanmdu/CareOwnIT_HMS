@@ -6,7 +6,6 @@ export type ModuleKey =
   | 'overview'
   | 'patient-registration'
   | 'appointments'
-  | 'billing'
   | 'insurance'
   | 'lab'
   | 'upload-reports'
@@ -45,13 +44,12 @@ export type PackageTier = 'BASIC' | 'STANDARD' | 'PREMIUM';
 const ALWAYS_ON: ModuleKey[] = ['overview', 'masters', 'administration'];
 
 export const PACKAGES: Record<PackageTier, ModuleKey[]> = {
-  BASIC: [...ALWAYS_ON, 'patient-registration', 'appointments', 'billing'],
-  STANDARD: [...ALWAYS_ON, 'patient-registration', 'appointments', 'billing', 'lab', 'upload-reports', 'pharmacy', 'icd-codes'],
+  BASIC: [...ALWAYS_ON, 'patient-registration', 'appointments'],
+  STANDARD: [...ALWAYS_ON, 'patient-registration', 'appointments', 'lab', 'upload-reports', 'pharmacy', 'icd-codes'],
   PREMIUM: [
     ...ALWAYS_ON,
     'patient-registration',
     'appointments',
-    'billing',
     'lab',
     'upload-reports',
     'pharmacy',

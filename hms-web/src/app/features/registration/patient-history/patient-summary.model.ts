@@ -4,9 +4,9 @@ import type { LabRequisition } from '../../lab/requisitions/lab-requisition.mode
 import type { PatientReport } from '../../patient-reports/patient-report.model';
 import type { Patient } from '../patients/patient.model';
 
-export type BillingSource = 'OP_INVOICE' | 'OP_DIRECT_BILLING' | 'IP_BILLING';
+export type BillingSource = 'OP_DIRECT_BILLING' | 'IP_BILLING';
 
-/** Unifies the app's 3 separate OP/IP billing paths for display - see the backend's BillingSummaryItem for why this exists. */
+/** Unifies the app's 2 separate OP/IP billing paths for display - see the backend's BillingSummaryItem for why this exists. */
 export interface BillingSummaryItem {
   source: BillingSource;
   id: number;

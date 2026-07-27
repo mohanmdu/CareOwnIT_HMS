@@ -86,9 +86,6 @@ public class ModulePathMappings {
         map.put("/api/masters/ip-billing-components", ModuleKey.IP_BILLING_MASTER);
         map.put("/api/ipbilling", ModuleKey.IP_BILLING_MASTER);
 
-        // Billing (general OP billing catalog/invoices)
-        map.put("/api/billing/", ModuleKey.BILLING);
-
         // Masters
         map.put("/api/masters/departments", ModuleKey.MASTERS);
         map.put("/api/masters/consultants", ModuleKey.MASTERS);

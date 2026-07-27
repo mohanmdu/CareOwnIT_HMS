@@ -1,7 +1,5 @@
 package com.pms.reporting.service;
 
-import com.pms.billing.entity.InvoiceStatus;
-import com.pms.billing.repository.InvoiceRepository;
 import com.pms.insurance.entity.PreAuthorizationStatus;
 import com.pms.insurance.repository.PreAuthorizationRequestRepository;
 import com.pms.ipadmission.entity.AdmissionStatus;
@@ -27,19 +25,19 @@ public class DashboardService {
     private final PatientRepository patientRepository;
     private final AdmissionRepository admissionRepository;
     private final AppointmentRepository appointmentRepository;
-    private final InvoiceRepository invoiceRepository;
+    private final CeoOpRevenueService ceoOpRevenueService;
     private final PreAuthorizationRequestRepository preAuthorizationRequestRepository;
 
     public DashboardService(
             PatientRepository patientRepository,
             AdmissionRepository admissionRepository,
             AppointmentRepository appointmentRepository,
-            InvoiceRepository invoiceRepository,
+            CeoOpRevenueService ceoOpRevenueService,
             PreAuthorizationRequestRepository preAuthorizationRequestRepository) {
         this.patientRepository = patientRepository;
         this.admissionRepository = admissionRepository;
         this.appointmentRepository = appointmentRepository;
-        this.invoiceRepository = invoiceRepository;
+        this.ceoOpRevenueService = ceoOpRevenueService;
         this.preAuthorizationRequestRepository = preAuthorizationRequestRepository;
     }
 
@@ -48,7 +46,7 @@ public class DashboardService {
                 patientRepository.count(),
                 admissionRepository.countByStatus(AdmissionStatus.ADMITTED),
                 appointmentRepository.findByAppointmentDate(LocalDate.now()).size(),
-                invoiceRepository.sumTotalAmountByStatus(InvoiceStatus.PAID),
+                ceoOpRevenueService.revenue(null, null).total(),
                 preAuthorizationRequestRepository.findByStatus(PreAuthorizationStatus.PENDING).size());
     }
 }

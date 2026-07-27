@@ -24,12 +24,11 @@ export interface NavGroup {
  * Patient Registration, Appointments / Direct Visit, IP Admission Module,
  * Room / Ward Management, Lab & Investigations, Upload Reports, Pharmacy,
  * Insurance Module, IP Billing Master, Masters, Administration, Website CMS -
- * with three groups that request didn't mention (Discharge Summary Module,
- * ICD Codes Module, the general Billing group) kept as their own sections at
- * the most logical adjacent slot (confirmed with the user rather than
- * silently hiding them) - Discharge Summary right after IP Admission, ICD
- * Codes right after Lab & Investigations, Billing right after IP Billing
- * Master.
+ * with two groups that request didn't mention (Discharge Summary Module,
+ * ICD Codes Module) kept as their own sections at the most logical adjacent
+ * slot (confirmed with the user rather than silently hiding them) -
+ * Discharge Summary right after IP Admission, ICD Codes right after Lab &
+ * Investigations.
  *
  * Cashier Module was originally a single item bundled inside Overview (both
  * were metrics-only landing screens); it became its own top-level group,
@@ -217,16 +216,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'Advance Cancel', route: '/ip/reports/advance-cancel', icon: 'cancel' },
       { label: 'Cancelled Admissions', route: '/ip/reports/cancelled-admissions', icon: 'event_busy' },
       { label: 'IP/OP Tracking Report', route: '/ip/reports/activity-log', icon: 'manage_search' }
-    ]
-  },
-  {
-    label: 'Billing',
-    moduleKey: 'billing',
-    icon: 'receipt_long',
-    items: [
-      { label: 'Billing Catalog', route: '/billing/catalog', icon: 'sell' },
-      { label: 'New Invoice', route: '/billing/invoices/new', icon: 'receipt_long' },
-      { label: 'Invoices', route: '/billing/invoices', icon: 'request_quote' }
     ]
   },
   {

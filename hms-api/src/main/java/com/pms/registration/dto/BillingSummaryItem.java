@@ -3,10 +3,11 @@ package com.pms.registration.dto;
 import java.time.LocalDate;
 
 /**
- * Unifies the app's 3 separate OP/IP billing paths (Invoice, OpDirectBilling,
- * IP billing) into one shape for the Patient Information screen's Billing
- * Details/Payments Details/Cancelled Details tabs - none of those 3 entities
- * share a common DTO today, this is display-only, not a new billing model.
+ * Unifies the app's 2 separate OP/IP billing paths (OpDirectBilling, IP
+ * billing) into one shape for the Patient Information screen's Billing
+ * Details/Payments Details/Cancelled Details tabs - neither of those 2
+ * entities share a common DTO today, this is display-only, not a new billing
+ * model.
  */
 public record BillingSummaryItem(
         BillingSource source,
@@ -23,7 +24,6 @@ public record BillingSummaryItem(
         boolean refundEligible) {
 
     public enum BillingSource {
-        OP_INVOICE,
         OP_DIRECT_BILLING,
         IP_BILLING
     }

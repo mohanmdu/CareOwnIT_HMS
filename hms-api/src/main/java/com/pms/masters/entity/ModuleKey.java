@@ -16,7 +16,6 @@ public enum ModuleKey {
     OVERVIEW("overview"),
     PATIENT_REGISTRATION("patient-registration"),
     APPOINTMENTS("appointments"),
-    BILLING("billing"),
     INSURANCE("insurance"),
     LAB("lab"),
     UPLOAD_REPORTS("upload-reports"),

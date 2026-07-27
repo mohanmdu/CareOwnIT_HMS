@@ -44,7 +44,6 @@ const INVESTIGATION_STATUS_TONE: Record<string, StatusBadgeTone> = {
 };
 
 const BILLING_SOURCE_LABEL: Record<string, string> = {
-  OP_INVOICE: 'OP Invoice',
   OP_DIRECT_BILLING: 'OP Direct Billing',
   IP_BILLING: 'IP Billing'
 };
