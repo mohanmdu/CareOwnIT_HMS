@@ -57,7 +57,7 @@
 
 .admission-ward-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: var(--hms-space-3);
   align-items: start;
 }

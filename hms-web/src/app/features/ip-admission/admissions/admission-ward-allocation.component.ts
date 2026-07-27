@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -76,7 +76,24 @@ export class AdmissionWardAllocationComponent {
   submitting = signal(false);
   notPending = signal(false);
 
+  /** Distinct room numbers among the available rooms - a room number can have several beds (see bedsForSelectedRoomNumber), so it must only appear once in this dropdown. */
+  uniqueRoomNumbers = computed(() => {
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const room of this.availableRooms()) {
+      if (!seen.has(room.roomNumber)) {
+        seen.add(room.roomNumber);
+        result.push(room.roomNumber);
+      }
+    }
+    return result;
+  });
+
+  /** Every available bed under the selected room number - what selectedRoomId actually resolves against. Recomputed explicitly in onRoomNumberChange() rather than as a computed(), since selectedRoomNumber is a plain ngModel-bound field, not a signal. */
+  bedsForSelectedRoomNumber = signal<Room[]>([]);
+
   selectedRoomTypeId: number | null = null;
+  selectedRoomNumber: string | null = null;
   selectedRoomId: number | null = null;
   form!: Omit<AdmissionAdmitInput, 'patientId' | 'roomId'>;
 
@@ -143,7 +160,9 @@ export class AdmissionWardAllocationComponent {
     if (!this.selectedRoomTypeId) {
       return;
     }
+    this.selectedRoomNumber = null;
     this.selectedRoomId = null;
+    this.bedsForSelectedRoomNumber.set([]);
     this.roomService.list().subscribe({
       next: (rooms) => {
         this.availableRooms.set(rooms.filter((r) => r.status === 'AVAILABLE' && r.roomTypeId === this.selectedRoomTypeId));
@@ -151,6 +170,13 @@ export class AdmissionWardAllocationComponent {
       },
       error: () => this.notification.error('Failed to check room availability.')
     });
+  }
+
+  /** A room number can span several beds - narrow to just this room number's beds, and auto-pick when there's only one. */
+  onRoomNumberChange(): void {
+    const beds = this.availableRooms().filter((room) => room.roomNumber === this.selectedRoomNumber);
+    this.bedsForSelectedRoomNumber.set(beds);
+    this.selectedRoomId = beds.length === 1 ? beds[0].id : null;
   }
 
   submit(): void {

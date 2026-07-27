@@ -172,13 +172,29 @@
               </button>
               <mat-form-field appearance="outline" subscriptSizing="dynamic">
                 <mat-label>Room No</mat-label>
-                <mat-select name="selectedRoomId" [(ngModel)]="selectedRoomId" [disabled]="!checkedAvailability()">
-                  @for (room of availableRooms(); track room.id) {
-                    <mat-option [value]="room.id">{{ room.roomNumber }}</mat-option>
+                <mat-select
+                  name="selectedRoomNumber"
+                  [(ngModel)]="selectedRoomNumber"
+                  [disabled]="!checkedAvailability()"
+                  (selectionChange)="onRoomNumberChange()"
+                >
+                  @for (roomNumber of uniqueRoomNumbers(); track roomNumber) {
+                    <mat-option [value]="roomNumber">{{ roomNumber }}</mat-option>
                   }
                 </mat-select>
                 @if (checkedAvailability() && availableRooms().length === 0) {
                   <mat-hint>No available rooms of this type</mat-hint>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Bed No</mat-label>
+                <mat-select name="selectedRoomId" [(ngModel)]="selectedRoomId" [disabled]="!selectedRoomNumber">
+                  @for (room of bedsForSelectedRoomNumber(); track room.id) {
+                    <mat-option [value]="room.id">{{ room.bedNumber ? 'Bed ' + room.bedNumber : room.roomNumber }}</mat-option>
+                  }
+                </mat-select>
+                @if (selectedRoomNumber && bedsForSelectedRoomNumber().length === 0) {
+                  <mat-hint>No beds available</mat-hint>
                 }
               </mat-form-field>
               <mat-form-field appearance="outline" subscriptSizing="dynamic">
