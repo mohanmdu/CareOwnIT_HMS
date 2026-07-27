@@ -1,252 +1,249 @@
 <div class="hms-page">
-  <app-page-header title="Clinic Settings" subtitle="Hospital name, address and logo shown on printed receipts." />
+  <app-page-header title="Clinic Settings" subtitle="Hospital name, address and logo shown on printed receipts.">
+    <button mat-flat-button color="primary" type="button" [disabled]="!isValid || saving()" (click)="save()">
+      <mat-icon aria-hidden="true">check_circle</mat-icon>
+      Save Changes
+    </button>
+  </app-page-header>
 
-  <section class="hms-card-surface clinic-settings-section">
-    @if (loading()) {
-      <mat-progress-bar mode="indeterminate" />
-    } @else {
-      <div class="clinic-logo-row">
-        @if (logoUrl()) {
-          <img [src]="logoUrl()" alt="" class="clinic-logo-preview" />
-        } @else {
-          <mat-icon aria-hidden="true" class="clinic-logo-fallback">local_hospital</mat-icon>
-        }
-        <button mat-stroked-button type="button" [disabled]="uploadingLogo()" (click)="logoInput.click()">
-          <mat-icon aria-hidden="true">upload</mat-icon>
-          {{ uploadingLogo() ? 'Uploading…' : 'Change logo' }}
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  } @else {
+    <form class="clinic-settings-form" (ngSubmit)="save()">
+      <app-section-card icon="business_center" tone="primary" title="Hospital Information">
+        <div class="hms-form-grid">
+          <div class="clinic-logo-row">
+            <app-clinic-logo [size]="64" [url]="logoUrl()" />
+            <button mat-stroked-button type="button" [disabled]="uploadingLogo()" (click)="logoInput.click()">
+              <mat-icon aria-hidden="true">upload</mat-icon>
+              {{ uploadingLogo() ? 'Uploading…' : 'Change logo' }}
+            </button>
+            <input #logoInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onLogoSelected($event)" />
+          </div>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Hospital name</mat-label>
+            <input matInput name="name" [(ngModel)]="form.name" required />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Phone</mat-label>
+            <input matInput name="phone" [(ngModel)]="form.phone" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Email</mat-label>
+            <input matInput name="email" type="email" [(ngModel)]="form.email" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>TIN No</mat-label>
+            <input matInput name="tinNo" [(ngModel)]="form.tinNo" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>DL No</mat-label>
+            <input matInput name="dlNo" [(ngModel)]="form.dlNo" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="clinic-address-field">
+            <mat-label>Address</mat-label>
+            <textarea matInput name="address" rows="2" [(ngModel)]="form.address"></textarea>
+          </mat-form-field>
+        </div>
+      </app-section-card>
+
+      <app-section-card icon="language" tone="secondary" title="Website Configuration">
+        <div class="hms-form-grid">
+          <mat-slide-toggle name="websiteEnabled" [(ngModel)]="form.websiteEnabled" class="clinic-website-toggle">
+            Website enabled
+          </mat-slide-toggle>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Domain</mat-label>
+            <input matInput name="domain" [(ngModel)]="form.domain" placeholder="www.example-hospital.com" />
+          </mat-form-field>
+
+          <div class="clinic-favicon-row">
+            @if (faviconUrl()) {
+              <img [src]="faviconUrl()" alt="" class="clinic-favicon-preview" />
+            } @else {
+              <mat-icon aria-hidden="true" class="clinic-logo-fallback">image</mat-icon>
+            }
+            <button mat-stroked-button type="button" [disabled]="uploadingFavicon()" (click)="faviconInput.click()">
+              <mat-icon aria-hidden="true">upload</mat-icon>
+              {{ uploadingFavicon() ? 'Uploading…' : 'Change favicon' }}
+            </button>
+            <input #faviconInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onFaviconSelected($event)" />
+          </div>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>SEO default title</mat-label>
+            <input matInput name="seoDefaultTitle" [(ngModel)]="form.seoDefaultTitle" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="clinic-address-field">
+            <mat-label>SEO default description</mat-label>
+            <textarea matInput name="seoDefaultDescription" rows="2" [(ngModel)]="form.seoDefaultDescription"></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Facebook URL</mat-label>
+            <input matInput name="socialFacebookUrl" [(ngModel)]="form.socialFacebookUrl" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Instagram URL</mat-label>
+            <input matInput name="socialInstagramUrl" [(ngModel)]="form.socialInstagramUrl" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>YouTube URL</mat-label>
+            <input matInput name="socialYoutubeUrl" [(ngModel)]="form.socialYoutubeUrl" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>WhatsApp number</mat-label>
+            <input matInput name="whatsappNumber" [(ngModel)]="form.whatsappNumber" />
+          </mat-form-field>
+        </div>
+      </app-section-card>
+
+      <app-section-card icon="palette" tone="warning" title="Appearance Settings">
+        <button sectionActions mat-stroked-button type="button" [disabled]="saving()" (click)="resetTheme()">
+          <mat-icon aria-hidden="true">restart_alt</mat-icon>
+          Reset Theme &amp; Appearance
         </button>
-        <input #logoInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onLogoSelected($event)" />
-      </div>
 
-      <form class="hms-form-grid clinic-settings-form" (ngSubmit)="save()">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Hospital name</mat-label>
-          <input matInput name="name" [(ngModel)]="form.name" required />
-        </mat-form-field>
+        <div class="hms-form-grid">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Theme mode</mat-label>
+            <mat-select name="themeMode" [(ngModel)]="form.themeMode" (selectionChange)="previewTheme()">
+              @for (option of themeModeOptions; track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+            @switch (form.themeMode) {
+              @case ('CUSTOM') {
+                <mat-hint>Light appearance as a base - use the colors, font, and menu settings below for full branding.</mat-hint>
+              }
+              @case ('AUTO') {
+                <mat-hint>Follows the visitor's device setting; your brand colors still apply either way.</mat-hint>
+              }
+            }
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Phone</mat-label>
-          <input matInput name="phone" [(ngModel)]="form.phone" />
-        </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Theme primary color</mat-label>
+            <input matInput type="color" name="themePrimaryColor" [(ngModel)]="form.themePrimaryColor" (change)="previewTheme()" />
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Email</mat-label>
-          <input matInput name="email" type="email" [(ngModel)]="form.email" />
-        </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Theme secondary color</mat-label>
+            <input matInput type="color" name="themeSecondaryColor" [(ngModel)]="form.themeSecondaryColor" (change)="previewTheme()" />
+            <mat-hint>Used for secondary/accent-style buttons</mat-hint>
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>TIN No</mat-label>
-          <input matInput name="tinNo" [(ngModel)]="form.tinNo" />
-        </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Theme tertiary color</mat-label>
+            <input matInput type="color" name="themeTertiaryColor" [(ngModel)]="form.themeTertiaryColor" (change)="previewTheme()" />
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>DL No</mat-label>
-          <input matInput name="dlNo" [(ngModel)]="form.dlNo" />
-        </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Font family</mat-label>
+            <mat-select name="fontFamily" [(ngModel)]="form.fontFamily" (selectionChange)="previewTheme()">
+              @for (option of fontFamilyOptions; track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="clinic-address-field">
-          <mat-label>Address</mat-label>
-          <textarea matInput name="address" rows="2" [(ngModel)]="form.address"></textarea>
-        </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Font size</mat-label>
+            <mat-select name="fontSizeScale" [(ngModel)]="form.fontSizeScale" (selectionChange)="previewTheme()">
+              @for (option of fontSizeScaleOptions; track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
 
-        <h2 class="clinic-settings-section-title">Website</h2>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Corner radius style</mat-label>
+            <mat-select name="cornerRadiusStyle" [(ngModel)]="form.cornerRadiusStyle" (selectionChange)="previewTheme()">
+              @for (option of cornerRadiusStyleOptions; track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
 
-        <mat-slide-toggle name="websiteEnabled" [(ngModel)]="form.websiteEnabled" class="clinic-website-toggle">
-          Website enabled
-        </mat-slide-toggle>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Header background color</mat-label>
+            <input matInput type="color" name="headerBackgroundColor" [(ngModel)]="form.headerBackgroundColor" (change)="previewTheme()" />
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Domain</mat-label>
-          <input matInput name="domain" [(ngModel)]="form.domain" placeholder="www.example-hospital.com" />
-        </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Footer background color</mat-label>
+            <input matInput type="color" name="footerBackgroundColor" [(ngModel)]="form.footerBackgroundColor" (change)="previewTheme()" />
+          </mat-form-field>
 
-        <div class="clinic-favicon-row">
-          @if (faviconUrl()) {
-            <img [src]="faviconUrl()" alt="" class="clinic-favicon-preview" />
-          } @else {
-            <mat-icon aria-hidden="true" class="clinic-logo-fallback">image</mat-icon>
-          }
-          <button mat-stroked-button type="button" [disabled]="uploadingFavicon()" (click)="faviconInput.click()">
-            <mat-icon aria-hidden="true">upload</mat-icon>
-            {{ uploadingFavicon() ? 'Uploading…' : 'Change favicon' }}
-          </button>
-          <input #faviconInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onFaviconSelected($event)" />
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Menu background color</mat-label>
+            <input matInput type="color" name="menuBackgroundColor" [(ngModel)]="form.menuBackgroundColor" (change)="previewTheme()" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Menu text color</mat-label>
+            <input matInput type="color" name="menuTextColor" [(ngModel)]="form.menuTextColor" (change)="previewTheme()" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Menu active background color</mat-label>
+            <input
+              matInput
+              type="color"
+              name="menuActiveBackgroundColor"
+              [(ngModel)]="form.menuActiveBackgroundColor"
+              (change)="previewTheme()"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Menu active text color</mat-label>
+            <input matInput type="color" name="menuActiveTextColor" [(ngModel)]="form.menuActiveTextColor" (change)="previewTheme()" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Menu hover background color</mat-label>
+            <input
+              matInput
+              type="color"
+              name="menuHoverBackgroundColor"
+              [(ngModel)]="form.menuHoverBackgroundColor"
+              (change)="previewTheme()"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Menu hover text color</mat-label>
+            <input matInput type="color" name="menuHoverTextColor" [(ngModel)]="form.menuHoverTextColor" (change)="previewTheme()" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Menu icon color</mat-label>
+            <input matInput type="color" name="menuIconColor" [(ngModel)]="form.menuIconColor" (change)="previewTheme()" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Expand/collapse icon color</mat-label>
+            <input matInput type="color" name="menuChevronColor" [(ngModel)]="form.menuChevronColor" (change)="previewTheme()" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="clinic-address-field">
+            <mat-label>Footer text</mat-label>
+            <input matInput name="footerText" [(ngModel)]="form.footerText" placeholder="e.g. a copyright line shown on printed receipts" />
+          </mat-form-field>
         </div>
-
-        <div class="clinic-settings-section-heading">
-          <h2 class="clinic-settings-section-title">Theme &amp; Appearance</h2>
-          <button
-            mat-stroked-button
-            type="button"
-            [disabled]="saving()"
-            (click)="resetTheme()"
-          >
-            <mat-icon aria-hidden="true">restart_alt</mat-icon>
-            Reset Theme &amp; Appearance
-          </button>
-        </div>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Theme mode</mat-label>
-          <mat-select name="themeMode" [(ngModel)]="form.themeMode" (selectionChange)="previewTheme()">
-            @for (option of themeModeOptions; track option.value) {
-              <mat-option [value]="option.value">{{ option.label }}</mat-option>
-            }
-          </mat-select>
-          @switch (form.themeMode) {
-            @case ('CUSTOM') {
-              <mat-hint>Light appearance as a base - use the colors, font, and menu settings below for full branding.</mat-hint>
-            }
-            @case ('AUTO') {
-              <mat-hint>Follows the visitor's device setting; your brand colors still apply either way.</mat-hint>
-            }
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Theme primary color</mat-label>
-          <input matInput type="color" name="themePrimaryColor" [(ngModel)]="form.themePrimaryColor" (change)="previewTheme()" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Theme secondary color</mat-label>
-          <input matInput type="color" name="themeSecondaryColor" [(ngModel)]="form.themeSecondaryColor" (change)="previewTheme()" />
-          <mat-hint>Used for secondary/accent-style buttons</mat-hint>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Theme tertiary color</mat-label>
-          <input matInput type="color" name="themeTertiaryColor" [(ngModel)]="form.themeTertiaryColor" (change)="previewTheme()" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Font family</mat-label>
-          <mat-select name="fontFamily" [(ngModel)]="form.fontFamily" (selectionChange)="previewTheme()">
-            @for (option of fontFamilyOptions; track option.value) {
-              <mat-option [value]="option.value">{{ option.label }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Font size</mat-label>
-          <mat-select name="fontSizeScale" [(ngModel)]="form.fontSizeScale" (selectionChange)="previewTheme()">
-            @for (option of fontSizeScaleOptions; track option.value) {
-              <mat-option [value]="option.value">{{ option.label }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Corner radius style</mat-label>
-          <mat-select name="cornerRadiusStyle" [(ngModel)]="form.cornerRadiusStyle" (selectionChange)="previewTheme()">
-            @for (option of cornerRadiusStyleOptions; track option.value) {
-              <mat-option [value]="option.value">{{ option.label }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Header background color</mat-label>
-          <input matInput type="color" name="headerBackgroundColor" [(ngModel)]="form.headerBackgroundColor" (change)="previewTheme()" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Footer background color</mat-label>
-          <input matInput type="color" name="footerBackgroundColor" [(ngModel)]="form.footerBackgroundColor" (change)="previewTheme()" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Menu background color</mat-label>
-          <input matInput type="color" name="menuBackgroundColor" [(ngModel)]="form.menuBackgroundColor" (change)="previewTheme()" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Menu text color</mat-label>
-          <input matInput type="color" name="menuTextColor" [(ngModel)]="form.menuTextColor" (change)="previewTheme()" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Menu active background color</mat-label>
-          <input
-            matInput
-            type="color"
-            name="menuActiveBackgroundColor"
-            [(ngModel)]="form.menuActiveBackgroundColor"
-            (change)="previewTheme()"
-          />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Menu active text color</mat-label>
-          <input matInput type="color" name="menuActiveTextColor" [(ngModel)]="form.menuActiveTextColor" (change)="previewTheme()" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Menu hover background color</mat-label>
-          <input
-            matInput
-            type="color"
-            name="menuHoverBackgroundColor"
-            [(ngModel)]="form.menuHoverBackgroundColor"
-            (change)="previewTheme()"
-          />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Menu hover text color</mat-label>
-          <input matInput type="color" name="menuHoverTextColor" [(ngModel)]="form.menuHoverTextColor" (change)="previewTheme()" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Menu icon color</mat-label>
-          <input matInput type="color" name="menuIconColor" [(ngModel)]="form.menuIconColor" (change)="previewTheme()" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Expand/collapse icon color</mat-label>
-          <input matInput type="color" name="menuChevronColor" [(ngModel)]="form.menuChevronColor" (change)="previewTheme()" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="clinic-address-field">
-          <mat-label>Footer text</mat-label>
-          <input matInput name="footerText" [(ngModel)]="form.footerText" placeholder="e.g. a copyright line shown on printed receipts" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>SEO default title</mat-label>
-          <input matInput name="seoDefaultTitle" [(ngModel)]="form.seoDefaultTitle" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="clinic-address-field">
-          <mat-label>SEO default description</mat-label>
-          <textarea matInput name="seoDefaultDescription" rows="2" [(ngModel)]="form.seoDefaultDescription"></textarea>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Facebook URL</mat-label>
-          <input matInput name="socialFacebookUrl" [(ngModel)]="form.socialFacebookUrl" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Instagram URL</mat-label>
-          <input matInput name="socialInstagramUrl" [(ngModel)]="form.socialInstagramUrl" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>YouTube URL</mat-label>
-          <input matInput name="socialYoutubeUrl" [(ngModel)]="form.socialYoutubeUrl" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>WhatsApp number</mat-label>
-          <input matInput name="whatsappNumber" [(ngModel)]="form.whatsappNumber" />
-        </mat-form-field>
-
-        <div class="clinic-settings-submit">
-          <button mat-flat-button color="primary" type="submit" [disabled]="!isValid || saving()">Save</button>
-        </div>
-      </form>
-    }
-  </section>
+      </app-section-card>
+    </form>
+  }
 </div>

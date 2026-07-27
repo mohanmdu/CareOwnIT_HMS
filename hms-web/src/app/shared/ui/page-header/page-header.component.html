@@ -1,5 +1,16 @@
 <header class="page-header">
   <div class="page-header-text">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+      @for (crumb of breadcrumbs; track crumb.label) {
+        @if (crumb.route) {
+          <a [routerLink]="crumb.route">{{ crumb.label }}</a>
+        } @else {
+          <span>{{ crumb.label }}</span>
+        }
+        <span class="page-breadcrumb-sep" aria-hidden="true">/</span>
+      }
+      <span class="page-breadcrumb-current">{{ title() }}</span>
+    </nav>
     <h1>{{ title() }}</h1>
     @if (subtitle()) {
       <p class="page-header-subtitle">{{ subtitle() }}</p>

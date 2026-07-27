@@ -22,6 +22,8 @@
 
   --hms-color-secondary: #6a4fb0;
   --hms-color-on-secondary: #ffffff;
+  --hms-color-secondary-container: #ede7f6;
+  --hms-color-on-secondary-container: #3f2a70;
 
   --hms-color-success: #1e8e3e;
   --hms-color-success-container: #e6f4ea;
@@ -78,6 +80,8 @@
 
     --hms-color-secondary: #b39ddb;
     --hms-color-on-secondary: #2a1a4a;
+    --hms-color-secondary-container: #2e2350;
+    --hms-color-on-secondary-container: #dccdf0;
 
     --hms-color-success: #6cc98a;
     --hms-color-success-container: #123821;
@@ -126,6 +130,8 @@
 
   --hms-color-secondary: #b39ddb;
   --hms-color-on-secondary: #2a1a4a;
+  --hms-color-secondary-container: #2e2350;
+  --hms-color-on-secondary-container: #dccdf0;
 
   --hms-color-success: #6cc98a;
   --hms-color-success-container: #123821;
@@ -171,6 +177,8 @@
 
   --hms-color-secondary: #6a4fb0;
   --hms-color-on-secondary: #ffffff;
+  --hms-color-secondary-container: #ede7f6;
+  --hms-color-on-secondary-container: #3f2a70;
 
   --hms-color-success: #1e8e3e;
   --hms-color-success-container: #e6f4ea;
@@ -206,7 +214,7 @@
 
 :root {
   // ---- Typography --------------------------------------------------------
-  --hms-font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --hms-font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
   // Multiplier applied to every --hms-font-size-* below - ClinicSettings.fontSizeScale
   // (ThemeService) sets this at runtime; default 1 reproduces the literal values in
   // the comments exactly, so an unconfigured deployment sees zero change. Deliberately
@@ -255,11 +263,12 @@
   --hms-shell-sidenav-width-collapsed: 72px;
   --hms-content-max-width: 1440px;
 
-  // Header/footer background default to the brand primary/surface colors -
-  // ClinicSettings.headerBackgroundColor/footerBackgroundColor (ThemeService)
-  // override these independently of the primary brand color when a client
-  // sets them, so a deployment with no customization looks unchanged.
-  --hms-header-bg: var(--hms-color-primary);
+  // Header/footer background default to a light surface (matches the
+  // approved dashboard mockup's white top bar) - ClinicSettings.
+  // headerBackgroundColor/footerBackgroundColor (ThemeService) override
+  // these independently of the primary brand color when a client sets them.
+  --hms-header-bg: var(--hms-color-surface);
+  --hms-header-text: var(--hms-color-text);
   --hms-footer-bg: var(--hms-color-surface-alt);
 
   // ---- Sidenav / menu (ClinicSettings.menu*Color, ThemeService) ----------

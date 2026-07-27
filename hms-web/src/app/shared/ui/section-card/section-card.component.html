@@ -1,0 +1,19 @@
+<section class="hms-card-surface section-card" [class]="'tone-' + tone()">
+  <header class="section-card-header">
+    <div class="section-card-icon">
+      <mat-icon aria-hidden="true">{{ icon() }}</mat-icon>
+    </div>
+    <div class="section-card-heading">
+      <h2>{{ title() }}</h2>
+      @if (subtitle()) {
+        <p class="section-card-subtitle">{{ subtitle() }}</p>
+      }
+    </div>
+    <div class="section-card-actions">
+      <ng-content select="[sectionActions]" />
+    </div>
+  </header>
+  <div class="section-card-body">
+    <ng-content />
+  </div>
+</section>

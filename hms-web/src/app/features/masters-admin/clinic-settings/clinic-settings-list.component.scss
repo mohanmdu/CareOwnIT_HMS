@@ -1,22 +1,16 @@
-.clinic-settings-section {
-  padding: var(--hms-space-5);
-  display: flex;
-  flex-direction: column;
-  gap: var(--hms-space-4);
+// The <form> itself carries no visual box - display:contents lets its
+// children (the 3 <app-section-card>s) become direct flex items of
+// .hms-page, inheriting its gap so the cards stack with the same spacing
+// as everywhere else, without a second spacing scale to keep in sync. The
+// element remains a real DOM node for Angular's ngModel/ngSubmit to target.
+.clinic-settings-form {
+  display: contents;
 }
 
 .clinic-logo-row {
   display: flex;
   align-items: center;
   gap: var(--hms-space-3);
-}
-
-.clinic-logo-preview {
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
-  border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
-  border-radius: var(--hms-radius-md, 8px);
 }
 
 .clinic-logo-fallback {
@@ -28,33 +22,6 @@
 
 .clinic-address-field {
   grid-column: 1 / -1;
-}
-
-.clinic-settings-section-title {
-  grid-column: 1 / -1;
-  font-size: var(--hms-font-size-lg);
-  margin: 0;
-  padding-top: var(--hms-space-3);
-  border-top: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
-}
-
-// Wraps a .clinic-settings-section-title h2 together with an action button
-// (e.g. "Reset Theme & Appearance") on the same row - the wrapper takes over
-// the grid-column/border/padding so the nested h2 doesn't double them up.
-.clinic-settings-section-heading {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--hms-space-3);
-  padding-top: var(--hms-space-3);
-  border-top: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
-
-  .clinic-settings-section-title {
-    grid-column: unset;
-    padding-top: 0;
-    border-top: none;
-  }
 }
 
 .clinic-website-toggle {
@@ -73,10 +40,4 @@
   object-fit: contain;
   border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
   border-radius: var(--hms-radius-md, 8px);
-}
-
-.clinic-settings-submit {
-  display: flex;
-  align-items: center;
-  grid-column: 1 / -1;
 }

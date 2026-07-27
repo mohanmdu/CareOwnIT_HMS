@@ -9,7 +9,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog.service';
 import { NotificationService } from '../../../shared/services/notification.service';
+import { ClinicLogoComponent } from '../../../shared/ui/clinic-logo/clinic-logo.component';
 import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
+import { SectionCardComponent } from '../../../shared/ui/section-card/section-card.component';
 import { ThemeService } from '../../../core/services/theme.service';
 import {
   CORNER_RADIUS_STYLE_OPTIONS,
@@ -35,7 +37,9 @@ import { ClinicSettingsInput, ClinicSettingsService } from './clinic-settings.se
     MatProgressBarModule,
     MatSelectModule,
     MatSlideToggleModule,
-    PageHeaderComponent
+    ClinicLogoComponent,
+    PageHeaderComponent,
+    SectionCardComponent
   ],
   templateUrl: './clinic-settings-list.component.html',
   styleUrl: './clinic-settings-list.component.scss'

@@ -14,6 +14,8 @@ export interface NavGroup {
   /** Shown on the group's own collapsible header row (or the flat row, for a single-item group). */
   icon: string;
   items: NavItem[];
+  /** Sidenav category super-label ("MAIN MODULES" vs "SYSTEM") - defaults to 'main' when omitted, so most groups don't need to set it. */
+  category?: 'main' | 'system';
 }
 
 /**
@@ -222,6 +224,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: 'Masters',
     moduleKey: 'masters',
     icon: 'settings_applications',
+    category: 'system',
     items: [
       { label: 'Departments', route: '/masters/departments', icon: 'apartment' },
       { label: 'Consultants', route: '/masters/consultants', icon: 'medical_services' },
@@ -234,6 +237,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: 'Administration',
     moduleKey: 'administration',
     icon: 'manage_accounts',
+    category: 'system',
     items: [
       { label: 'Roles', route: '/masters/roles', icon: 'admin_panel_settings' },
       { label: 'General Users', route: '/masters/general-users', icon: 'group' },
@@ -245,6 +249,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: 'Website CMS',
     moduleKey: 'website-cms',
     icon: 'language',
+    category: 'system',
     items: [
       { label: 'Site Content', route: '/masters/cms/site-content', icon: 'article' },
       { label: 'Banner Slides', route: '/masters/cms/banner-slides', icon: 'wallpaper' },

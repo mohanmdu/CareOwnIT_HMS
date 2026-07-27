@@ -8,68 +8,32 @@
     (closedStart)="sidenavOpened.set(false)"
   >
     <div class="shell-brand">
-      <mat-icon aria-hidden="true">local_hospital</mat-icon>
-      <span> HMS</span>
+      <app-clinic-logo [size]="32" />
+      <span>{{ clinicName() }}</span>
     </div>
 
     <mat-nav-list class="shell-nav-list">
-      @for (group of navGroups(); track group.label) {
-        @if (group.items.length === 1) {
-          <a
-            mat-list-item
-            class="shell-nav-flat-link"
-            [routerLink]="group.items[0].route"
-            routerLinkActive="shell-nav-active"
-            [routerLinkActiveOptions]="{ exact: true }"
-            (click)="closeOnMobileNav()"
-          >
-            <mat-icon matListItemIcon fontSet="material-icons-outlined" aria-hidden="true">{{ group.icon }}</mat-icon>
-            <span matListItemTitle>{{ group.label }}</span>
-          </a>
-        } @else {
-          <button
-            type="button"
-            class="shell-nav-group-header"
-            [class.shell-nav-group-header-active]="isGroupActive(group)"
-            [attr.aria-expanded]="isGroupExpanded(group)"
-            [attr.aria-controls]="'nav-panel-' + group.moduleKey"
-            (click)="toggleGroup(group.label)"
-          >
-            <mat-icon class="shell-nav-group-icon" fontSet="material-icons-outlined" aria-hidden="true">{{
-              group.icon
-            }}</mat-icon>
-            <span class="shell-nav-group-label">{{ group.label }}</span>
-            <mat-icon
-              class="shell-nav-chevron"
-              [class.shell-nav-chevron-expanded]="isGroupExpanded(group)"
-              aria-hidden="true"
-              >expand_more</mat-icon
-            >
-          </button>
-          <div
-            class="shell-nav-group-panel"
-            [class.shell-nav-group-panel-expanded]="isGroupExpanded(group)"
-            [id]="'nav-panel-' + group.moduleKey"
-            [attr.inert]="isGroupExpanded(group) ? null : ''"
-          >
-            <div class="shell-nav-group-panel-inner">
-              @for (item of group.items; track item.route) {
-                <a
-                  mat-list-item
-                  [routerLink]="item.route"
-                  routerLinkActive="shell-nav-active"
-                  [routerLinkActiveOptions]="{ exact: true }"
-                  (click)="closeOnMobileNav()"
-                >
-                  <mat-icon matListItemIcon aria-hidden="true">{{ item.icon }}</mat-icon>
-                  <span matListItemTitle>{{ item.label }}</span>
-                </a>
-              }
-            </div>
-          </div>
+      @if (mainGroups().length > 0) {
+        <div class="shell-nav-category-label">Main Modules</div>
+        @for (group of mainGroups(); track group.label) {
+          <ng-container *ngTemplateOutlet="navGroupTemplate; context: { group: group }" />
+        }
+      }
+      @if (systemGroups().length > 0) {
+        <div class="shell-nav-category-label">System</div>
+        @for (group of systemGroups(); track group.label) {
+          <ng-container *ngTemplateOutlet="navGroupTemplate; context: { group: group }" />
         }
       }
     </mat-nav-list>
+
+    <div class="shell-help-card">
+      <mat-icon aria-hidden="true">support_agent</mat-icon>
+      <div class="shell-help-text">
+        <p class="shell-help-title">Need Help?</p>
+        <p class="shell-help-subtitle">Contact support for assistance</p>
+      </div>
+    </div>
   </mat-sidenav>
 
   <mat-sidenav-content class="shell-content">
@@ -77,10 +41,55 @@
       <button mat-icon-button type="button" (click)="toggleSidenav()" aria-label="Toggle navigation menu">
         <mat-icon>menu</mat-icon>
       </button>
-      <span class="shell-title"> Hospital Management System</span>
+
+      <div class="shell-search">
+        <mat-icon class="shell-search-icon" aria-hidden="true">search</mat-icon>
+        <input
+          #searchInput
+          type="text"
+          class="shell-search-input"
+          placeholder="Search menus... (Ctrl+K)"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          (keydown.escape)="clearSearch()"
+          (keydown.enter)="navigateToFirstResult()"
+        />
+        <span class="shell-search-hint">Ctrl+K</span>
+
+        @if (searchResults().length > 0) {
+          <div class="shell-search-results">
+            @for (result of searchResults(); track result.route) {
+              <a class="shell-search-result" [routerLink]="result.route" (click)="clearSearch()">
+                <mat-icon aria-hidden="true">{{ result.icon }}</mat-icon>
+                <span>{{ result.label }}</span>
+              </a>
+            }
+          </div>
+        }
+      </div>
+
       <span class="shell-spacer"></span>
-      <button mat-icon-button type="button" [matMenuTriggerFor]="userMenu" aria-label="Account menu">
-        <mat-icon>account_circle</mat-icon>
+
+      <button
+        mat-icon-button
+        type="button"
+        (click)="toggleFullscreen()"
+        [attr.aria-label]="isFullscreen() ? 'Exit fullscreen' : 'Enter fullscreen'"
+      >
+        <mat-icon>{{ isFullscreen() ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+      </button>
+
+      <button mat-icon-button type="button" aria-label="Notifications">
+        <mat-icon>notifications</mat-icon>
+      </button>
+
+      <button type="button" class="shell-user-button" [matMenuTriggerFor]="userMenu" aria-label="Account menu">
+        <span class="shell-user-avatar">{{ userInitials() }}</span>
+        <span class="shell-user-info">
+          <span class="shell-user-name">{{ currentUsername() }}</span>
+          <span class="shell-user-role">{{ roleName() }}</span>
+        </span>
+        <mat-icon class="shell-user-caret" aria-hidden="true">arrow_drop_down</mat-icon>
       </button>
       <mat-menu #userMenu="matMenu">
         <button mat-menu-item type="button" (click)="signOut()">
@@ -99,3 +108,66 @@
     }
   </mat-sidenav-content>
 </mat-sidenav-container>
+
+<ng-template #navGroupTemplate let-group="group">
+  @if (group.items.length === 1) {
+    <a
+      mat-list-item
+      class="shell-nav-flat-link"
+      [routerLink]="group.items[0].route"
+      routerLinkActive="shell-nav-active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      (click)="closeOnMobileNav()"
+    >
+      <mat-icon
+        matListItemIcon
+        fontSet="material-icons-outlined"
+        aria-hidden="true"
+        [class]="'shell-nav-icon-badge tone-' + iconToneFor(group)"
+        >{{ group.icon }}</mat-icon
+      >
+      <span matListItemTitle>{{ group.label }}</span>
+    </a>
+  } @else {
+    <button
+      type="button"
+      class="shell-nav-group-header"
+      [class.shell-nav-group-header-active]="isGroupActive(group)"
+      [attr.aria-expanded]="isGroupExpanded(group)"
+      [attr.aria-controls]="'nav-panel-' + group.moduleKey"
+      (click)="toggleGroup(group.label)"
+    >
+      <mat-icon
+        [class]="'shell-nav-group-icon shell-nav-icon-badge tone-' + iconToneFor(group)"
+        fontSet="material-icons-outlined"
+        aria-hidden="true"
+        >{{ group.icon }}</mat-icon
+      >
+      <span class="shell-nav-group-label">{{ group.label }}</span>
+      <mat-icon class="shell-nav-chevron" [class.shell-nav-chevron-expanded]="isGroupExpanded(group)" aria-hidden="true"
+        >expand_more</mat-icon
+      >
+    </button>
+    <div
+      class="shell-nav-group-panel"
+      [class.shell-nav-group-panel-expanded]="isGroupExpanded(group)"
+      [id]="'nav-panel-' + group.moduleKey"
+      [attr.inert]="isGroupExpanded(group) ? null : ''"
+    >
+      <div class="shell-nav-group-panel-inner">
+        @for (item of group.items; track item.route) {
+          <a
+            mat-list-item
+            [routerLink]="item.route"
+            routerLinkActive="shell-nav-active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            (click)="closeOnMobileNav()"
+          >
+            <mat-icon matListItemIcon aria-hidden="true">{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+          </a>
+        }
+      </div>
+    </div>
+  }
+</ng-template>

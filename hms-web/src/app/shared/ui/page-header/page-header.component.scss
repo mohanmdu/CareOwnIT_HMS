@@ -6,6 +6,34 @@
   flex-wrap: wrap;
 }
 
+.page-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-1);
+  font-size: var(--hms-font-size-sm);
+  color: var(--hms-color-text-muted);
+  margin-bottom: var(--hms-space-1);
+
+  a {
+    color: var(--hms-color-text-muted);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--hms-color-primary);
+      text-decoration: underline;
+    }
+  }
+}
+
+.page-breadcrumb-sep {
+  color: var(--hms-color-text-disabled);
+}
+
+.page-breadcrumb-current {
+  color: var(--hms-color-text);
+  font-weight: var(--hms-font-weight-medium);
+}
+
 .page-header-text h1 {
   font-size: var(--hms-font-size-2xl);
   margin: 0;

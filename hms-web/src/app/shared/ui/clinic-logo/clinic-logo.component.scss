@@ -1,0 +1,8 @@
+.clinic-logo-image {
+  object-fit: contain;
+  border-radius: var(--hms-radius-sm);
+}
+
+.clinic-logo-fallback {
+  color: var(--hms-color-primary);
+}

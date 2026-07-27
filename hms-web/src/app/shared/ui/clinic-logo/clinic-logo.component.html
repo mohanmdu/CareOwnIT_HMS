@@ -1,0 +1,7 @@
+@if (resolvedUrl(); as url) {
+  <img [src]="url" alt="" class="clinic-logo-image" [style.width.px]="size()" [style.height.px]="size()" />
+} @else {
+  <mat-icon aria-hidden="true" class="clinic-logo-fallback" [style.width.px]="size()" [style.height.px]="size()" [style.font-size.px]="size()">
+    local_hospital
+  </mat-icon>
+}

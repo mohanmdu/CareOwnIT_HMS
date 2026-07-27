@@ -1,7 +1,8 @@
 import { Component, input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { Tone } from '../tone';
 
-export type StatTileTone = 'primary' | 'success' | 'warning' | 'danger' | 'info';
+export type StatTileTone = Tone;
 
 /**
  * KPI tile used on the MIS dashboard (and any future summary screen) so

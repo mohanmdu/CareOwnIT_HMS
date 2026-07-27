@@ -1,6 +1,7 @@
 import { Component, input } from '@angular/core';
+import { Tone } from '../tone';
 
-export type StatusBadgeTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+export type StatusBadgeTone = Tone;
 
 /**
  * Single consistent "pill" used everywhere a status enum is rendered
