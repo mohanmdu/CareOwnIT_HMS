@@ -8,6 +8,7 @@ import java.util.List;
 
 public record OpDirectBillingRequest(
         @NotNull Long patientId,
+        Long consultantId,
         @NotEmpty @Valid List<OpDirectBillingItemRequest> items,
         @NotNull PaymentMode paymentMode,
         String remarks) {

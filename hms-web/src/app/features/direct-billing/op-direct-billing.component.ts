@@ -13,6 +13,8 @@ import { NotificationService } from '../../shared/services/notification.service'
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { PatientSearchComponent } from '../../shared/ui/patient-search/patient-search.component';
 import { PAYMENT_MODE_LABELS, PAYMENT_MODES, PaymentMode } from '../appointments/booking/appointment.model';
+import { Consultant } from '../masters-admin/consultants/consultant.model';
+import { ConsultantService } from '../masters-admin/consultants/consultant.service';
 import { OpBillingCategory } from '../masters-admin/op-billing-categories/op-billing-category.model';
 import { OpBillingCategoryService } from '../masters-admin/op-billing-categories/op-billing-category.service';
 import { OpBillingComponent } from '../masters-admin/op-billing-components/op-billing-component.model';
@@ -57,6 +59,7 @@ export class OpDirectBillingComponent {
   private readonly service = inject(OpDirectBillingService);
   private readonly categoryService = inject(OpBillingCategoryService);
   private readonly componentService = inject(OpBillingComponentService);
+  private readonly consultantService = inject(ConsultantService);
   private readonly notification = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
 
@@ -67,6 +70,7 @@ export class OpDirectBillingComponent {
   patient = signal<Patient | null>(null);
   categories = signal<OpBillingCategory[]>([]);
   components = signal<OpBillingComponent[]>([]);
+  consultants = signal<Consultant[]>([]);
   items = signal<OpDirectBillingWorkingItem[]>([]);
   saving = signal(false);
 
@@ -77,6 +81,8 @@ export class OpDirectBillingComponent {
   // Component list never updated after picking a Category.
   selectedCategoryId = signal<number | null>(null);
   paymentMode: PaymentMode = 'CASH';
+  /** Optional - most walk-in charges have no doctor involved. */
+  selectedConsultantId: number | null = null;
   remarks = '';
 
   filteredComponents = computed(() => {
@@ -97,6 +103,10 @@ export class OpDirectBillingComponent {
     this.componentService.list().subscribe({
       next: (components) => this.components.set(components),
       error: () => this.notification.error('Failed to load OP Billing Components.')
+    });
+    this.consultantService.list().subscribe({
+      next: (consultants) => this.consultants.set(consultants),
+      error: () => this.notification.error('Failed to load Consultants.')
     });
   }
 
@@ -152,6 +162,7 @@ export class OpDirectBillingComponent {
     this.service
       .create({
         patientId: patient.id,
+        consultantId: this.selectedConsultantId,
         items: this.items().map((item) => ({
           componentId: item.componentId,
           quantity: item.quantity,
@@ -184,6 +195,7 @@ export class OpDirectBillingComponent {
     this.newItem = emptyNewItem();
     this.selectedCategoryId.set(null);
     this.paymentMode = 'CASH';
+    this.selectedConsultantId = null;
     this.remarks = '';
   }
 }

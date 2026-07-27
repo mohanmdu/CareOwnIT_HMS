@@ -1,5 +1,6 @@
 package com.pms.registration.entity;
 
+import com.pms.masters.entity.Consultant;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -42,6 +43,11 @@ public class OpDirectBilling {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
+
+    /** Optional - most walk-in charges have no doctor involved; staff can attribute one when relevant. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "consultant_id")
+    private Consultant consultant;
 
     @Column(name = "invoice_number", nullable = false, unique = true)
     private Long invoiceNumber;

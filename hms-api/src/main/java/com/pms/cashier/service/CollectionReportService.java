@@ -113,13 +113,14 @@ public class CollectionReportService {
             }
         }
 
-        // OP Direct Billing - always Bill Type OP, no consultant/department concept.
-        if (billType != BillType.IP
-                && consultantId == null
-                && departmentId == null
-                && includes(collectionType, CollectionType.OP_DIRECT_BILLING)) {
+        // OP Direct Billing - always Bill Type OP. Consultant/department are
+        // optional on a walk-in charge - the consultantId/departmentId
+        // filters below (line ~174) already re-narrow using the real values
+        // toRow() now populates, so this block doesn't need its own guard.
+        if (billType != BillType.IP && includes(collectionType, CollectionType.OP_DIRECT_BILLING)) {
             PaymentMode directPaymentMode = parseEnum(PaymentMode.class, paymentMode);
-            for (OpDirectBilling billing : opDirectBillingRepository.collectionReport(fromInstant, toInstant, directPaymentMode)) {
+            for (OpDirectBilling billing :
+                    opDirectBillingRepository.collectionReport(fromInstant, toInstant, consultantId, directPaymentMode)) {
                 rows.add(toRow(billing, userDisplayNames));
             }
         }
@@ -215,6 +216,7 @@ public class CollectionReportService {
 
     private CollectionReportRowDto toRow(OpDirectBilling billing, Map<String, String> userDisplayNames) {
         Patient patient = billing.getPatient();
+        Consultant consultant = billing.getConsultant();
         double total = billing.getTotalAmount() != null ? billing.getTotalAmount() : 0.0;
         double refund = billing.getRefundAmount() != null ? billing.getRefundAmount() : 0.0;
         return new CollectionReportRowDto(
@@ -226,12 +228,12 @@ public class CollectionReportService {
                 billing.getBilledAt(),
                 billing.getInvoiceNumber() != null ? String.valueOf(billing.getInvoiceNumber()) : null,
                 billing.getPaymentMode() != null ? billing.getPaymentMode().name() : null,
-                null,
-                null,
+                consultant != null ? consultant.getName() : null,
+                consultant != null ? consultant.getDepartment().getName() : null,
                 billing.getBilledBy(),
                 userDisplayNames.get(billing.getBilledBy()),
-                null,
-                null,
+                consultant != null ? consultant.getDepartment().getId() : null,
+                consultant != null ? consultant.getId() : null,
                 total,
                 0.0,
                 0.0,

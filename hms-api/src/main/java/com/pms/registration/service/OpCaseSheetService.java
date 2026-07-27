@@ -11,13 +11,20 @@ import com.pms.registration.dto.PrescriptionWorklistEntryDto;
 import com.pms.registration.dto.ReviewDateReportEntryDto;
 import com.pms.registration.entity.Appointment;
 import com.pms.registration.entity.OpCaseSheet;
+import com.pms.registration.entity.OpDirectBilling;
 import com.pms.registration.entity.OpPrescriptionItem;
 import com.pms.registration.entity.Patient;
 import com.pms.registration.repository.AppointmentRepository;
 import com.pms.registration.repository.OpCaseSheetRepository;
+import com.pms.registration.repository.OpDirectBillingRepository;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,15 +40,38 @@ public class OpCaseSheetService {
 
     private final AppointmentRepository appointmentRepository;
     private final OpCaseSheetRepository caseSheetRepository;
+    private final OpDirectBillingRepository opDirectBillingRepository;
 
-    public OpCaseSheetService(AppointmentRepository appointmentRepository, OpCaseSheetRepository caseSheetRepository) {
+    public OpCaseSheetService(
+            AppointmentRepository appointmentRepository,
+            OpCaseSheetRepository caseSheetRepository,
+            OpDirectBillingRepository opDirectBillingRepository) {
         this.appointmentRepository = appointmentRepository;
         this.caseSheetRepository = caseSheetRepository;
+        this.opDirectBillingRepository = opDirectBillingRepository;
     }
 
+    /**
+     * Merges two visit sources: appointments (which may need a case sheet
+     * documented) and OP Direct Billing walk-ins (view-only here - a case
+     * sheet requires a real appointment, and there's nothing clinical to
+     * document for a walk-in charge; see the Patient Prescription plan).
+     */
     public List<PrescriptionWorklistEntryDto> worklist(LocalDate fromDate, LocalDate toDate, Long consultantId, String search) {
-        return appointmentRepository.prescriptionWorklist(fromDate, toDate, consultantId, search).stream()
-                .map(this::toWorklistEntry)
+        Stream<PrescriptionWorklistEntryDto> appointmentEntries =
+                appointmentRepository.prescriptionWorklist(fromDate, toDate, consultantId, search).stream()
+                        .map(this::toWorklistEntry);
+
+        Instant fromInstant = fromDate != null ? fromDate.atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
+        Instant toInstant = toDate != null ? toDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
+        Stream<PrescriptionWorklistEntryDto> directBillingEntries =
+                opDirectBillingRepository.prescriptionWorklist(fromInstant, toInstant, consultantId, search).stream()
+                        .map(this::toWorklistEntry);
+
+        return Stream.concat(appointmentEntries, directBillingEntries)
+                .sorted(Comparator.comparing(PrescriptionWorklistEntryDto::appointmentDate)
+                        .thenComparing(PrescriptionWorklistEntryDto::slotTime)
+                        .reversed())
                 .toList();
     }
 
@@ -214,6 +244,8 @@ public class OpCaseSheetService {
                 .orElse(null);
         return new PrescriptionWorklistEntryDto(
                 appointment.getId(),
+                null,
+                "APPOINTMENT",
                 patient.getId(),
                 displayName(patient),
                 patient.getRegistrationNumber(),
@@ -226,6 +258,28 @@ public class OpCaseSheetService {
                 appointment.getSlotTime(),
                 hasCaseSheet,
                 reviewDate);
+    }
+
+    private PrescriptionWorklistEntryDto toWorklistEntry(OpDirectBilling billing) {
+        Patient patient = billing.getPatient();
+        Consultant consultant = billing.getConsultant();
+        ZonedDateTime billedAt = billing.getBilledAt().atZone(ZoneId.systemDefault());
+        return new PrescriptionWorklistEntryDto(
+                null,
+                billing.getId(),
+                "DIRECT_BILLING",
+                patient.getId(),
+                displayName(patient),
+                patient.getRegistrationNumber(),
+                patient.getAge(),
+                patient.getGender(),
+                patient.getMobileNumber(),
+                consultant != null ? consultant.getDepartment().getName() : null,
+                consultant != null ? consultant.getName() : null,
+                billedAt.toLocalDate(),
+                billedAt.toLocalTime(),
+                false,
+                null);
     }
 
     private ReviewDateReportEntryDto toReviewDateEntry(OpCaseSheet caseSheet) {

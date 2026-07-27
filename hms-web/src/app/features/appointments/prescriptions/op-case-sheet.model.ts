@@ -60,8 +60,12 @@ export interface OpCaseSheet {
 
 export type OpCaseSheetSaveRequest = Omit<OpCaseSheet, 'id' | 'header' | 'createdAt' | 'updatedAt'>;
 
+export type PrescriptionWorklistSource = 'APPOINTMENT' | 'DIRECT_BILLING';
+
 export interface PrescriptionWorklistEntry {
-  appointmentId: number;
+  appointmentId: number | null;
+  directBillingId: number | null;
+  source: PrescriptionWorklistSource;
   patientId: number;
   patientName: string | null;
   patientRegistrationNumber: string | null;

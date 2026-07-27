@@ -72,6 +72,11 @@
             <td mat-cell *matCellDef="let entry">{{ entry.patientRegistrationNumber }}</td>
           </ng-container>
 
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef>Category</th>
+            <td mat-cell *matCellDef="let entry">{{ categoryLabel(entry.source) }}</td>
+          </ng-container>
+
           <ng-container matColumnDef="billedAt">
             <th mat-header-cell *matHeaderCellDef>Date &amp; Time</th>
             <td mat-cell *matCellDef="let entry">{{ entry.billedAt | date: 'dd-MM-yyyy hh:mm a' }}</td>
@@ -86,7 +91,7 @@
 
           <ng-container matColumnDef="consultantName">
             <th mat-header-cell *matHeaderCellDef>Consultant Name</th>
-            <td mat-cell *matCellDef="let entry">{{ entry.consultantName ?? 'Direct Billing' }}</td>
+            <td mat-cell *matCellDef="let entry">{{ entry.consultantName ?? '-' }}</td>
           </ng-container>
 
           <ng-container matColumnDef="billedBy">

@@ -174,9 +174,9 @@ public class AppointmentService {
 
     /**
      * Merges two revenue sources into one report: appointment billing and OP
-     * Direct Billing (walk-in charges with no consultant). Direct Billing
-     * rows are naturally excluded whenever a specific consultantId filter is
-     * applied, since they have none.
+     * Direct Billing (walk-in charges, optionally attributed to a
+     * consultant - see OpDirectBilling.consultant). A consultantId filter
+     * now matches both sources, since a walk-in can have one too.
      */
     public List<CollectionReportEntryDto> collectionReport(
             LocalDate fromDate, LocalDate toDate, Long consultantId, PaymentMode paymentMode) {
@@ -186,13 +186,8 @@ public class AppointmentService {
         Stream<CollectionReportEntryDto> appointmentEntries =
                 repository.collectionReport(fromInstant, toInstant, consultantId, paymentMode).stream()
                         .map(this::toCollectionReportEntry);
-        if (consultantId != null) {
-            return appointmentEntries
-                    .sorted(Comparator.comparing(CollectionReportEntryDto::billedAt).reversed())
-                    .toList();
-        }
         Stream<CollectionReportEntryDto> directBillingEntries =
-                opDirectBillingRepository.collectionReport(fromInstant, toInstant, paymentMode).stream()
+                opDirectBillingRepository.collectionReport(fromInstant, toInstant, consultantId, paymentMode).stream()
                         .map(this::toCollectionReportEntry);
         return Stream.concat(appointmentEntries, directBillingEntries)
                 .sorted(Comparator.comparing(CollectionReportEntryDto::billedAt).reversed())
@@ -353,7 +348,7 @@ public class AppointmentService {
                 patient.getRegistrationNumber(),
                 billing.getBilledAt(),
                 billing.getPaymentMode(),
-                null,
+                billing.getConsultant() != null ? billing.getConsultant().getName() : null,
                 billing.getBilledBy(),
                 billing.getTotalAmount(),
                 0.0,

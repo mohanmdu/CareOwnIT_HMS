@@ -31,7 +31,7 @@
       <span>Patient ID: {{ refund.patientRegistrationNumber }}</span>
     </div>
     <div class="receipt-meta">
-      <span>Consultant Name: {{ refund.consultantName ?? 'Direct Billing' }}</span>
+      <span>Consultant Name: {{ refund.consultantName ?? '-' }}</span>
       <span>Refund Date: {{ refund.refundedAt | date: 'dd-MM-yyyy' }}</span>
     </div>
 

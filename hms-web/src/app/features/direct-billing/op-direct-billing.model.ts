@@ -19,6 +19,7 @@ export interface OpDirectBillingItemRequest {
 
 export interface OpDirectBillingRequest {
   patientId: number;
+  consultantId: number | null;
   items: OpDirectBillingItemRequest[];
   paymentMode: PaymentMode;
   remarks: string | null;
@@ -41,6 +42,8 @@ export interface OpDirectBillingReceipt {
   gender: string | null;
   age: number | null;
   mobileNumber: string | null;
+  consultantId: number | null;
+  consultantName: string | null;
   items: OpDirectBillingReceiptItem[];
   totalAmount: number;
   paymentMode: PaymentMode;
@@ -61,6 +64,8 @@ export interface OpDirectBillingListEntry {
   billedBy: string | null;
   billedAt: string;
   refundAmount: number | null;
+  consultantId: number | null;
+  consultantName: string | null;
 }
 
 export interface OpDirectBillingListFilter {

@@ -5,6 +5,8 @@ import java.time.LocalTime;
 
 public record PrescriptionWorklistEntryDto(
         Long appointmentId,
+        Long directBillingId,
+        String source,
         Long patientId,
         String patientName,
         String patientRegistrationNumber,

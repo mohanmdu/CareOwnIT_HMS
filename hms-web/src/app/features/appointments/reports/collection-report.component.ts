@@ -19,9 +19,20 @@ import { ConsultantService } from '../../masters-admin/consultants/consultant.se
 import { OpDirectBillingReceiptDialogComponent } from '../../direct-billing/op-direct-billing-receipt-dialog.component';
 import { OpDirectBillingService } from '../../direct-billing/op-direct-billing.service';
 import { AppointmentBillingDialogComponent } from '../booking/appointment-billing-dialog.component';
-import { CollectionReportEntry, PAYMENT_MODE_LABELS, PAYMENT_MODES, PaymentMode } from '../booking/appointment.model';
+import {
+  CollectionReportEntry,
+  CollectionReportSource,
+  PAYMENT_MODE_LABELS,
+  PAYMENT_MODES,
+  PaymentMode
+} from '../booking/appointment.model';
 import { AppointmentService } from '../booking/appointment.service';
 import { REPORT_PRINT_STYLES } from './report-print-styles';
+
+const CATEGORY_LABELS: Record<CollectionReportSource, string> = {
+  APPOINTMENT: 'Appointment',
+  DIRECT_BILLING: 'Direct Billing'
+};
 
 function toIsoDate(date: Date | null): string | undefined {
   if (!date) {
@@ -42,6 +53,7 @@ const CSV_HEADERS = [
   'S.No',
   'Patient Name',
   'Patient ID',
+  'Category',
   'Date & Time',
   'Payment Mode',
   'Consultant Name',
@@ -96,6 +108,7 @@ export class CollectionReportComponent {
     'serial',
     'patientName',
     'patientId',
+    'category',
     'billedAt',
     'paymentMode',
     'consultantName',
@@ -108,6 +121,10 @@ export class CollectionReportComponent {
   ];
   readonly paymentModes = PAYMENT_MODES;
   readonly paymentModeLabels = PAYMENT_MODE_LABELS;
+
+  categoryLabel(source: CollectionReportSource): string {
+    return CATEGORY_LABELS[source];
+  }
 
   consultants = signal<Consultant[]>([]);
   entries = signal<CollectionReportEntry[]>([]);
@@ -241,9 +258,10 @@ export class CollectionReportComponent {
           csvCell(index + 1),
           csvCell(entry.patientName),
           csvCell(entry.patientRegistrationNumber),
+          csvCell(CATEGORY_LABELS[entry.source]),
           csvCell(entry.billedAt),
           csvCell(this.paymentModeLabel(entry.paymentMode)),
-          csvCell(entry.consultantName),
+          csvCell(entry.consultantName ?? '-'),
           csvCell(entry.billedBy),
           csvCell(entry.invoiceNumber),
           csvCell(entry.invoicedAmount),

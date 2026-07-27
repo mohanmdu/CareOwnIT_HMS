@@ -104,6 +104,15 @@
             }
           </mat-select>
         </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Consultant</mat-label>
+          <mat-select [(ngModel)]="selectedConsultantId">
+            <mat-option [value]="null">No consultant</mat-option>
+            @for (consultant of consultants(); track consultant.id) {
+              <mat-option [value]="consultant.id">{{ consultant.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="direct-billing-full-field">
           <mat-label>Remarks</mat-label>
           <input matInput [(ngModel)]="remarks" />

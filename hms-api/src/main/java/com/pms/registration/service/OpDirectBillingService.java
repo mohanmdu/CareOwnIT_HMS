@@ -1,7 +1,9 @@
 package com.pms.registration.service;
 
 import com.pms.common.EntityNotFoundException;
+import com.pms.masters.entity.Consultant;
 import com.pms.masters.entity.OpBillingComponent;
+import com.pms.masters.repository.ConsultantRepository;
 import com.pms.masters.repository.OpBillingComponentRepository;
 import com.pms.registration.dto.OpDirectBillingItemDto;
 import com.pms.registration.dto.OpDirectBillingItemRequest;
@@ -33,16 +35,19 @@ public class OpDirectBillingService {
 
     private final OpDirectBillingRepository repository;
     private final PatientRepository patientRepository;
+    private final ConsultantRepository consultantRepository;
     private final OpBillingComponentRepository componentRepository;
     private final InvoiceNumberService invoiceNumberService;
 
     public OpDirectBillingService(
             OpDirectBillingRepository repository,
             PatientRepository patientRepository,
+            ConsultantRepository consultantRepository,
             OpBillingComponentRepository componentRepository,
             InvoiceNumberService invoiceNumberService) {
         this.repository = repository;
         this.patientRepository = patientRepository;
+        this.consultantRepository = consultantRepository;
         this.componentRepository = componentRepository;
         this.invoiceNumberService = invoiceNumberService;
     }
@@ -54,6 +59,11 @@ public class OpDirectBillingService {
 
         OpDirectBilling billing = new OpDirectBilling();
         billing.setPatient(patient);
+        if (request.consultantId() != null) {
+            Consultant consultant = consultantRepository.findById(request.consultantId())
+                    .orElseThrow(() -> new EntityNotFoundException("Consultant not found: " + request.consultantId()));
+            billing.setConsultant(consultant);
+        }
         billing.setPaymentMode(request.paymentMode());
         billing.setRemarks(request.remarks());
         billing.setBilledAt(Instant.now());
@@ -97,7 +107,7 @@ public class OpDirectBillingService {
         Instant fromInstant = fromDate != null ? fromDate.atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
         Instant toInstant =
                 toDate != null ? toDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
-        return repository.collectionReport(fromInstant, toInstant, null).stream()
+        return repository.collectionReport(fromInstant, toInstant, null, null).stream()
                 .map(this::toListEntry)
                 .toList();
     }
@@ -109,6 +119,7 @@ public class OpDirectBillingService {
 
     private OpDirectBillingListEntryDto toListEntry(OpDirectBilling billing) {
         Patient patient = billing.getPatient();
+        Consultant consultant = billing.getConsultant();
         return new OpDirectBillingListEntryDto(
                 billing.getId(),
                 billing.getInvoiceNumber(),
@@ -118,11 +129,14 @@ public class OpDirectBillingService {
                 billing.getPaymentMode(),
                 billing.getBilledBy(),
                 billing.getBilledAt(),
-                billing.getRefundAmount());
+                billing.getRefundAmount(),
+                consultant != null ? consultant.getId() : null,
+                consultant != null ? consultant.getName() : null);
     }
 
     private OpDirectBillingReceiptDto toReceipt(OpDirectBilling billing) {
         Patient patient = billing.getPatient();
+        Consultant consultant = billing.getConsultant();
         List<OpDirectBillingItemDto> items = billing.getItems().stream()
                 .map(item -> new OpDirectBillingItemDto(
                         item.getId(), item.getCategoryName(), item.getComponentName(), item.getQuantity(), item.getAmount(), item.getRemarks()))
@@ -135,6 +149,8 @@ public class OpDirectBillingService {
                 patient.getGender(),
                 patient.getAge(),
                 patient.getMobileNumber(),
+                consultant != null ? consultant.getId() : null,
+                consultant != null ? consultant.getName() : null,
                 items,
                 billing.getTotalAmount(),
                 billing.getPaymentMode(),

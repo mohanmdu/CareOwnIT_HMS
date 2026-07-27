@@ -17,5 +17,7 @@ public record OpDirectBillingListEntryDto(
         PaymentMode paymentMode,
         String billedBy,
         Instant billedAt,
-        Double refundAmount) {
+        Double refundAmount,
+        Long consultantId,
+        String consultantName) {
 }

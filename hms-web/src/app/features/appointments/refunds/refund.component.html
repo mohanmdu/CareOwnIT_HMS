@@ -44,7 +44,7 @@
                   <tr>
                     <td>{{ candidate.patientRegistrationNumber }}</td>
                     <td>{{ candidate.patientName }}</td>
-                    <td>{{ candidate.consultantName ?? 'Direct Billing' }}</td>
+                    <td>{{ candidate.consultantName ?? '-' }}</td>
                     <td>{{ candidate.invoiceNumber }}</td>
                     <td>{{ candidate.invoicedAmount | number: '1.0-2' }}</td>
                     <td>{{ candidate.paidAmount | number: '1.0-2' }}</td>

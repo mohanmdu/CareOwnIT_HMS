@@ -15,12 +15,18 @@ import { TablePagination } from '../../../shared/table/table-pagination';
 import { TableSearchComponent } from '../../../shared/table/table-search.component';
 import { EmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
+import { StatusBadgeComponent, StatusBadgeTone } from '../../../shared/ui/status-badge/status-badge.component';
 import { Consultant } from '../../masters-admin/consultants/consultant.model';
 import { ConsultantService } from '../../masters-admin/consultants/consultant.service';
 import { OpCaseSheetDialogComponent } from './op-case-sheet-dialog.component';
 import { OpCaseSheetViewDialogComponent } from './op-case-sheet-view-dialog.component';
-import { PrescriptionWorklistEntry } from './op-case-sheet.model';
+import { PrescriptionWorklistEntry, PrescriptionWorklistSource } from './op-case-sheet.model';
 import { OpCaseSheetService } from './op-case-sheet.service';
+
+const CATEGORY_LABELS: Record<PrescriptionWorklistSource, string> = {
+  APPOINTMENT: 'Appointment',
+  DIRECT_BILLING: 'Direct Billing'
+};
 
 function toIsoDate(date: Date | null): string | undefined {
   if (!date) {
@@ -53,6 +59,7 @@ function toIsoDate(date: Date | null): string | undefined {
     MatTableModule,
     PageHeaderComponent,
     EmptyStateComponent,
+    StatusBadgeComponent,
     TableSearchComponent
   ],
   templateUrl: './patient-prescription.component.html',
@@ -64,7 +71,26 @@ export class PatientPrescriptionComponent {
   private readonly notification = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
 
-  readonly worklistColumns = ['patient', 'mobile', 'department', 'doctor', 'appointment', 'actions'];
+  readonly worklistColumns = ['patient', 'mobile', 'category', 'department', 'doctor', 'appointment', 'status', 'actions'];
+
+  categoryLabel(source: PrescriptionWorklistSource): string {
+    return CATEGORY_LABELS[source];
+  }
+
+  /** Case-sheet documentation status - separate from Category (what kind of visit) and Actions (what you can do about it). */
+  statusLabel(entry: PrescriptionWorklistEntry): string {
+    if (entry.source === 'DIRECT_BILLING') {
+      return 'Walk-in visit';
+    }
+    return entry.hasCaseSheet ? 'Documented' : 'Pending';
+  }
+
+  statusTone(entry: PrescriptionWorklistEntry): StatusBadgeTone {
+    if (entry.source === 'DIRECT_BILLING') {
+      return 'neutral';
+    }
+    return entry.hasCaseSheet ? 'success' : 'warning';
+  }
 
   consultants = signal<Consultant[]>([]);
   worklist = signal<PrescriptionWorklistEntry[]>([]);
@@ -113,6 +139,9 @@ export class PatientPrescriptionComponent {
   }
 
   openCaseSheet(entry: PrescriptionWorklistEntry): void {
+    if (entry.appointmentId === null) {
+      return;
+    }
     this.dialog
       .open(OpCaseSheetDialogComponent, {
         width: '820px',
@@ -128,6 +157,9 @@ export class PatientPrescriptionComponent {
   }
 
   viewCaseSheet(entry: PrescriptionWorklistEntry): void {
+    if (entry.appointmentId === null) {
+      return;
+    }
     this.dialog.open(OpCaseSheetViewDialogComponent, {
       width: '760px',
       maxWidth: '95vw',

@@ -12,6 +12,8 @@ public record OpDirectBillingReceiptDto(
         String gender,
         Integer age,
         String mobileNumber,
+        Long consultantId,
+        String consultantName,
         List<OpDirectBillingItemDto> items,
         Double totalAmount,
         PaymentMode paymentMode,
