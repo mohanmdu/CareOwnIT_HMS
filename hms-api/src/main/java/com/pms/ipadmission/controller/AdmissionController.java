@@ -1,5 +1,7 @@
 package com.pms.ipadmission.controller;
 
+import com.pms.cashier.entity.PaymentRequestType;
+import com.pms.cashier.service.IpPaymentRequestService;
 import com.pms.ipadmission.dto.AdmissionDto;
 import com.pms.ipadmission.service.AdmissionService;
 import jakarta.validation.Valid;
@@ -19,9 +21,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class AdmissionController {
 
     private final AdmissionService service;
+    private final IpPaymentRequestService paymentRequestService;
 
-    public AdmissionController(AdmissionService service) {
+    public AdmissionController(AdmissionService service, IpPaymentRequestService paymentRequestService) {
         this.service = service;
+        this.paymentRequestService = paymentRequestService;
     }
 
     @GetMapping
@@ -53,7 +57,17 @@ public class AdmissionController {
 
     @PatchMapping("/{id}/admit")
     public AdmissionDto admitRegistered(@PathVariable Long id, @Valid @RequestBody AdmissionDto dto) {
-        return service.admitRegistered(id, dto);
+        AdmissionDto admitted = service.admitRegistered(id, dto);
+        if (dto.advanceAmount() != null && dto.advanceAmount() > 0) {
+            paymentRequestService.createPreApproved(
+                    id,
+                    PaymentRequestType.ADVANCE,
+                    dto.advanceAmount(),
+                    "Advance",
+                    admitted.paymentType() != null ? admitted.paymentType().name() : null);
+            admitted = service.findById(id);
+        }
+        return admitted;
     }
 
     @PutMapping("/{id}")
@@ -63,7 +77,14 @@ public class AdmissionController {
 
     @PatchMapping("/{id}/advance-payment")
     public AdmissionDto addAdvancePayment(@PathVariable Long id, @RequestBody Map<String, Double> body) {
-        return service.addAdvancePayment(id, body.getOrDefault("amount", 0.0));
+        AdmissionDto current = service.findById(id);
+        paymentRequestService.createPreApproved(
+                id,
+                PaymentRequestType.ADVANCE,
+                body.getOrDefault("amount", 0.0),
+                "Advance",
+                current.paymentType() != null ? current.paymentType().name() : null);
+        return service.findById(id);
     }
 
     @PatchMapping("/{id}/initiate-discharge")

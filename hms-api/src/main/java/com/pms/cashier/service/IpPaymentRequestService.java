@@ -121,6 +121,47 @@ public class IpPaymentRequestService {
         return toDto(saved);
     }
 
+    /**
+     * Records a payment that's approved on the spot rather than routed through
+     * the pending-request queue (e.g. an advance collected directly at Ward
+     * Allocation or via the Admission Worklist's "Add Advance" action) - same
+     * ledger write approve() does, wrapped in an already-APPROVED
+     * IpPaymentRequest so it appears in Advance Report/Advance Cancel exactly
+     * like a cashier-approved request would.
+     */
+    @Transactional
+    public IpPaymentRequestDto createPreApproved(
+            Long admissionId, PaymentRequestType requestType, double amount, String description, String paymentMode) {
+        Admission admission = admissionRepository.findById(admissionId)
+                .orElseThrow(() -> new EntityNotFoundException("Admission not found: " + admissionId));
+
+        IpPayment payment = admissionService.recordCashierPayment(admissionId, amount, description, paymentMode);
+
+        IpPaymentRequest request = new IpPaymentRequest();
+        request.setAdmission(admission);
+        request.setRequestType(requestType);
+        request.setAmount(amount);
+        request.setDescription(description);
+        request.setStatus(PaymentRequestStatus.APPROVED);
+        request.setRequestedAt(Instant.now());
+        request.setRequestedBy(currentUsername());
+        request.setPaymentMode(paymentMode);
+        request.setApprovedAt(Instant.now());
+        request.setApprovedBy(currentUsername());
+        request.setIpPayment(payment);
+
+        IpPaymentRequest saved = repository.save(request);
+        Patient patient = admission.getPatient();
+        activityLogService.log(new ActivityLogEntry("Advance Payment", "Payment Received")
+                .content(requestTypeLabel(requestType) + " " + amount + " collected via " + paymentMode
+                        + " (Receipt " + payment.getReceiptNumber() + ")")
+                .status("Approved")
+                .patient(patient.getRegistrationNumber(), patientDisplayName(patient))
+                .ipNumber(admission.getAdmissionNumber())
+                .screenName("Ward Allocation"));
+        return toDto(saved);
+    }
+
     /** Advance Report: every approved cashier request in a date range, one row per request. */
     public List<AdvanceReportRowDto> getAdvanceReport(LocalDate fromDate, LocalDate toDate) {
         Instant fromInstant = fromDate != null ? fromDate.atStartOfDay(ZoneId.systemDefault()).toInstant() : null;

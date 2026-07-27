@@ -18,8 +18,8 @@ import lombok.Setter;
 
 /**
  * One transaction in the PAYMENTS history ledger (PDF p.11-12) - a receipt
- * row. Created whenever an advance is collected against an admission
- * (AdmissionService.addAdvancePayment), so this ledger reflects real
+ * row. Created whenever a payment is collected against an admission
+ * (AdmissionService.recordCashierPayment), so this ledger reflects real
  * transaction history rather than only the single running advanceAmount total.
  */
 @Entity

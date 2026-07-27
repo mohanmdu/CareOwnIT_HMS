@@ -138,10 +138,13 @@ public class AdmissionService {
 
     /**
      * Step 2 of the two-step flow (Ward Allocation): lets staff review/correct
-     * the intake details captured at registration, assigns a bed, records an
-     * initial advance, and flips the admission to ADMITTED in one step -
-     * mirrors the legacy "Edit Admission Advice + Ward Allocation" screen.
-     * Reuses applyIntakeFields() so this and register() stay in sync field-for-field.
+     * the intake details captured at registration, assigns a bed, and flips
+     * the admission to ADMITTED - mirrors the legacy "Edit Admission Advice +
+     * Ward Allocation" screen. Reuses applyIntakeFields() so this and
+     * register() stay in sync field-for-field. Any initial advance amount is
+     * recorded separately by AdmissionController via
+     * IpPaymentRequestService.createPreApproved(), so it also lands in the
+     * cashier's Advance Report/Advance Cancel screens, not just this admission's own total.
      */
     @Transactional
     public AdmissionDto admitRegistered(Long id, AdmissionDto dto) {
@@ -162,9 +165,6 @@ public class AdmissionService {
         applyIntakeFields(admission, dto);
         if (dto.admissionDate() != null) {
             admission.setAdmissionDate(dto.admissionDate());
-        }
-        if (dto.advanceAmount() != null) {
-            admission.setAdvanceAmount(dto.advanceAmount());
         }
         admission.setRoom(room);
         admission.setStatus(AdmissionStatus.ADMITTED);
@@ -239,33 +239,13 @@ public class AdmissionService {
         return toDto(repository.save(admission));
     }
 
-    @Transactional
-    public AdmissionDto addAdvancePayment(Long id, double amount) {
-        Admission admission = getOrThrow(id);
-        requireAdmitted(admission);
-        admission.setAdvanceAmount(admission.getAdvanceAmount() + amount);
-        Admission saved = repository.save(admission);
-
-        IpPayment payment = new IpPayment();
-        payment.setAdmission(saved);
-        payment.setPaymentDate(Instant.now());
-        payment.setReceiptNumber(nextReceiptNumber());
-        payment.setDescription("Advance");
-        payment.setPaymentType(saved.getPaymentType() != null ? saved.getPaymentType().name() : null);
-        payment.setInvoicedAmount(amount);
-        payment.setNetAmount(amount);
-        payment.setCreatedBy(currentUsername());
-        paymentRepository.save(payment);
-
-        return toDto(saved);
-    }
-
     /**
-     * Collects a cashier-approved payment (Advance / Final Settlement / Due
-     * Amount request types all share this mechanism - only the ledger label
-     * and payment mode differ). Unlike addAdvancePayment, this also accepts
-     * DISCHARGE_INITIATED admissions since a Final Settlement is typically
-     * collected between Initiate Discharge and Finalize Discharge.
+     * Collects a payment (Advance / Final Settlement / Due Amount request
+     * types all share this mechanism - only the ledger label and payment
+     * mode differ), whether it's cashier-approved via IpPaymentRequestService
+     * or recorded directly (see IpPaymentRequestService.createPreApproved()).
+     * Also accepts DISCHARGE_INITIATED admissions since a Final Settlement is
+     * typically collected between Initiate Discharge and Finalize Discharge.
      */
     @Transactional
     public IpPayment recordCashierPayment(Long id, double amount, String description, String paymentMode) {
