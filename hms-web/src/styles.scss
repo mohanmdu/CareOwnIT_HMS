@@ -4,6 +4,7 @@
 // tokens/resets/utilities. Anything screen-specific belongs in that
 // component's own stylesheet, not here.
 @use '@angular/material' as mat;
+@use 'styles/fonts';
 @use 'styles/theme' as hms-theme;
 @use 'styles/tokens';
 @use 'styles/base';

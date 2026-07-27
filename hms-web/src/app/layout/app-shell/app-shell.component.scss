@@ -6,8 +6,27 @@
   width: var(--hms-shell-sidenav-width);
   border-right: 1px solid var(--hms-color-border);
   background-color: var(--hms-menu-bg, var(--hms-color-surface));
+  display: flex;
+  flex-direction: column;
+}
 
-  // Smooth, subtle scrolling when the group list is taller than the viewport.
+.shell-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  padding: var(--hms-space-4) var(--hms-space-4) var(--hms-space-3);
+  font-weight: var(--hms-font-weight-semibold);
+  font-size: var(--hms-font-size-lg);
+  color: var(--hms-color-primary);
+}
+
+.shell-nav-list {
+  flex: 1 1 auto;
+  padding-top: 0;
+  padding-bottom: var(--hms-space-3);
+
+  // Smooth, subtle scrolling when the group list is taller than the viewport
+  // (only the nav list itself scrolls - the brand and Need Help card stay put).
   overflow-y: auto;
   scroll-behavior: smooth;
   scrollbar-width: thin;
@@ -27,19 +46,17 @@
   }
 }
 
-.shell-brand {
-  display: flex;
-  align-items: center;
-  gap: var(--hms-space-2);
-  padding: var(--hms-space-4) var(--hms-space-4) var(--hms-space-3);
+// "MAIN MODULES" / "SYSTEM" super-labels splitting the sidenav into two
+// scannable sections - purely a visual grouping, doesn't affect
+// getVisibleNavGroups()'s existing package/role filtering.
+.shell-nav-category-label {
+  margin: var(--hms-space-3) var(--hms-space-4) var(--hms-space-1);
+  font-size: var(--hms-font-size-xs);
   font-weight: var(--hms-font-weight-semibold);
-  font-size: var(--hms-font-size-lg);
-  color: var(--hms-color-primary);
-}
-
-.shell-nav-list {
-  padding-top: 0;
-  padding-bottom: var(--hms-space-3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--hms-menu-text, var(--hms-color-text-muted));
+  opacity: 0.7;
 }
 
 // Base (non-active) leaf nav item text/icon + hover - previously relied
@@ -48,6 +65,9 @@
 .shell-nav-list a.mat-mdc-list-item {
   --mdc-list-list-item-label-text-color: var(--hms-menu-text, var(--hms-color-text));
   --mdc-list-list-item-leading-icon-color: var(--hms-menu-icon, var(--hms-color-text-muted));
+  width: calc(100% - var(--hms-space-4));
+  margin: 0 var(--hms-space-2);
+  border-radius: var(--hms-radius-full);
 
   &:hover,
   &:focus-visible {
@@ -128,6 +148,51 @@
   color: var(--hms-menu-icon, var(--hms-color-text-muted));
 }
 
+// Colorful icon-per-module badge (matches the approved dashboard mockup) -
+// cycled by fixed NAV_GROUPS position, see AppShellComponent.iconToneFor().
+// Foreground still respects ClinicSettings.menuIconColor (ThemeService) when
+// a clinic has customized it, uniformly overriding every module's tone.
+.shell-nav-icon-badge {
+  padding: 4px;
+  box-sizing: content-box;
+  border-radius: var(--hms-radius-sm);
+}
+
+.shell-nav-icon-badge.tone-primary {
+  background: var(--hms-color-primary-container);
+  color: var(--hms-menu-icon, var(--hms-color-primary));
+}
+
+.shell-nav-icon-badge.tone-secondary {
+  background: var(--hms-color-secondary-container);
+  color: var(--hms-menu-icon, var(--hms-color-secondary));
+}
+
+.shell-nav-icon-badge.tone-tertiary {
+  background: var(--hms-color-tertiary-container);
+  color: var(--hms-menu-icon, var(--hms-color-tertiary));
+}
+
+.shell-nav-icon-badge.tone-success {
+  background: var(--hms-color-success-container);
+  color: var(--hms-menu-icon, var(--hms-color-success));
+}
+
+.shell-nav-icon-badge.tone-warning {
+  background: var(--hms-color-warning-container);
+  color: var(--hms-menu-icon, var(--hms-color-warning));
+}
+
+.shell-nav-icon-badge.tone-danger {
+  background: var(--hms-color-danger-container);
+  color: var(--hms-menu-icon, var(--hms-color-danger));
+}
+
+.shell-nav-icon-badge.tone-info {
+  background: var(--hms-color-tertiary-container);
+  color: var(--hms-menu-icon, var(--hms-color-tertiary));
+}
+
 // Wraps to a second line rather than ellipsis-truncating - several group
 // names (e.g. "Appointments / Direct Visit") don't fit on one line at this
 // sidenav width, and a clean two-line label reads more finished than "...".
@@ -190,19 +255,20 @@
   z-index: 10;
   // Explicit override (not just Material's own color="primary") so
   // ClinicSettings.headerBackgroundColor can differ from the brand primary
-  // color - see ThemeService. Falls back to --hms-color-primary (today's
-  // look) when a client hasn't customized it.
+  // color - see ThemeService. Falls back to a light surface (today's look,
+  // matching the approved dashboard mockup) when a client hasn't customized it.
   background-color: var(--hms-header-bg) !important;
-  color: var(--hms-color-on-primary) !important;
+  color: var(--hms-header-text) !important;
+  border-bottom: 1px solid var(--hms-color-border);
 
   // The menu/account icon buttons don't pick up the toolbar's own color
   // override above (Material's MDC icon-button sets its own icon-color
   // custom property, which wins over an inherited `color`) - force both so
-  // they stay white against the branded header background.
+  // they stay legible against the header background.
   .mat-mdc-icon-button {
-    color: var(--hms-color-on-primary) !important;
-    --mdc-icon-button-icon-color: var(--hms-color-on-primary);
-    --mat-icon-button-state-layer-color: var(--hms-color-on-primary);
+    color: var(--hms-header-text) !important;
+    --mdc-icon-button-icon-color: var(--hms-header-text);
+    --mat-icon-button-state-layer-color: var(--hms-header-text);
   }
 }
 
@@ -218,16 +284,6 @@
   border-top: 1px solid var(--hms-color-border);
 }
 
-.shell-title {
-  margin-left: var(--hms-space-2);
-  font-size: var(--hms-font-size-lg);
-  font-weight: var(--hms-font-weight-medium);
-
-  @media (max-width: 599px) {
-    display: none;
-  }
-}
-
 .shell-spacer {
   flex: 1 1 auto;
 }
@@ -239,4 +295,186 @@
   @media (max-width: 599px) {
     padding: var(--hms-space-4);
   }
+}
+
+// Pinned below the (scrollable) nav list via .shell-sidenav's flex-column +
+// .shell-nav-list's flex:1 1 auto - stays visible without scrolling away.
+// Presentational only for now (no real support channel to link to yet).
+.shell-help-card {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+  margin: var(--hms-space-3);
+  padding: var(--hms-space-4);
+  border-radius: var(--hms-radius-lg);
+  background: var(--hms-color-surface-alt);
+  color: var(--hms-color-text-muted);
+
+  mat-icon {
+    color: var(--hms-color-primary);
+  }
+}
+
+.shell-help-title {
+  margin: 0;
+  font-size: var(--hms-font-size-sm);
+  font-weight: var(--hms-font-weight-semibold);
+  color: var(--hms-color-text);
+}
+
+.shell-help-subtitle {
+  margin: var(--hms-space-1) 0 0;
+  font-size: var(--hms-font-size-xs);
+}
+
+// ---- Header search --------------------------------------------------
+.shell-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  width: 100%;
+  max-width: 420px;
+  margin-left: var(--hms-space-4);
+  padding: var(--hms-space-2) var(--hms-space-3);
+  border-radius: var(--hms-radius-full);
+  background: var(--hms-color-surface-alt);
+  border: 1px solid var(--hms-color-border);
+
+  @media (max-width: 767px) {
+    display: none;
+  }
+}
+
+.shell-search-icon {
+  flex-shrink: 0;
+  color: var(--hms-color-text-muted);
+}
+
+.shell-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--hms-color-text);
+  font: inherit;
+  font-size: var(--hms-font-size-md);
+
+  &::placeholder {
+    color: var(--hms-color-text-muted);
+  }
+}
+
+.shell-search-hint {
+  flex-shrink: 0;
+  padding: 2px var(--hms-space-2);
+  border-radius: var(--hms-radius-sm);
+  background: var(--hms-color-surface);
+  border: 1px solid var(--hms-color-border);
+  color: var(--hms-color-text-muted);
+  font-size: var(--hms-font-size-xs);
+}
+
+.shell-search-results {
+  position: absolute;
+  top: calc(100% + var(--hms-space-2));
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  padding: var(--hms-space-2);
+  border-radius: var(--hms-radius-md);
+  background: var(--hms-color-surface);
+  border: 1px solid var(--hms-color-border);
+  box-shadow: var(--hms-shadow-lg);
+  z-index: 20;
+}
+
+.shell-search-result {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-2) var(--hms-space-3);
+  border-radius: var(--hms-radius-sm);
+  color: var(--hms-color-text);
+  text-decoration: none;
+  font-size: var(--hms-font-size-md);
+
+  mat-icon {
+    color: var(--hms-color-text-muted);
+  }
+
+  &:hover {
+    background: var(--hms-color-surface-alt);
+  }
+}
+
+// ---- Header user menu --------------------------------------------------
+// Deliberately a plain <button>, not mat-button - Material's mat-button
+// directive hoists a trailing mat-icon out of its own .mdc-button__label
+// wrapper (which is display:block, not flex), breaking this element's
+// intended single flex row (avatar + name/role + caret all inline). Full
+// manual reset + hover/focus styling below since we lose Material's own.
+.shell-user-button {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  border: none;
+  background: transparent;
+  padding: var(--hms-space-1) var(--hms-space-2);
+  border-radius: var(--hms-radius-full);
+  color: var(--hms-header-text);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color var(--hms-transition-fast);
+
+  &:hover,
+  &:focus-visible {
+    background: var(--hms-color-surface-alt);
+  }
+
+  @media (max-width: 599px) {
+    .shell-user-info {
+      display: none;
+    }
+  }
+}
+
+.shell-user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--hms-radius-full);
+  background: var(--hms-color-primary);
+  color: var(--hms-color-on-primary);
+  font-size: var(--hms-font-size-xs);
+  font-weight: var(--hms-font-weight-semibold);
+  flex-shrink: 0;
+}
+
+.shell-user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: var(--hms-line-height-tight);
+  text-transform: none;
+}
+
+.shell-user-name {
+  font-size: var(--hms-font-size-sm);
+  font-weight: var(--hms-font-weight-medium);
+}
+
+.shell-user-role {
+  font-size: var(--hms-font-size-xs);
+  opacity: 0.8;
+}
+
+.shell-user-caret {
+  flex-shrink: 0;
+  opacity: 0.8;
 }

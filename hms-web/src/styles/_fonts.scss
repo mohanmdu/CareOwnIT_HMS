@@ -1,0 +1,37 @@
+// Self-hosted Poppins (matches the approved dashboard mockup's typeface) -
+// woff2 files only, latin subset, weights 400/500/600/700 (the only weights
+// --hms-font-weight-* uses). Self-hosted rather than a Google Fonts <link>
+// so the app doesn't depend on an external CDN at runtime - this product
+// can run on a hospital's internal network with no guaranteed internet
+// access.
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/poppins-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/poppins-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/poppins-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/poppins-700.woff2') format('woff2');
+}

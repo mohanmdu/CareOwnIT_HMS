@@ -12,8 +12,8 @@ $hms-theme: mat.define-theme(
       tertiary: mat.$cyan-palette
     ),
     typography: (
-      brand-family: 'system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
-      plain-family: 'system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif'
+      brand-family: '"Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+      plain-family: '"Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif'
     ),
     density: (
       scale: -1
