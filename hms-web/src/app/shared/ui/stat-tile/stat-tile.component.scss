@@ -1,7 +1,25 @@
+// Grid layouts (e.g. the MIS dashboard's .dashboard-grid) stretch this host
+// to match the tallest tile in its row by default - without :host also
+// being block-level and 100% height, that extra space would go unused
+// instead of reaching .stat-tile, leaving shorter-label tiles visibly
+// shorter than a tile whose label wraps to two lines.
+:host {
+  display: block;
+  height: 100%;
+}
+
 .stat-tile {
   display: flex;
   align-items: center;
   gap: var(--hms-space-4);
+  height: 100%;
+  // With auto-fit wrapping, a tile whose label wraps to 2 lines (e.g.
+  // "Pending Pre Authorization Requests") can end up alone in its own grid
+  // row at some viewport widths, with nothing for align-items:stretch to
+  // match its height against - a fixed min-height (fits 2 label lines)
+  // keeps every tile the same height regardless of how the grid wraps.
+  min-height: 116px;
+  box-sizing: border-box;
   padding: var(--hms-space-5);
   border-radius: var(--hms-radius-lg);
   border: 1px solid var(--hms-color-border);
