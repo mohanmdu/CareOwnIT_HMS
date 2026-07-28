@@ -188,7 +188,10 @@ export class AdmissionWardAllocationComponent {
     this.admissionService.admitRegistered(admission.id, { patientId: admission.patientId, roomId: this.selectedRoomId, ...this.form }).subscribe({
       next: (admitted) => {
         this.submitting.set(false);
-        this.router.navigate(['/ip/admissions', admitted.id, 'confirmation']);
+        this.notification.success(
+          `The Patient ${admitted.patientName} (In-Patient ID: ${admitted.admissionNumber}) has been admitted as In-Patient in ${admitted.roomTypeName} - ${admitted.roomNumber}.`
+        );
+        this.router.navigate(['/ip/admissions']);
       },
       error: (err) => {
         this.submitting.set(false);

@@ -14,18 +14,19 @@ export const OP_CASE_SHEET_PRINT_STYLES = `
     margin: 16px 0 4px;
   }
   .receipt-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    justify-content: center;
+    position: relative;
+    min-height: 64px;
     text-align: center;
     padding-bottom: 12px;
     border-bottom: 1px solid #ccc;
     margin-bottom: 12px;
   }
   .receipt-logo {
-    width: 48px;
-    height: 48px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 64px;
+    height: 64px;
     object-fit: contain;
   }
   .receipt-clinic-info {

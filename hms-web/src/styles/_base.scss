@@ -122,20 +122,6 @@ button:focus-visible,
   background: transparent;
 }
 
-// Snackbar tone overrides (rendered into the CDK overlay container, outside
-// any component's view encapsulation, so these rules must be global).
-.hms-snackbar-success {
-  --mdc-snackbar-container-color: var(--hms-color-success);
-  --mdc-snackbar-supporting-text-color: var(--hms-color-on-primary);
-  --mat-snack-bar-button-color: var(--hms-color-on-primary);
-}
-
-.hms-snackbar-error {
-  --mdc-snackbar-container-color: var(--hms-color-danger);
-  --mdc-snackbar-supporting-text-color: var(--hms-color-on-primary);
-  --mat-snack-bar-button-color: var(--hms-color-on-primary);
-}
-
 // Gives color="accent" buttons (MatButton always applies class="mat-accent"
 // to the host element regardless of whether Material's own compiled theme
 // has anything for it - this app's M3 theme only configures primary/tertiary

@@ -1,0 +1,40 @@
+<div class="toast-stack">
+  @for (toast of toasts(); track toast.id) {
+    <div
+      class="toast-card"
+      [class]="'tone-' + toast.tone"
+      [attr.role]="toast.tone === 'error' ? 'alert' : 'status'"
+      [attr.aria-live]="toast.tone === 'error' ? 'assertive' : 'polite'"
+      (mouseenter)="pause(toast.id)"
+      (mouseleave)="resume(toast.id)"
+      @toastAnimation
+    >
+      <div class="toast-icon">
+        @if (toast.tone === 'loading') {
+          <mat-spinner diameter="20" strokeWidth="2" />
+        } @else {
+          <mat-icon aria-hidden="true">{{ toneIcons[toast.tone] }}</mat-icon>
+        }
+      </div>
+      <div class="toast-body">
+        <p class="toast-title">{{ toast.title }}</p>
+        <p class="toast-message">{{ toast.message }}</p>
+        @if (toast.tone === 'loading') {
+          <div class="toast-progress-row">
+            <mat-progress-bar
+              class="toast-progress"
+              [mode]="toast.progress != null ? 'determinate' : 'indeterminate'"
+              [value]="toast.progress ?? 0"
+            />
+            @if (toast.progress != null) {
+              <span class="toast-progress-label">{{ toast.progress }}%</span>
+            }
+          </div>
+        }
+      </div>
+      <button mat-icon-button type="button" class="toast-close" (click)="close(toast.id)" aria-label="Dismiss notification">
+        <mat-icon aria-hidden="true">close</mat-icon>
+      </button>
+    </div>
+  }
+</div>

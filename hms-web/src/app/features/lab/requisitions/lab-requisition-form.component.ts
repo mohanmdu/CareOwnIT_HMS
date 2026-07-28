@@ -156,9 +156,10 @@ export class LabRequisitionFormComponent {
         subCategoryIds: Array.from(this.selectedSubCategoryIds())
       })
       .subscribe({
-        next: (requisition) => {
+        next: () => {
           this.saving.set(false);
-          this.router.navigate(['/lab/requisitions', requisition.id, 'success']);
+          this.notification.success('Labtest requisition has been initiated. Receive the payment in Labtest billing.');
+          this.router.navigate(['/lab/billing']);
         },
         error: (err) => {
           this.saving.set(false);

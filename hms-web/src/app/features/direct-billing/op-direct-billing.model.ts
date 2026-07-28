@@ -1,15 +1,5 @@
 import { PaymentMode } from '../appointments/booking/appointment.model';
 
-/** A line already added to the working bill, before submit. */
-export interface OpDirectBillingWorkingItem {
-  componentId: number;
-  categoryName: string;
-  componentName: string;
-  quantity: number;
-  amount: number;
-  remarks: string | null;
-}
-
 export interface OpDirectBillingItemRequest {
   componentId: number;
   quantity: number;

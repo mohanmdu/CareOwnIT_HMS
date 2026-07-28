@@ -38,9 +38,10 @@ export const REPORT_PRINT_STYLES = `
     background: #f0f0f0;
   }
   .ar2-letterhead,
-  .dl-letterhead {
+  .dl-letterhead,
+  .dsl-letterhead {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
     padding-bottom: 12px;
@@ -48,21 +49,36 @@ export const REPORT_PRINT_STYLES = `
     border-bottom: 2px solid #ccc;
   }
   .ar2-logo,
-  .dl-logo {
-    width: 56px;
-    height: 56px;
+  .dl-logo,
+  .dsl-logo {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+  .ar2-logo-placeholder,
+  .dl-logo-placeholder,
+  .dsl-logo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 50%;
-    object-fit: cover;
+    background: #1565c0;
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 700;
   }
   .ar2-title,
-  .dl-title {
+  .dl-title,
+  .dsl-title {
     flex: 1;
     text-align: center;
     font-size: 1.3rem;
     font-weight: 700;
   }
   .ar2-contact,
-  .dl-contact {
+  .dl-contact,
+  .dsl-contact {
     display: flex;
     flex-direction: column;
     text-align: right;

@@ -15,7 +15,7 @@
 .dsl-letterhead {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  align-items: center;
+  align-items: start;
   gap: var(--hms-space-4);
   padding: var(--hms-space-4) 0;
   border-bottom: 2px solid var(--hms-color-border, #e0e0e0);
@@ -24,14 +24,15 @@
 .dsl-logo {
   width: 64px;
   height: 64px;
-  border-radius: 50%;
-  object-fit: cover;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .dsl-logo-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
   background: var(--hms-color-primary, #1565c0);
   color: #fff;
   font-size: 1.5rem;

@@ -362,13 +362,6 @@ export const routes: Routes = [
           import('./features/lab/requisitions/lab-requisition-form.component').then((m) => m.LabRequisitionFormComponent)
       },
       {
-        path: 'lab/requisitions/:id/success',
-        loadComponent: () =>
-          import('./features/lab/requisitions/lab-requisition-success.component').then(
-            (m) => m.LabRequisitionSuccessComponent
-          )
-      },
-      {
         path: 'lab/investigations/new/:patientId',
         loadComponent: () =>
           import('./features/lab/requisitions/lab-investigation-billing.component').then(
@@ -461,11 +454,6 @@ export const routes: Routes = [
         path: 'patient-reports/upload/patient',
         loadComponent: () =>
           import('./features/patient-reports/reports-upload-form.component').then((m) => m.ReportsUploadFormComponent)
-      },
-      {
-        path: 'patient-reports/upload/success/:id',
-        loadComponent: () =>
-          import('./features/patient-reports/report-upload-success.component').then((m) => m.ReportUploadSuccessComponent)
       },
       {
         path: 'patient-reports/view',
@@ -577,13 +565,6 @@ export const routes: Routes = [
           )
       },
       {
-        path: 'ip/admissions/new/success/:admissionId',
-        loadComponent: () =>
-          import('./features/ip-admission/admissions/admission-registration-success.component').then(
-            (m) => m.AdmissionRegistrationSuccessComponent
-          )
-      },
-      {
         path: 'ip/admissions/new/:patientId/register',
         loadComponent: () =>
           import('./features/ip-admission/admissions/admission-registration-form.component').then(
@@ -605,23 +586,9 @@ export const routes: Routes = [
           )
       },
       {
-        path: 'ip/admissions/:id/confirmation',
-        loadComponent: () =>
-          import('./features/ip-admission/admissions/admission-confirmation.component').then(
-            (m) => m.AdmissionConfirmationComponent
-          )
-      },
-      {
         path: 'ip/admissions/:id/ward-change',
         loadComponent: () =>
           import('./features/ip-admission/admissions/ward-change.component').then((m) => m.WardChangeComponent)
-      },
-      {
-        path: 'ip/admissions/:id/ward-change/confirmation',
-        loadComponent: () =>
-          import('./features/ip-admission/admissions/ward-change-confirmation.component').then(
-            (m) => m.WardChangeConfirmationComponent
-          )
       },
       {
         path: 'ip/inpatient-list',
@@ -649,13 +616,6 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/ip-admission/payment-request/payment-request-form.component').then(
             (m) => m.PaymentRequestFormComponent
-          )
-      },
-      {
-        path: 'ip/admissions/:id/payment-request/success',
-        loadComponent: () =>
-          import('./features/ip-admission/payment-request/payment-request-success.component').then(
-            (m) => m.PaymentRequestSuccessComponent
           )
       },
       {

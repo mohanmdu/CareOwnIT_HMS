@@ -95,9 +95,8 @@ export class WardChangeComponent {
     this.admissionService.changeRoom(admission.id, this.roomId, this.changedAt).subscribe({
       next: () => {
         this.saving.set(false);
-        this.router.navigate(['/ip/admissions', admission.id, 'ward-change', 'confirmation'], {
-          queryParams: { patientName: admission.patientName, from: oldWard, to: newWard }
-        });
+        this.notification.success(`The Patient ${admission.patientName} has been ward changed from ${oldWard} to ${newWard}.`);
+        this.router.navigate(['/ip/inpatient-list']);
       },
       error: (err) => {
         this.saving.set(false);

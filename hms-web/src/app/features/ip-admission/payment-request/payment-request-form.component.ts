@@ -10,7 +10,7 @@ import { NotificationService } from '../../../shared/services/notification.servi
 import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
 import { Admission } from '../admissions/admission.model';
 import { AdmissionService } from '../admissions/admission.service';
-import { PAYMENT_REQUEST_TYPE_OPTIONS, PaymentRequestType } from './payment-request.model';
+import { PAYMENT_REQUEST_TYPE_OPTIONS, PaymentRequestType, requestTypeLabel } from './payment-request.model';
 import { PaymentRequestService } from './payment-request.service';
 
 /** Patient IP Details request form (Cashier Approval Workflow, PDF screen 1) - reached from the billing page's "Amount Received" action. */
@@ -64,9 +64,8 @@ export class PaymentRequestFormComponent {
       .subscribe({
         next: (request) => {
           this.submitting.set(false);
-          this.router.navigate(['/ip/admissions', this.admissionId, 'payment-request', 'success'], {
-            queryParams: { type: request.requestType }
-          });
+          this.notification.success(`${requestTypeLabel(request.requestType)} request has been sent to cashier.`);
+          this.router.navigate(['/ip/admissions', this.admissionId, 'billing']);
         },
         error: (err) => {
           this.submitting.set(false);

@@ -265,20 +265,23 @@ export class AdmissionRegistrationFormComponent {
     }
     this.admissionService.register({ patientId: patient.id, ...this.form }).subscribe({
       next: (admission) => {
+        const registeredMessage = `The Patient ${admission.patientName} has been registered with the IPID ${admission.admissionNumber} successfully.`;
         if (!this.photoFile || admission.id === null) {
           this.submitting.set(false);
-          this.router.navigate(['/ip/admissions/new/success', admission.id]);
+          this.notification.success(registeredMessage);
+          this.router.navigate(['/ip/admissions']);
           return;
         }
         this.admissionService.uploadPhoto(admission.id, this.photoFile).subscribe({
           next: () => {
             this.submitting.set(false);
-            this.router.navigate(['/ip/admissions/new/success', admission.id]);
+            this.notification.success(registeredMessage);
+            this.router.navigate(['/ip/admissions']);
           },
           error: () => {
             this.submitting.set(false);
             this.notification.error('Registered, but the photo upload failed.');
-            this.router.navigate(['/ip/admissions/new/success', admission.id]);
+            this.router.navigate(['/ip/admissions']);
           }
         });
       },

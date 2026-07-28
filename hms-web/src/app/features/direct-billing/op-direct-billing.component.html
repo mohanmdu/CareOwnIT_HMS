@@ -22,42 +22,6 @@
     <section class="hms-card-surface direct-billing-items-section">
       <h3>Billing Items</h3>
 
-      @if (items().length > 0) {
-        <table mat-table [dataSource]="items()" class="direct-billing-items-table">
-          <ng-container matColumnDef="category">
-            <th mat-header-cell *matHeaderCellDef>Category</th>
-            <td mat-cell *matCellDef="let item">{{ item.categoryName }}</td>
-          </ng-container>
-          <ng-container matColumnDef="component">
-            <th mat-header-cell *matHeaderCellDef>Component</th>
-            <td mat-cell *matCellDef="let item">{{ item.componentName }}</td>
-          </ng-container>
-          <ng-container matColumnDef="quantity">
-            <th mat-header-cell *matHeaderCellDef>Qty</th>
-            <td mat-cell *matCellDef="let item">{{ item.quantity }}</td>
-          </ng-container>
-          <ng-container matColumnDef="amount">
-            <th mat-header-cell *matHeaderCellDef>Amount</th>
-            <td mat-cell *matCellDef="let item">{{ item.amount | number: '1.0-2' }}</td>
-          </ng-container>
-          <ng-container matColumnDef="remarks">
-            <th mat-header-cell *matHeaderCellDef>Remarks</th>
-            <td mat-cell *matCellDef="let item">{{ item.remarks }}</td>
-          </ng-container>
-          <ng-container matColumnDef="remove">
-            <th mat-header-cell *matHeaderCellDef></th>
-            <td mat-cell *matCellDef="let item; let i = index">
-              <button mat-icon-button type="button" color="warn" (click)="removeItem(i)" aria-label="Remove item">
-                <mat-icon aria-hidden="true">delete</mat-icon>
-              </button>
-            </td>
-          </ng-container>
-          <tr mat-header-row *matHeaderRowDef="itemColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: itemColumns"></tr>
-        </table>
-        <p class="direct-billing-total">Total Amount: {{ totalAmount() | number: '1.0-2' }}</p>
-      }
-
       <div class="direct-billing-add-row">
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Category</mat-label>
@@ -90,12 +54,9 @@
           <mat-label>Remarks</mat-label>
           <input matInput [(ngModel)]="newItem.remarks" />
         </mat-form-field>
-        <button mat-flat-button color="primary" type="button" (click)="addItem()">Add</button>
       </div>
-    </section>
 
-    <section class="hms-card-surface direct-billing-payment-section">
-      <div class="hms-form-grid">
+      <div class="direct-billing-payment-row hms-form-grid">
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Payment Mode</mat-label>
           <mat-select [(ngModel)]="paymentMode">
@@ -128,7 +89,7 @@
           mat-flat-button
           color="primary"
           type="button"
-          [disabled]="items().length === 0 || saving()"
+          [disabled]="!newItem.componentId || newItem.quantity <= 0 || newItem.amount <= 0 || saving()"
           (click)="submit()"
         >
           Submit

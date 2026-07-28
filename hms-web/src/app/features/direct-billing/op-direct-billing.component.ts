@@ -1,14 +1,11 @@
-import { DecimalPipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
-import { MatTableModule } from '@angular/material/table';
 import { NotificationService } from '../../shared/services/notification.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { PatientSearchComponent } from '../../shared/ui/patient-search/patient-search.component';
@@ -21,7 +18,6 @@ import { OpBillingComponent } from '../masters-admin/op-billing-components/op-bi
 import { OpBillingComponentService } from '../masters-admin/op-billing-components/op-billing-component.service';
 import { Patient } from '../registration/patients/patient.model';
 import { OpDirectBillingReceiptDialogComponent } from './op-direct-billing-receipt-dialog.component';
-import { OpDirectBillingWorkingItem } from './op-direct-billing.model';
 import { OpDirectBillingService } from './op-direct-billing.service';
 
 function emptyNewItem() {
@@ -40,15 +36,12 @@ function emptyNewItem() {
   selector: 'app-op-direct-billing',
   standalone: true,
   imports: [
-    DecimalPipe,
     FormsModule,
     MatButtonModule,
     MatFormFieldModule,
-    MatIconModule,
     MatInputModule,
     MatProgressBarModule,
     MatSelectModule,
-    MatTableModule,
     PageHeaderComponent,
     PatientSearchComponent
   ],
@@ -63,7 +56,6 @@ export class OpDirectBillingComponent {
   private readonly notification = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
 
-  readonly itemColumns = ['category', 'component', 'quantity', 'amount', 'remarks', 'remove'];
   readonly paymentModes = PAYMENT_MODES;
   readonly paymentModeLabels = PAYMENT_MODE_LABELS;
 
@@ -71,7 +63,6 @@ export class OpDirectBillingComponent {
   categories = signal<OpBillingCategory[]>([]);
   components = signal<OpBillingComponent[]>([]);
   consultants = signal<Consultant[]>([]);
-  items = signal<OpDirectBillingWorkingItem[]>([]);
   saving = signal(false);
 
   newItem = emptyNewItem();
@@ -92,8 +83,6 @@ export class OpDirectBillingComponent {
     }
     return this.components().filter((component) => component.categoryId === categoryId);
   });
-
-  totalAmount = computed(() => this.items().reduce((sum, item) => sum + item.amount, 0));
 
   constructor() {
     this.categoryService.list().subscribe({
@@ -129,33 +118,10 @@ export class OpDirectBillingComponent {
     this.onComponentChange();
   }
 
-  addItem(): void {
-    const component = this.components().find((c) => c.id === this.newItem.componentId);
-    if (!component || this.newItem.quantity <= 0 || this.newItem.amount <= 0) {
-      return;
-    }
-    this.items.set([
-      ...this.items(),
-      {
-        componentId: component.id!,
-        categoryName: component.categoryName ?? '',
-        componentName: component.name,
-        quantity: this.newItem.quantity,
-        amount: this.newItem.amount,
-        remarks: this.newItem.remarks.trim() || null
-      }
-    ]);
-    this.newItem = emptyNewItem();
-    this.selectedCategoryId.set(null);
-  }
-
-  removeItem(index: number): void {
-    this.items.set(this.items().filter((_, i) => i !== index));
-  }
-
   submit(): void {
     const patient = this.patient();
-    if (!patient?.id || this.items().length === 0) {
+    const component = this.components().find((c) => c.id === this.newItem.componentId);
+    if (!patient?.id || !component || this.newItem.quantity <= 0 || this.newItem.amount <= 0) {
       return;
     }
     this.saving.set(true);
@@ -163,12 +129,14 @@ export class OpDirectBillingComponent {
       .create({
         patientId: patient.id,
         consultantId: this.selectedConsultantId,
-        items: this.items().map((item) => ({
-          componentId: item.componentId,
-          quantity: item.quantity,
-          amount: item.amount,
-          remarks: item.remarks
-        })),
+        items: [
+          {
+            componentId: component.id!,
+            quantity: this.newItem.quantity,
+            amount: this.newItem.amount,
+            remarks: this.newItem.remarks.trim() || null
+          }
+        ],
         paymentMode: this.paymentMode,
         remarks: this.remarks.trim() || null
       })
@@ -191,7 +159,6 @@ export class OpDirectBillingComponent {
 
   reset(): void {
     this.patient.set(null);
-    this.items.set([]);
     this.newItem = emptyNewItem();
     this.selectedCategoryId.set(null);
     this.paymentMode = 'CASH';

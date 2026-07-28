@@ -13,18 +13,19 @@
 }
 
 .receipt-header {
-  display: flex;
-  align-items: center;
-  gap: var(--hms-space-3);
-  justify-content: center;
+  position: relative;
+  min-height: 64px;
   text-align: center;
   padding-bottom: var(--hms-space-3);
   border-bottom: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
 }
 
 .receipt-logo {
-  width: 48px;
-  height: 48px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
 }
 

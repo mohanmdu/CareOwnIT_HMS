@@ -70,6 +70,15 @@ export class LabTestReportPrintComponent {
             table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
             th, td { border: 1px solid #999; padding: 6px 8px; text-align: left; }
             th { background: #e65100; color: #fff; }
+            .ltp-letterhead { position: relative; min-height: 64px; padding-bottom: 12px; padding-left: 76px; margin-bottom: 8px; border-bottom: 2px solid #ccc; }
+            .ltp-logo { position: absolute; top: 0; left: 0; width: 64px; height: 64px; object-fit: contain; }
+            .ltp-clinic-info { display: flex; flex-direction: column; font-size: 0.85rem; }
+            .ltp-meta { display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 4px; }
+            .ltp-specimen { font-weight: 600; border: 1px solid #999; padding: 4px 8px; width: fit-content; margin-top: 8px; }
+            .ltp-group-row td { background: #f0f0f0; font-weight: 700; text-decoration: underline; }
+            .ltp-abnormal u { color: #c62828; font-weight: 700; }
+            .ltp-remarks { font-size: 0.85rem; }
+            .ltp-signoff { display: flex; justify-content: space-between; margin-top: 24px; padding-top: 12px; border-top: 1px solid #999; font-weight: 700; }
           </style>
         </head>
         <body>${content}</body>

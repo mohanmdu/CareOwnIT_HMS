@@ -1,0 +1,148 @@
+// Mounted at the app root - sits above the shell toolbar (z-index: 10) and
+// its search-results dropdown (z-index: 20), and above Material's own
+// dialog/overlay stacking, so a toast fired while a dialog is open is never
+// hidden behind it.
+.toast-stack {
+  position: fixed;
+  top: calc(var(--hms-shell-header-height) + var(--hms-space-4));
+  right: var(--hms-space-4);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+  pointer-events: none;
+
+  @media (max-width: 599px) {
+    top: calc(var(--hms-shell-header-height) + var(--hms-space-2));
+    right: var(--hms-space-2);
+    left: var(--hms-space-2);
+  }
+}
+
+.toast-card {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+  width: min(420px, calc(100vw - 32px));
+  padding: var(--hms-space-4);
+  border-radius: var(--hms-radius-lg);
+  border-left: 4px solid var(--hms-color-primary);
+  background: var(--hms-color-surface);
+  box-shadow: var(--hms-shadow-lg);
+}
+
+.toast-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: var(--hms-radius-full);
+  background: var(--hms-color-primary-container);
+  color: var(--hms-color-primary);
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.toast-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.toast-title {
+  margin: 0;
+  font-size: var(--hms-font-size-lg);
+  font-weight: var(--hms-font-weight-semibold);
+  color: var(--hms-color-text);
+  line-height: var(--hms-line-height-tight);
+}
+
+.toast-message {
+  margin: var(--hms-space-1) 0 0;
+  font-size: var(--hms-font-size-md);
+  font-weight: var(--hms-font-weight-regular);
+  color: var(--hms-color-text-muted);
+  line-height: var(--hms-line-height-normal);
+}
+
+.toast-progress-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  margin-top: var(--hms-space-2);
+}
+
+.toast-progress {
+  flex: 1 1 auto;
+}
+
+.toast-progress-label {
+  flex-shrink: 0;
+  font-size: var(--hms-font-size-xs);
+  font-weight: var(--hms-font-weight-semibold);
+  color: var(--hms-color-text-muted);
+}
+
+.toast-close {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  color: var(--hms-color-text-muted);
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.tone-success {
+  border-left-color: var(--hms-color-success);
+
+  .toast-icon {
+    background: var(--hms-color-success-container);
+    color: var(--hms-color-success);
+  }
+}
+
+.tone-error {
+  border-left-color: var(--hms-color-danger);
+
+  .toast-icon {
+    background: var(--hms-color-danger-container);
+    color: var(--hms-color-danger);
+  }
+}
+
+.tone-warning {
+  border-left-color: var(--hms-color-warning);
+
+  .toast-icon {
+    background: var(--hms-color-warning-container);
+    color: var(--hms-color-warning);
+  }
+}
+
+.tone-info {
+  border-left-color: var(--hms-color-tertiary);
+
+  .toast-icon {
+    background: var(--hms-color-tertiary-container);
+    color: var(--hms-color-tertiary);
+  }
+}
+
+.tone-loading {
+  border-left-color: var(--hms-color-primary);
+
+  .toast-icon {
+    background: var(--hms-color-primary-container);
+  }
+}

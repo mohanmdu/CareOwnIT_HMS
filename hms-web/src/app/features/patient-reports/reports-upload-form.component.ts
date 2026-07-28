@@ -7,7 +7,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { NotificationService } from '../../shared/services/notification.service';
@@ -41,7 +40,6 @@ export class ReportsUploadFormComponent {
   private readonly patientService = inject(PatientService);
   private readonly reportService = inject(PatientReportService);
   private readonly notification = inject(NotificationService);
-  private readonly router = inject(Router);
   private readonly nameSearchTerms = new Subject<string>();
   private readonly patientIdSearchTerms = new Subject<string>();
 
@@ -142,7 +140,14 @@ export class ReportsUploadFormComponent {
     this.reportService.upload(patient.id, this.comments || null, file).subscribe({
       next: (report) => {
         this.uploading.set(false);
-        this.router.navigate(['/patient-reports/upload/success', report.id]);
+        this.notification.success(`Medical report for ${report.patientName} - ${report.patientRegistrationNumber} has been uploaded successfully.`);
+        if (this.filePreviewUrl()) {
+          URL.revokeObjectURL(this.filePreviewUrl()!);
+        }
+        this.comments = '';
+        this.selectedFile.set(null);
+        this.filePreviewUrl.set(null);
+        this.isImagePreview.set(false);
       },
       error: (err) => {
         this.uploading.set(false);
