@@ -25,21 +25,35 @@
   margin: 0 0 var(--hms-space-3);
 }
 
-.direct-billing-add-row {
+.direct-billing-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--hms-space-4);
+  align-items: start;
+}
+
+// Qty and Amount share a single grid track so they read as a paired
+// quantity/price group rather than two full-width fields fighting the
+// wider Category/Component/Remarks columns for visual weight.
+.direct-billing-qty-amount {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
   gap: var(--hms-space-2);
+
+  mat-form-field {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
-.direct-billing-narrow-field {
-  width: 90px;
-}
-
-.direct-billing-payment-row {
-  margin-top: var(--hms-space-4);
+.direct-billing-subsection-title {
+  margin: var(--hms-space-5) 0 var(--hms-space-3);
   padding-top: var(--hms-space-4);
   border-top: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+  font-size: var(--hms-font-size-xs);
+  font-weight: var(--hms-font-weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--hms-color-text-muted);
 }
 
 .direct-billing-full-field {
@@ -49,5 +63,7 @@
 .direct-billing-submit-row {
   display: flex;
   justify-content: flex-end;
-  margin-top: var(--hms-space-3);
+  margin-top: var(--hms-space-5);
+  padding-top: var(--hms-space-4);
+  border-top: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
 }

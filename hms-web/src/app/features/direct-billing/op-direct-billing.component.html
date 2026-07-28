@@ -22,7 +22,7 @@
     <section class="hms-card-surface direct-billing-items-section">
       <h3>Billing Items</h3>
 
-      <div class="direct-billing-add-row">
+      <div class="direct-billing-fields-grid">
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Category</mat-label>
           <mat-select
@@ -42,21 +42,25 @@
             }
           </mat-select>
         </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="direct-billing-narrow-field">
-          <mat-label>Qty</mat-label>
-          <input matInput type="number" min="1" [(ngModel)]="newItem.quantity" (ngModelChange)="onQuantityChange()" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="direct-billing-narrow-field">
-          <mat-label>Amount</mat-label>
-          <input matInput type="number" min="0" [(ngModel)]="newItem.amount" />
-        </mat-form-field>
+        <div class="direct-billing-qty-amount">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Qty</mat-label>
+            <input matInput type="number" min="1" [(ngModel)]="newItem.quantity" (ngModelChange)="onQuantityChange()" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Amount</mat-label>
+            <input matInput type="number" min="0" [(ngModel)]="newItem.amount" />
+          </mat-form-field>
+        </div>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Remarks</mat-label>
+          <mat-label>Item Remarks</mat-label>
           <input matInput [(ngModel)]="newItem.remarks" />
         </mat-form-field>
       </div>
 
-      <div class="direct-billing-payment-row hms-form-grid">
+      <h3 class="direct-billing-subsection-title">Payment Details</h3>
+
+      <div class="direct-billing-fields-grid">
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Payment Mode</mat-label>
           <mat-select [(ngModel)]="paymentMode">
@@ -75,7 +79,7 @@
           </mat-select>
         </mat-form-field>
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="direct-billing-full-field">
-          <mat-label>Remarks</mat-label>
+          <mat-label>Bill Remarks</mat-label>
           <input matInput [(ngModel)]="remarks" />
         </mat-form-field>
       </div>
