@@ -9,6 +9,9 @@ export const THEME_MODE_OPTIONS: { value: ThemeMode; label: string }[] = [
   { value: 'AUTO', label: 'Follow system' }
 ];
 
+/** The 3 primary modes shown in the Appearance Settings mode selector - AUTO is offered separately as a "follow system" toggle instead of a 4th equal option. */
+export const PRIMARY_THEME_MODE_OPTIONS = THEME_MODE_OPTIONS.filter((option) => option.value !== 'AUTO');
+
 export const CORNER_RADIUS_STYLE_OPTIONS: { value: CornerRadiusStyle; label: string }[] = [
   { value: 'SQUARE', label: 'Square' },
   { value: 'ROUNDED', label: 'Rounded' },

@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -20,10 +21,12 @@ import {
   FONT_FAMILY_OPTIONS,
   FONT_SIZE_SCALE_OPTIONS,
   FontSizeScale,
-  THEME_MODE_OPTIONS,
+  PRIMARY_THEME_MODE_OPTIONS,
   ThemeMode
 } from './clinic-settings.model';
 import { ClinicSettingsInput, ClinicSettingsService } from './clinic-settings.service';
+import { ThemeMockPreviewComponent } from './theme-mock-preview/theme-mock-preview.component';
+import { THEME_PRESETS, ThemePreset, ThemePresetId } from './theme-presets';
 
 @Component({
   selector: 'app-clinic-settings-list',
@@ -31,6 +34,7 @@ import { ClinicSettingsInput, ClinicSettingsService } from './clinic-settings.se
   imports: [
     FormsModule,
     MatButtonModule,
+    MatButtonToggleModule,
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
@@ -39,7 +43,8 @@ import { ClinicSettingsInput, ClinicSettingsService } from './clinic-settings.se
     MatSlideToggleModule,
     ClinicLogoComponent,
     PageHeaderComponent,
-    SectionCardComponent
+    SectionCardComponent,
+    ThemeMockPreviewComponent
   ],
   templateUrl: './clinic-settings-list.component.html',
   styleUrl: './clinic-settings-list.component.scss'
@@ -50,10 +55,11 @@ export class ClinicSettingsListComponent {
   private readonly themeService = inject(ThemeService);
   private readonly confirmDialog = inject(ConfirmDialogService);
 
-  readonly themeModeOptions = THEME_MODE_OPTIONS;
+  readonly primaryThemeModeOptions = PRIMARY_THEME_MODE_OPTIONS;
   readonly cornerRadiusStyleOptions = CORNER_RADIUS_STYLE_OPTIONS;
   readonly fontFamilyOptions = FONT_FAMILY_OPTIONS;
   readonly fontSizeScaleOptions = FONT_SIZE_SCALE_OPTIONS;
+  readonly themePresets = THEME_PRESETS;
 
   loading = signal(true);
   saving = signal(false);
@@ -61,6 +67,8 @@ export class ClinicSettingsListComponent {
   uploadingFavicon = signal(false);
   logoUrl = signal<string | null>(null);
   faviconUrl = signal<string | null>(null);
+  showAdvanced = signal(false);
+  private lastExplicitThemeMode: ThemeMode = 'LIGHT';
 
   form = {
     name: '',
@@ -147,6 +155,75 @@ export class ClinicSettingsListComponent {
 
   get isValid(): boolean {
     return this.form.name.trim().length > 0;
+  }
+
+  /** Whichever preset's fields all match the current form, or null - derived, never imperatively tracked, so manually tweaking a color after picking a preset naturally un-highlights it. */
+  get selectedPresetId(): ThemePresetId | null {
+    const match = this.themePresets.find(
+      (preset) =>
+        preset.values.themeMode === this.form.themeMode &&
+        preset.values.cornerRadiusStyle === this.form.cornerRadiusStyle &&
+        (preset.values.themePrimaryColor ?? '') === this.form.themePrimaryColor &&
+        (preset.values.themeSecondaryColor ?? '') === this.form.themeSecondaryColor &&
+        (preset.values.themeTertiaryColor ?? '') === this.form.themeTertiaryColor &&
+        (preset.values.headerBackgroundColor ?? '') === this.form.headerBackgroundColor &&
+        (preset.values.footerBackgroundColor ?? '') === this.form.footerBackgroundColor &&
+        (preset.values.menuBackgroundColor ?? '') === this.form.menuBackgroundColor &&
+        (preset.values.menuTextColor ?? '') === this.form.menuTextColor &&
+        (preset.values.menuActiveBackgroundColor ?? '') === this.form.menuActiveBackgroundColor &&
+        (preset.values.menuActiveTextColor ?? '') === this.form.menuActiveTextColor &&
+        (preset.values.menuHoverBackgroundColor ?? '') === this.form.menuHoverBackgroundColor &&
+        (preset.values.menuHoverTextColor ?? '') === this.form.menuHoverTextColor &&
+        (preset.values.menuIconColor ?? '') === this.form.menuIconColor &&
+        (preset.values.menuChevronColor ?? '') === this.form.menuChevronColor
+    );
+    return match?.id ?? null;
+  }
+
+  /** "Follow my device setting instead" toggle beneath the Light/Dark/Custom selector - maps to themeMode === 'AUTO', remembering the last explicit mode so switching it off restores something sensible. */
+  get followSystemTheme(): boolean {
+    return this.form.themeMode === 'AUTO';
+  }
+
+  set followSystemTheme(value: boolean) {
+    if (value) {
+      if (this.form.themeMode !== 'AUTO') {
+        this.lastExplicitThemeMode = this.form.themeMode;
+      }
+      this.form.themeMode = 'AUTO';
+    } else {
+      this.form.themeMode = this.lastExplicitThemeMode;
+    }
+    this.previewTheme();
+  }
+
+  toggleAdvanced(): void {
+    this.showAdvanced.update((expanded) => !expanded);
+  }
+
+  onThemeModeChange(mode: ThemeMode): void {
+    this.form.themeMode = mode;
+    this.previewTheme();
+  }
+
+  /** Applies a curated preset's colors/mode/corner style to the staged form and previews it immediately - does not save, exactly like every other field. */
+  applyPreset(preset: ThemePreset): void {
+    this.form.themeMode = preset.values.themeMode;
+    this.form.cornerRadiusStyle = preset.values.cornerRadiusStyle;
+    this.form.themePrimaryColor = preset.values.themePrimaryColor ?? '';
+    this.form.themeSecondaryColor = preset.values.themeSecondaryColor ?? '';
+    this.form.themeTertiaryColor = preset.values.themeTertiaryColor ?? '';
+    this.form.headerBackgroundColor = preset.values.headerBackgroundColor ?? '';
+    this.form.footerBackgroundColor = preset.values.footerBackgroundColor ?? '';
+    this.form.menuBackgroundColor = preset.values.menuBackgroundColor ?? '';
+    this.form.menuTextColor = preset.values.menuTextColor ?? '';
+    this.form.menuActiveBackgroundColor = preset.values.menuActiveBackgroundColor ?? '';
+    this.form.menuActiveTextColor = preset.values.menuActiveTextColor ?? '';
+    this.form.menuHoverBackgroundColor = preset.values.menuHoverBackgroundColor ?? '';
+    this.form.menuHoverTextColor = preset.values.menuHoverTextColor ?? '';
+    this.form.menuIconColor = preset.values.menuIconColor ?? '';
+    this.form.menuChevronColor = preset.values.menuChevronColor ?? '';
+    this.previewTheme();
   }
 
   onLogoSelected(event: Event): void {

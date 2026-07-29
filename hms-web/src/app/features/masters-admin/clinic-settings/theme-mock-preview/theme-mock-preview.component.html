@@ -1,0 +1,41 @@
+<div class="tmp-window" [class.tmp-lg]="size() === 'lg'" [style.border-color]="resolvedBorder()">
+  <div class="tmp-header" [style.background]="resolvedHeaderBg()" [style.border-color]="resolvedBorder()">
+    <span class="tmp-header-dot" [style.background]="resolvedPrimary()"></span>
+    <span class="tmp-header-bar" [style.background]="resolvedBorder()"></span>
+    <span class="tmp-header-bar tmp-header-bar-short" [style.background]="resolvedBorder()"></span>
+  </div>
+
+  <div class="tmp-body">
+    <div class="tmp-sidebar" [style.background]="resolvedMenuBg()">
+      <div class="tmp-nav-item tmp-nav-active" [style.background]="resolvedMenuActiveBg()">
+        <span class="tmp-nav-icon" [style.background]="resolvedPrimary()" [style.border-radius]="resolvedIconRadius()"></span>
+        <span class="tmp-nav-label" [style.background]="resolvedMenuActiveText()"></span>
+      </div>
+      <div class="tmp-nav-item">
+        <span class="tmp-nav-icon" [style.background]="resolvedSecondary()" [style.border-radius]="resolvedIconRadius()"></span>
+        <span class="tmp-nav-label" [style.background]="resolvedMenuIcon()"></span>
+      </div>
+      <div class="tmp-nav-item">
+        <span class="tmp-nav-icon" [style.background]="resolvedTertiary()" [style.border-radius]="resolvedIconRadius()"></span>
+        <span class="tmp-nav-label" [style.background]="resolvedMenuIcon()"></span>
+      </div>
+      <div class="tmp-nav-item">
+        <span class="tmp-nav-icon" [style.background]="resolvedMenuText()" [style.border-radius]="resolvedIconRadius()"></span>
+        <span class="tmp-nav-label" [style.background]="resolvedMenuIcon()"></span>
+      </div>
+    </div>
+
+    <div class="tmp-content" [style.background]="resolvedContentBg()">
+      <div class="tmp-stat-row">
+        <div class="tmp-stat" [style.background]="resolvedCardBg()" [style.border-color]="resolvedBorder()"></div>
+        <div class="tmp-stat" [style.background]="resolvedCardBg()" [style.border-color]="resolvedBorder()"></div>
+      </div>
+      <span class="tmp-button" [style.background]="resolvedPrimary()"></span>
+      <div class="tmp-table" [style.border-color]="resolvedBorder()">
+        <div class="tmp-table-header" [style.background]="resolvedPrimary()"></div>
+        <div class="tmp-table-row" [style.background]="resolvedCardBg()" [style.border-color]="resolvedBorder()"></div>
+        <div class="tmp-table-row" [style.background]="resolvedCardBg()" [style.border-color]="resolvedBorder()"></div>
+      </div>
+    </div>
+  </div>
+</div>

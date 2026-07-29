@@ -41,3 +41,122 @@
   border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
   border-radius: var(--hms-radius-md, 8px);
 }
+
+.theme-subheading {
+  margin: var(--hms-space-5) 0 var(--hms-space-3);
+  font-size: var(--hms-font-size-sm);
+  font-weight: var(--hms-font-weight-semibold);
+  color: var(--hms-color-text-muted);
+}
+
+.theme-mode-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hms-space-4);
+}
+
+.theme-preset-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--hms-space-3);
+}
+
+.theme-preset-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+  padding: var(--hms-space-3);
+  background: var(--hms-color-surface);
+  border: 1px solid var(--hms-color-border);
+  border-radius: var(--hms-radius-lg);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: border-color var(--hms-transition-fast), box-shadow var(--hms-transition-fast);
+
+  &:hover {
+    border-color: var(--hms-color-border-strong);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--hms-color-primary);
+    outline-offset: 2px;
+  }
+
+  &[aria-pressed='true'] {
+    border-color: var(--hms-color-primary);
+    box-shadow: 0 0 0 2px var(--hms-color-primary-container);
+  }
+}
+
+.theme-preset-label {
+  font-size: var(--hms-font-size-sm);
+  font-weight: var(--hms-font-weight-semibold);
+  color: var(--hms-color-text);
+}
+
+.theme-preset-caption {
+  font-size: var(--hms-font-size-xs);
+  color: var(--hms-color-text-muted);
+}
+
+.theme-live-preview {
+  margin-top: var(--hms-space-2);
+  padding: var(--hms-space-4);
+  border: 1px solid var(--hms-color-border);
+  border-radius: var(--hms-radius-lg);
+  background: var(--hms-color-surface-alt);
+
+  .theme-subheading {
+    margin-top: 0;
+  }
+}
+
+.theme-advanced-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  margin-top: var(--hms-space-5);
+  padding: var(--hms-space-2) 0;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--hms-color-border);
+  padding-top: var(--hms-space-4);
+  width: 100%;
+  cursor: pointer;
+  font: inherit;
+  font-weight: var(--hms-font-weight-semibold);
+  color: var(--hms-color-text);
+
+  &:focus-visible {
+    outline: 2px solid var(--hms-color-primary);
+    outline-offset: 2px;
+  }
+}
+
+// Same grid-template-rows 0fr -> 1fr technique as app-shell's
+// .shell-nav-group-panel, so an <input type="color"> panel can collapse to
+// zero height without removing its bound ngModel fields from the DOM.
+.theme-advanced-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--hms-transition-base), margin-top var(--hms-transition-base);
+}
+
+// margin lives on the container (only when expanded), not on the grid item
+// inside it - padding/margin on the item itself would still render even at
+// grid-template-rows:0fr, since neither is compressible by height alone,
+// which is what kept this panel from ever reaching a true 0px collapse.
+.theme-advanced-panel-expanded {
+  grid-template-rows: 1fr;
+  margin-top: var(--hms-space-4);
+}
+
+.theme-advanced-panel-inner {
+  overflow: hidden;
+  min-height: 0;
+  // Overrides .hms-form-grid's own padding-top (also applied to this same
+  // element) - same non-compressible-box-model reason as the comment above.
+  padding-top: 0;
+}
