@@ -2,24 +2,40 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSelectModule } from '@angular/material/select';
 import { MatStepperModule } from '@angular/material/stepper';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { EmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
 import { PatientSearchComponent } from '../../../shared/ui/patient-search/patient-search.component';
+import { StatusBadgeComponent } from '../../../shared/ui/status-badge/status-badge.component';
+import { ClinicSettings } from '../../masters-admin/clinic-settings/clinic-settings.model';
+import { ClinicSettingsService } from '../../masters-admin/clinic-settings/clinic-settings.service';
 import { Consultant } from '../../masters-admin/consultants/consultant.model';
 import { ConsultantService } from '../../masters-admin/consultants/consultant.service';
 import { DayOfWeek, Session, SESSIONS } from '../../masters-admin/consultants/consultant-timing.model';
+import { Department } from '../../masters-admin/departments/department.model';
+import { DepartmentService } from '../../masters-admin/departments/department.service';
 import { Patient } from '../../registration/patients/patient.model';
 import { Appointment, AppointmentSlot, CancelledBy, DailyAvailability } from './appointment.model';
 import { AppointmentService } from './appointment.service';
 import { CancelAppointmentDialogComponent, CancelAppointmentDialogResult } from './cancel-appointment-dialog.component';
+
+/** Categorical avatar palette for doctors without a photo - same 5-slot set already used for chart series in _tokens.scss. */
+const AVATAR_COLORS = [
+  'var(--hms-chart-series-1)',
+  'var(--hms-chart-series-2)',
+  'var(--hms-chart-series-3)',
+  'var(--hms-chart-series-4)',
+  'var(--hms-chart-series-5)'
+];
 
 const SHORT_DAY_LABELS: Record<DayOfWeek, string> = {
   MONDAY: 'Mon',
@@ -68,11 +84,14 @@ function addDays(iso: string, days: number): string {
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatButtonToggleModule,
     MatIconModule,
     MatProgressBarModule,
+    MatSelectModule,
     PageHeaderComponent,
     EmptyStateComponent,
-    PatientSearchComponent
+    PatientSearchComponent,
+    StatusBadgeComponent
   ],
   templateUrl: './booking-wizard.component.html',
   styleUrl: './booking-wizard.component.scss'
@@ -80,6 +99,8 @@ function addDays(iso: string, days: number): string {
 export class BookingWizardComponent {
   private readonly consultantService = inject(ConsultantService);
   private readonly appointmentService = inject(AppointmentService);
+  private readonly departmentService = inject(DepartmentService);
+  private readonly clinicSettingsService = inject(ClinicSettingsService);
   private readonly notification = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
@@ -97,6 +118,35 @@ export class BookingWizardComponent {
   readonly selectedConsultant = computed(
     () => this.consultants().find((c) => c.id === this.selectedConsultantId()) ?? null
   );
+
+  viewMode = signal<'grid' | 'list'>('grid');
+  departments = signal<Department[]>([]);
+  selectedDepartmentId = signal<number | null>(null);
+  readonly filteredConsultants = computed(() => {
+    const departmentId = this.selectedDepartmentId();
+    const list = this.consultants();
+    return departmentId === null ? list : list.filter((c) => c.departmentId === departmentId);
+  });
+
+  clinicSettings = signal<ClinicSettings | null>(null);
+  readonly requestDoctorLink = computed(() => {
+    const settings = this.clinicSettings();
+    if (!settings) {
+      return null;
+    }
+    if (settings.email) {
+      return `mailto:${settings.email}?subject=${encodeURIComponent('Doctor Request')}`;
+    }
+    if (settings.phone) {
+      return `tel:${settings.phone}`;
+    }
+    return null;
+  });
+  /** Only surfaced as a separate "OR CALL US" line when phone is a genuinely additional channel - i.e. email is already the main button's target, not phone acting as its fallback. */
+  readonly clinicCallOption = computed(() => {
+    const settings = this.clinicSettings();
+    return settings?.email && settings.phone ? settings.phone : null;
+  });
 
   // Step 2: weekly strip + slot
   weekOffset = signal(0);
@@ -156,10 +206,28 @@ export class BookingWizardComponent {
       next: (consultants) => this.consultants.set(consultants.filter((c) => c.active && c.acceptingAppointments)),
       error: () => this.notification.error('Failed to load consultants.')
     });
+    this.departmentService.list().subscribe({
+      next: (departments) => this.departments.set(departments),
+      error: () => this.notification.error('Failed to load departments.')
+    });
+    // Silent on error - this only powers the secondary "Request a Doctor" contact link, not core booking.
+    this.clinicSettingsService.get().subscribe({ next: (settings) => this.clinicSettings.set(settings), error: () => {} });
   }
 
   sessionOf(day: DailyAvailability, session: Session) {
     return day.sessions.find((s) => s.session === session);
+  }
+
+  /** First letter of the doctor's name, for the colored fallback avatar when there's no photo - strips a leading "Dr."/"Dr" so every doctor doesn't just show "D". */
+  avatarInitial(consultant: Consultant): string {
+    const name = consultant.name.trim().replace(/^dr\.?\s+/i, '');
+    return name.charAt(0).toUpperCase() || '?';
+  }
+
+  /** Deterministic (not random) color pick from the id, so a doctor's avatar color stays stable across reloads. */
+  avatarColor(consultant: Consultant): string {
+    const index = (consultant.id ?? 0) % AVATAR_COLORS.length;
+    return AVATAR_COLORS[index];
   }
 
   /**

@@ -1,5 +1,8 @@
 <div class="hms-page">
-  <app-page-header title="Book Appointment" subtitle="Choose a doctor, pick an available slot, then identify the patient." />
+  <div class="booking-header-row">
+    <app-page-header title="Book Appointment" subtitle="Choose a doctor, pick an available slot, then identify the patient." />
+    <img src="images/appointmentheaderlogo.png" alt="" class="booking-header-illustration" />
+  </div>
 
   @if (bookedAppointment(); as appointment) {
     <section class="hms-card-surface booking-success">
@@ -9,6 +12,7 @@
         {{ selectedPatient()?.firstName }} with {{ appointment.consultantName }} on
         {{ appointment.appointmentDate }} at {{ appointment.slotTime }}.
       </p>
+
       <div class="booking-success-actions">
         @if (whatsAppLink(); as link) {
           <a mat-stroked-button [href]="link" target="_blank" rel="noopener">
@@ -27,33 +31,99 @@
       (selectedIndexChange)="onStepIndexChange($event)"
     >
       <mat-step [completed]="!!selectedConsultantId()">
-        <ng-template matStepLabel>Doctor</ng-template>
+        <ng-template matStepLabel>
+          <span class="booking-step-title">Doctor</span>
+          <span class="booking-step-subtitle">Choose your doctor</span>
+        </ng-template>
         <div class="booking-step-body">
-          @if (consultants().length === 0) {
-            <app-empty-state icon="medical_services" title="No doctors available" message="No consultants are currently accepting appointments." />
-          } @else {
-            <div class="booking-doctor-grid">
-              @for (consultant of consultants(); track consultant.id) {
+          <div class="booking-doctor-toolbar">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="booking-department-field">
+              <mat-label>Department</mat-label>
+              <mat-select [value]="selectedDepartmentId()" (selectionChange)="selectedDepartmentId.set($event.value)">
+                <mat-option [value]="null">All Departments</mat-option>
+                @for (department of departments(); track department.id) {
+                  <mat-option [value]="department.id">{{ department.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)" aria-label="Doctor list view">
+              <mat-button-toggle value="grid" aria-label="Grid view">
+                <mat-icon aria-hidden="true">grid_view</mat-icon>
+              </mat-button-toggle>
+              <mat-button-toggle value="list" aria-label="List view">
+                <mat-icon aria-hidden="true">view_list</mat-icon>
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+
+          <div class="booking-doctor-grid" [class.booking-doctor-list]="viewMode() === 'list'">
+            @if (consultants().length === 0) {
+              <app-empty-state
+                class="booking-doctor-empty"
+                icon="medical_services"
+                title="No doctors available"
+                message="No consultants are currently accepting appointments."
+              />
+            } @else if (filteredConsultants().length === 0) {
+              <app-empty-state
+                class="booking-doctor-empty"
+                icon="filter_alt_off"
+                title="No doctors match this filter"
+                message="Try a different department, or view all departments."
+              />
+            } @else {
+              @for (consultant of filteredConsultants(); track consultant.id) {
                 <div class="booking-doctor-card">
                   @if (consultant.imageUrl) {
                     <img [src]="consultant.imageUrl" alt="" class="booking-doctor-photo" />
                   } @else {
-                    <mat-icon aria-hidden="true" class="booking-doctor-photo-fallback">person</mat-icon>
+                    <div class="booking-doctor-avatar-initials" [style.background]="avatarColor(consultant)">
+                      {{ avatarInitial(consultant) }}
+                    </div>
                   }
-                  <strong>{{ consultant.name }}</strong>
-                  <span class="booking-doctor-meta">{{ consultant.specializationName ?? consultant.departmentName }}</span>
-                  <button mat-flat-button color="primary" type="button" (click)="selectConsultant(consultant)">
+                  <div class="booking-doctor-info">
+                    <strong class="booking-doctor-name">{{ consultant.name }}</strong>
+                    <span class="booking-doctor-meta">{{ consultant.specializationName ?? consultant.departmentName }}</span>
+                    <app-status-badge label="Accepting Appointments" tone="success" />
+                  </div>
+                  <button mat-flat-button color="primary" class="booking-doctor-book-btn" type="button" (click)="selectConsultant(consultant)">
                     Book Appointment
                   </button>
                 </div>
               }
+            }
+
+            <div class="booking-request-doctor-card">
+              <div class="booking-request-doctor-icon">
+                <mat-icon aria-hidden="true">support_agent</mat-icon>
+              </div>
+              <strong class="booking-request-doctor-title">Can't find your doctor?</strong>
+              <span class="booking-doctor-meta">Our care team will help you find the right specialist for your needs.</span>
+              @if (requestDoctorLink(); as link) {
+                <a mat-flat-button color="primary" class="booking-request-doctor-btn" [href]="link">
+                  <mat-icon aria-hidden="true">person_search</mat-icon>
+                  Request a Doctor
+                </a>
+              }
+              @if (clinicCallOption(); as phone) {
+                <div class="booking-request-doctor-call">
+                  <span class="booking-request-doctor-call-label">OR CALL US</span>
+                  <a [href]="'tel:' + phone" class="booking-request-doctor-call-link">
+                    <mat-icon aria-hidden="true">call</mat-icon>
+                    {{ phone }}
+                  </a>
+                </div>
+              }
             </div>
-          }
+          </div>
         </div>
       </mat-step>
 
       <mat-step [completed]="!!selectedTime()">
-        <ng-template matStepLabel>Session &amp; Slot</ng-template>
+        <ng-template matStepLabel>
+          <span class="booking-step-title">Session &amp; Slot</span>
+          <span class="booking-step-subtitle">Pick a date &amp; time</span>
+        </ng-template>
         <div class="booking-step-body">
           <p class="booking-doctor-line">
             <strong>{{ selectedConsultant()?.name }}</strong>
@@ -172,7 +242,10 @@
       </mat-step>
 
       <mat-step>
-        <ng-template matStepLabel>Patient &amp; Confirm</ng-template>
+        <ng-template matStepLabel>
+          <span class="booking-step-title">Patient &amp; Confirm</span>
+          <span class="booking-step-subtitle">Review &amp; confirm</span>
+        </ng-template>
         <div class="booking-step-body">
           @if (!selectedPatient()) {
             <app-patient-search (patientSelected)="selectPatient($event)" />
