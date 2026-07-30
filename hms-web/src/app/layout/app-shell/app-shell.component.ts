@@ -16,7 +16,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ClinicLogoComponent } from '../../shared/ui/clinic-logo/clinic-logo.component';
 import { ClinicSettingsService } from '../../features/masters-admin/clinic-settings/clinic-settings.service';
 import { Tone } from '../../shared/ui/tone';
-import { NAV_GROUPS, type NavGroup, type NavItem } from '../nav-config';
+import { DOCTOR_QUEUE_ROUTES, NAV_GROUPS, type NavGroup, type NavItem } from '../nav-config';
 import { getVisibleNavGroups } from '../package-config';
 
 /** True when `url` is exactly `route` or a child path under it (`/ip/admissions` matches `/ip/admissions/new`). */
@@ -62,8 +62,23 @@ export class AppShellComponent {
 
   @ViewChild('searchInput') private readonly searchInputRef?: ElementRef<HTMLInputElement>;
 
-  /** Recomputes if the signed-in user's role permissions ever change without a full page reload (e.g. after an admin edits their role and they re-authenticate). */
-  readonly navGroups = computed(() => getVisibleNavGroups(this.auth.permittedModules(), this.auth.permittedRoutes()));
+  /**
+   * Recomputes if the signed-in user's role permissions ever change without a
+   * full page reload (e.g. after an admin edits their role and they
+   * re-authenticate). Doctor Queue Management's 3 routes are additionally
+   * pruned when the clinic has that add-on turned off (see Clinic Settings'
+   * "Feature Add-Ons" toggle) - this is a separate, runtime axis from the
+   * package-tier/role filtering getVisibleNavGroups() already does.
+   */
+  readonly navGroups = computed(() => {
+    const groups = getVisibleNavGroups(this.auth.permittedModules(), this.auth.permittedRoutes());
+    if (this.clinicSettings()?.doctorQueueEnabled !== false) {
+      return groups;
+    }
+    return groups
+      .map((group) => ({ ...group, items: group.items.filter((item) => !DOCTOR_QUEUE_ROUTES.includes(item.route)) }))
+      .filter((group) => group.items.length > 0);
+  });
 
   /** Sidenav category split - "MAIN MODULES" vs "SYSTEM" - computed after package/role filtering so an unlicensed/unpermitted category never shows an empty heading. */
   readonly mainGroups = computed(() => this.navGroups().filter((group) => (group.category ?? 'main') === 'main'));

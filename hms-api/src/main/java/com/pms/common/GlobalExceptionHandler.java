@@ -3,6 +3,7 @@ package com.pms.common;
 import com.pms.security.InvalidCredentialsException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ResponseEntity<ApiError> handleConflict(OptimisticLockingFailureException ex, HttpServletRequest request) {
         return build(HttpStatus.CONFLICT, "This record was modified concurrently - please retry.", request);
+    }
+
+    // Fires on a same-row double-submit race (e.g. two concurrent Doctor
+    // Queue check-ins for the same appointment) caught by a DB unique
+    // constraint rather than an application-level guard.
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDataIntegrityViolation(DataIntegrityViolationException ex, HttpServletRequest request) {
+        return build(HttpStatus.CONFLICT, "This record conflicts with an existing one - please refresh and retry.", request);
     }
 
     private ResponseEntity<ApiError> build(HttpStatus status, String message, HttpServletRequest request) {

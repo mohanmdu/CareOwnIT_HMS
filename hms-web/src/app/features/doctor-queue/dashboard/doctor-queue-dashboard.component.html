@@ -1,0 +1,118 @@
+<div class="hms-page">
+  <app-page-header title="Doctor Dashboard" subtitle="Call, recall, skip and complete patients in real time." />
+
+  <section class="hms-card-surface dashboard-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Doctor</mat-label>
+      <mat-select [(ngModel)]="consultantId" (ngModelChange)="onFiltersChange()">
+        @for (consultant of consultants(); track consultant.id) {
+          <mat-option [value]="consultant.id">{{ consultant.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Date</mat-label>
+      <input matInput [matDatepicker]="datePicker" [(ngModel)]="queueDate" (ngModelChange)="onFiltersChange()" />
+      <mat-datepicker-toggle matIconSuffix [for]="datePicker" />
+      <mat-datepicker #datePicker />
+    </mat-form-field>
+  </section>
+
+  @if (loading() && !dashboard()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (dashboard(); as d) {
+    <section class="hms-card-surface now-calling-card">
+      @if (d.currentCalled; as current) {
+        <div class="now-calling-token">{{ current.tokenDisplay }}</div>
+        <div class="now-calling-details">
+          <strong>{{ current.patientName }}</strong>
+          <span class="now-calling-meta">
+            @if (current.patientGender) {
+              {{ current.patientGender }}
+            }
+            @if (current.patientAge) {
+              · {{ current.patientAge }} yrs
+            }
+          </span>
+          <div class="now-calling-badges">
+            @if (current.priority === 'EMERGENCY') {
+              <app-status-badge label="EMERGENCY" tone="danger" />
+            }
+            @if (elapsedSinceCalled()) {
+              <span class="now-calling-elapsed">Called {{ elapsedSinceCalled() }}</span>
+            }
+            @if (current.recallCount > 0) {
+              <span class="now-calling-recalls">Recalled {{ current.recallCount }}×</span>
+            }
+          </div>
+        </div>
+      } @else {
+        <app-empty-state icon="how_to_reg" title="No patient currently called" message="Click Next Patient to call the first waiting patient." />
+      }
+
+      <div class="now-calling-actions">
+        <button mat-flat-button color="primary" type="button" [disabled]="!canCallNext() || actionInFlight()" (click)="callNext()">
+          <mat-icon aria-hidden="true">skip_next</mat-icon>
+          Next Patient
+        </button>
+        <button mat-stroked-button type="button" [disabled]="!hasCurrentCalled() || actionInFlight()" (click)="recall()">
+          <mat-icon aria-hidden="true">campaign</mat-icon>
+          Recall
+        </button>
+        <button mat-stroked-button color="warn" type="button" [disabled]="!hasCurrentCalled() || actionInFlight()" (click)="skip()">
+          <mat-icon aria-hidden="true">redo</mat-icon>
+          Skip
+        </button>
+        <button mat-flat-button color="primary" type="button" [disabled]="!hasCurrentCalled() || actionInFlight()" (click)="complete()">
+          <mat-icon aria-hidden="true">task_alt</mat-icon>
+          Complete
+        </button>
+      </div>
+    </section>
+
+    <section class="dashboard-grid">
+      <app-stat-tile icon="groups" [value]="d.totalToday" label="Total Today" tone="primary" />
+      <app-stat-tile icon="hourglass_empty" [value]="d.waitingCount" label="Waiting" tone="info" />
+      <app-stat-tile icon="campaign" [value]="d.calledCount" label="Called" tone="warning" />
+      <app-stat-tile icon="task_alt" [value]="d.completedCount" label="Completed" tone="success" />
+      <app-stat-tile icon="skip_next" [value]="d.skippedCount" label="Skipped" tone="warning" />
+      <app-stat-tile icon="person_off" [value]="d.noShowCount" label="No-Show" tone="danger" />
+      <app-stat-tile icon="event_busy" [value]="d.cancelledCount" label="Cancelled" tone="danger" />
+    </section>
+
+    <section class="hms-card-surface up-next-section">
+      <h4>Up Next</h4>
+      @if (d.waiting.length === 0) {
+        <app-empty-state icon="hourglass_empty" title="No one waiting" message="The waiting list is empty." />
+      } @else {
+        <ul class="up-next-list">
+          @for (entry of d.waiting; track entry.id; let rank = $index) {
+            <li class="up-next-row" [class.up-next-row-emergency]="entry.priority === 'EMERGENCY'">
+              <span class="up-next-rank">{{ rank + 1 }}</span>
+              <span class="up-next-token">{{ entry.tokenDisplay }}</span>
+              <span class="up-next-name">{{ entry.patientName }}</span>
+              @if (entry.priority === 'EMERGENCY') {
+                <app-status-badge label="EMERGENCY" tone="danger" />
+              }
+              @if (entry.source === 'APPOINTMENT' && entry.scheduledSlotTime) {
+                <span class="up-next-scheduled">Scheduled {{ entry.scheduledSlotTime }}</span>
+              }
+              <span class="up-next-spacer"></span>
+              @if (entry.priority === 'NORMAL') {
+                <button mat-stroked-button color="warn" type="button" [disabled]="actionInFlight()" (click)="escalate(entry)">
+                  Escalate to Emergency
+                </button>
+              } @else {
+                <button mat-stroked-button type="button" [disabled]="actionInFlight()" (click)="deEscalate(entry)">De-escalate</button>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  } @else if (!consultantId()) {
+    <app-empty-state icon="monitor_heart" title="Select a doctor" message="Choose a doctor and date above to open their queue." />
+  }
+</div>

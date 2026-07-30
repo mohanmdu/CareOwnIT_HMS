@@ -8,6 +8,15 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/login/login.component').then((m) => m.LoginComponent)
   },
   {
+    // Unauthenticated by design - a kiosk display board for a TV/monitor
+    // outside a consulting room, with no staff login in front of it. See
+    // features/doctor-queue/doctor-queue-board.service.ts, which hits the
+    // unauthenticated /api/public/doctor-queue endpoint (never patient data).
+    path: 'board/:consultantId',
+    loadComponent: () =>
+      import('./features/doctor-queue/board/doctor-queue-board.component').then((m) => m.DoctorQueueBoardComponent)
+  },
+  {
     path: 'change-password',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -305,6 +314,27 @@ export const routes: Routes = [
         path: 'appointments/direct-billing',
         loadComponent: () =>
           import('./features/direct-billing/op-direct-billing.component').then((m) => m.OpDirectBillingComponent)
+      },
+      {
+        path: 'doctor-queue/reception',
+        loadComponent: () =>
+          import('./features/doctor-queue/reception/reception-worklist.component').then(
+            (m) => m.ReceptionWorklistComponent
+          )
+      },
+      {
+        path: 'doctor-queue/dashboard',
+        loadComponent: () =>
+          import('./features/doctor-queue/dashboard/doctor-queue-dashboard.component').then(
+            (m) => m.DoctorQueueDashboardComponent
+          )
+      },
+      {
+        path: 'doctor-queue/audit-logs',
+        loadComponent: () =>
+          import('./features/doctor-queue/audit-logs/doctor-queue-audit-log.component').then(
+            (m) => m.DoctorQueueAuditLogComponent
+          )
       },
       {
         path: 'appointments',

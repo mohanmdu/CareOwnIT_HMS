@@ -50,6 +50,7 @@ public class ClinicSettingsService {
         settings.setTinNo(dto.tinNo());
         settings.setDlNo(dto.dlNo());
         settings.setWebsiteEnabled(dto.websiteEnabled() != null && dto.websiteEnabled());
+        settings.setDoctorQueueEnabled(dto.doctorQueueEnabled() == null || dto.doctorQueueEnabled());
         settings.setDomain(dto.domain());
         settings.setThemePrimaryColor(dto.themePrimaryColor());
         settings.setThemeSecondaryColor(dto.themeSecondaryColor());
@@ -109,6 +110,7 @@ public class ClinicSettingsService {
                 settings.getTinNo(),
                 settings.getDlNo(),
                 settings.isWebsiteEnabled(),
+                settings.isDoctorQueueEnabled(),
                 settings.getDomain(),
                 settings.getThemePrimaryColor(),
                 settings.getThemeSecondaryColor(),

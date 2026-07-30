@@ -54,6 +54,7 @@ public class ModulePathMappings {
         map.put("/api/registration/op-direct-billing", ModuleKey.APPOINTMENTS);
         map.put("/api/registration/refunds", ModuleKey.APPOINTMENTS);
         map.put("/api/registration/op-case-sheets", ModuleKey.APPOINTMENTS);
+        map.put("/api/registration/doctor-queue", ModuleKey.APPOINTMENTS);
 
         // IP Admission Module
         map.put("/api/ip/admissions", ModuleKey.IP_ADMISSION);

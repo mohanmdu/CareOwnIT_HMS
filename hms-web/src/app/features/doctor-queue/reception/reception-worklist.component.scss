@@ -1,0 +1,44 @@
+.reception-section {
+  overflow-x: auto;
+}
+
+.reception-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.reception-search {
+  flex: 1 1 260px;
+}
+
+.reception-patient-meta {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
+}
+
+.reception-table {
+  width: 100%;
+}
+
+.reception-actions-cell {
+  text-align: right;
+}
+
+.reception-actions-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  padding: var(--hms-space-2) 0;
+}
+
+.reception-actions-header {
+  width: 0;
+  white-space: nowrap;
+}

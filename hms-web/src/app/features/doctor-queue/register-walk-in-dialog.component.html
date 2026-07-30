@@ -1,0 +1,38 @@
+<h2 mat-dialog-title>Register Walk-In</h2>
+
+<mat-dialog-content class="walk-in-dialog-content">
+  @if (!selectedPatient()) {
+    <app-patient-search (patientSelected)="onPatientSelected($event)" />
+  } @else {
+    <div class="walk-in-selected-patient">
+      <div>
+        <strong>{{ selectedPatient()!.firstName }} {{ selectedPatient()!.lastName }}</strong>
+        <span class="walk-in-selected-patient-meta">{{ selectedPatient()!.registrationNumber }} · {{ selectedPatient()!.mobileNumber }}</span>
+      </div>
+      <button mat-button type="button" (click)="changePatient()">Change</button>
+    </div>
+  }
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Doctor</mat-label>
+    <mat-select [(ngModel)]="consultantId">
+      @for (consultant of data.consultants; track consultant.id) {
+        <mat-option [value]="consultant.id">{{ consultant.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-slide-toggle [(ngModel)]="isEmergency">Register as Emergency</mat-slide-toggle>
+
+  @if (isEmergency) {
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Priority reason (optional)</mat-label>
+      <textarea matInput rows="2" [(ngModel)]="priorityReason"></textarea>
+    </mat-form-field>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close>Cancel</button>
+  <button mat-flat-button color="primary" type="button" [disabled]="!isValid" (click)="submit()">Register &amp; Issue Token</button>
+</mat-dialog-actions>

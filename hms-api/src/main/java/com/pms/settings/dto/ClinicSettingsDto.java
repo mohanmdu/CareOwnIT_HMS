@@ -14,6 +14,7 @@ public record ClinicSettingsDto(
         String tinNo,
         String dlNo,
         Boolean websiteEnabled,
+        Boolean doctorQueueEnabled,
         String domain,
         String themePrimaryColor,
         String themeSecondaryColor,

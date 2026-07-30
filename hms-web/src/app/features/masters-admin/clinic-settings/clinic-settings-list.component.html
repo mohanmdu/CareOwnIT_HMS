@@ -109,6 +109,19 @@
         </div>
       </app-section-card>
 
+      <app-section-card icon="extension" tone="secondary" title="Feature Add-Ons">
+        <div class="hms-form-grid">
+          <mat-slide-toggle name="doctorQueueEnabled" [(ngModel)]="form.doctorQueueEnabled" class="clinic-feature-toggle">
+            Doctor Queue Management
+          </mat-slide-toggle>
+          <p class="clinic-feature-hint">
+            Adds per-doctor token queues: Reception Check-In and the Doctor Dashboard (call / recall / skip / complete).
+            Turn this off if this clinic doesn't need queue management - patients are then billed directly from the
+            Appointments screen as before, with no check-in step.
+          </p>
+        </div>
+      </app-section-card>
+
       <app-section-card icon="palette" tone="warning" title="Appearance Settings">
         <button sectionActions mat-stroked-button type="button" [disabled]="saving()" (click)="resetTheme()">
           <mat-icon aria-hidden="true">restart_alt</mat-icon>
@@ -122,7 +135,7 @@
             }
           </mat-button-toggle-group>
 
-          <mat-slide-toggle [(ngModel)]="followSystemTheme">Follow my device setting instead</mat-slide-toggle>
+          <mat-slide-toggle name="followSystemTheme" [(ngModel)]="followSystemTheme">Follow my device setting instead</mat-slide-toggle>
         </div>
 
         <h4 class="theme-subheading">Quick start - pick a preset</h4>

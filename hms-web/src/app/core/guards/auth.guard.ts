@@ -1,7 +1,10 @@
 import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
+import { catchError, map, of } from 'rxjs';
 import { AuthService } from '../services/auth.service';
-import { NAV_GROUPS, routesForModule } from '../../layout/nav-config';
+import { NotificationService } from '../../shared/services/notification.service';
+import { ClinicSettingsService } from '../../features/masters-admin/clinic-settings/clinic-settings.service';
+import { DOCTOR_QUEUE_ROUTES, NAV_GROUPS, routesForModule } from '../../layout/nav-config';
 import type { ModuleKey } from '../../layout/package-config';
 
 const CHANGE_PASSWORD_ROUTE = '/change-password';
@@ -59,6 +62,24 @@ export const authGuard: CanActivateFn = (_route, state) => {
     if (!isRoutePermitted(match.route, match.moduleKey, auth.permittedRoutes())) {
       return router.parseUrl('/dashboard');
     }
+  }
+
+  // Doctor Queue Management is a runtime, admin-editable add-on (Clinic
+  // Settings), not a role permission - checked separately, and only for its
+  // own 3 routes, so every other navigation stays free of the extra request.
+  if (DOCTOR_QUEUE_ROUTES.some((route) => url === route || url.startsWith(`${route}/`))) {
+    const clinicSettingsService = inject(ClinicSettingsService);
+    const notification = inject(NotificationService);
+    return clinicSettingsService.get().pipe(
+      map((settings) => {
+        if (settings.doctorQueueEnabled) {
+          return true;
+        }
+        notification.info('Doctor Queue Management is not enabled for this clinic.');
+        return router.parseUrl('/dashboard');
+      }),
+      catchError(() => of(true))
+    );
   }
 
   return true;

@@ -75,7 +75,9 @@ export class ConsultantFormDialogComponent {
     consultationFee: this.data.consultant?.consultationFee ?? 0,
     profile: this.data.consultant?.profile ?? '',
     address: this.data.consultant?.address ?? '',
-    acceptingAppointments: this.data.consultant?.acceptingAppointments ?? true
+    acceptingAppointments: this.data.consultant?.acceptingAppointments ?? true,
+    queueTokenPrefix: this.data.consultant?.queueTokenPrefix ?? '',
+    consultingRoomLabel: this.data.consultant?.consultingRoomLabel ?? ''
   };
 
   constructor() {
@@ -113,6 +115,11 @@ export class ConsultantFormDialogComponent {
     this.form.mobileNumber = input.value.replace(/\D/g, '').slice(0, 10);
   }
 
+  onQueueTokenPrefixInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.form.queueTokenPrefix = input.value.replace(/[^a-zA-Z]/g, '').toUpperCase().slice(0, 3);
+  }
+
   onImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
@@ -139,7 +146,9 @@ export class ConsultantFormDialogComponent {
         consultationFee: this.form.consultationFee,
         profile: this.form.profile.trim() || null,
         address: this.form.address.trim() || null,
-        acceptingAppointments: this.form.acceptingAppointments
+        acceptingAppointments: this.form.acceptingAppointments,
+        queueTokenPrefix: this.form.queueTokenPrefix.trim() || null,
+        consultingRoomLabel: this.form.consultingRoomLabel.trim() || null
       },
       imageFile: this.imageFile,
       availability: this.form.acceptingAppointments && this.availabilityForm ? this.availabilityForm.getValue() : null

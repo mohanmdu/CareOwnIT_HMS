@@ -15,6 +15,8 @@ export interface ConsultantInput {
   profile: string | null;
   address: string | null;
   acceptingAppointments: boolean;
+  queueTokenPrefix: string | null;
+  consultingRoomLabel: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -142,6 +142,27 @@ public class ConsultantService {
         consultant.setProfile(dto.profile());
         consultant.setAddress(dto.address());
         consultant.setAcceptingAppointments(dto.acceptingAppointments() == null || dto.acceptingAppointments());
+        consultant.setQueueTokenPrefix(resolveQueueTokenPrefix(dto.queueTokenPrefix(), dto.name()));
+        consultant.setConsultingRoomLabel(dto.consultingRoomLabel());
+    }
+
+    /**
+     * Only actually overrides an existing custom prefix when the incoming
+     * value is blank/null - the edit dialog always round-trips whatever
+     * prefix it previously loaded, so this only fires in practice on first
+     * creation (or if a user deliberately clears the field), never as a side
+     * effect of unrelated name edits.
+     */
+    private String resolveQueueTokenPrefix(String requested, String name) {
+        if (requested != null && !requested.isBlank()) {
+            return requested.trim().toUpperCase();
+        }
+        // Strips a leading "Dr."/"Dr " - every consultant's name starts with
+        // that, so a naive first-character default would give every doctor
+        // the same prefix ("D").
+        String stripped = name.trim().replaceFirst("(?i)^dr\\.?\\s+", "");
+        String initialSource = stripped.isEmpty() ? name.trim() : stripped;
+        return initialSource.substring(0, 1).toUpperCase();
     }
 
     private Specialization resolveSpecialization(Long specializationId) {
@@ -203,6 +224,8 @@ public class ConsultantService {
                 consultant.getAddress(),
                 consultant.isAcceptingAppointments(),
                 consultant.getImagePath(),
+                consultant.getQueueTokenPrefix(),
+                consultant.getConsultingRoomLabel(),
                 consultant.isActive(),
                 consultant.isPublishedToWeb(),
                 consultant.getCreatedAt(),

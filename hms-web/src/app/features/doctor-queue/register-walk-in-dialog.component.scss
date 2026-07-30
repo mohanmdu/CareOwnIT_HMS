@@ -1,0 +1,22 @@
+.walk-in-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+  min-width: 420px;
+}
+
+.walk-in-selected-patient {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-3);
+  border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+  border-radius: var(--hms-radius-md, 8px);
+}
+
+.walk-in-selected-patient-meta {
+  display: block;
+  color: var(--hms-color-text-muted);
+  font-size: var(--hms-font-size-xs);
+}

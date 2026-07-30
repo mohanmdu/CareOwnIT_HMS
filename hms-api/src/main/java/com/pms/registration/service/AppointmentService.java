@@ -48,6 +48,7 @@ public class AppointmentService {
     private final OpDirectBillingRepository opDirectBillingRepository;
     private final ObjectMapper objectMapper;
     private final InvoiceNumberService invoiceNumberService;
+    private final DoctorQueueService doctorQueueService;
 
     public AppointmentService(
             AppointmentRepository repository,
@@ -56,7 +57,8 @@ public class AppointmentService {
             AppointmentAuditLogRepository auditLogRepository,
             OpDirectBillingRepository opDirectBillingRepository,
             ObjectMapper objectMapper,
-            InvoiceNumberService invoiceNumberService) {
+            InvoiceNumberService invoiceNumberService,
+            DoctorQueueService doctorQueueService) {
         this.repository = repository;
         this.patientRepository = patientRepository;
         this.consultantRepository = consultantRepository;
@@ -64,6 +66,7 @@ public class AppointmentService {
         this.opDirectBillingRepository = opDirectBillingRepository;
         this.objectMapper = objectMapper;
         this.invoiceNumberService = invoiceNumberService;
+        this.doctorQueueService = doctorQueueService;
     }
 
     public List<AppointmentDto> findAll() {
@@ -130,6 +133,10 @@ public class AppointmentService {
         appointment.setCancelledBy(cancelledBy);
         Appointment saved = repository.save(appointment);
         recordAudit("CANCEL", before, saved);
+        // A cancelled appointment must not leave a ghost token in the
+        // doctor's live queue - no-op if no active queue entry exists (most
+        // cancelled appointments never had one).
+        doctorQueueService.cascadeCancelForAppointment(saved.getId(), reason);
         return toDto(saved);
     }
 

@@ -127,4 +127,21 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("toDate") LocalDate toDate,
             @Param("consultantId") Long consultantId,
             @Param("search") String search);
+
+    // Doctor Queue Reception worklist's "still just Booked/Confirmed, no
+    // queue entry yet" half of the union (see DoctorQueueService). Excludes
+    // COMPLETED deliberately - an appointment can reach COMPLETED via
+    // bill() with no check-in ever happening, and such a finished visit must
+    // not resurface as a still-pending "Booked" row. The JPQL reference to
+    // DoctorQueueEntry is a runtime Hibernate-metamodel reference only, not
+    // a compile-time Java import.
+    @Query("""
+            SELECT a FROM Appointment a
+            WHERE a.consultant.id = :consultantId
+              AND a.appointmentDate = :date
+              AND a.status IN (com.pms.registration.entity.AppointmentStatus.BOOKED, com.pms.registration.entity.AppointmentStatus.CONFIRMED)
+              AND NOT EXISTS (SELECT 1 FROM DoctorQueueEntry q WHERE q.appointment = a)
+            ORDER BY a.slotTime ASC
+            """)
+    List<Appointment> findNotYetCheckedIn(@Param("consultantId") Long consultantId, @Param("date") LocalDate date);
 }

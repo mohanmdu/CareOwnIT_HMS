@@ -12,6 +12,8 @@ export interface Consultant {
   address: string | null;
   acceptingAppointments: boolean;
   imageUrl: string | null;
+  queueTokenPrefix: string | null;
+  consultingRoomLabel: string | null;
   active: boolean;
   publishedToWeb: boolean;
   createdAt: string | null;

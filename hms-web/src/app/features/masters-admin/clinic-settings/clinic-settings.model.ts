@@ -90,6 +90,7 @@ export interface ClinicSettings {
   tinNo: string | null;
   dlNo: string | null;
   websiteEnabled: boolean;
+  doctorQueueEnabled: boolean;
   domain: string | null;
   themePrimaryColor: string | null;
   themeSecondaryColor: string | null;

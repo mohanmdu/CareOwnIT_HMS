@@ -13,6 +13,7 @@ export type ClinicSettingsInput = Pick<
   | 'tinNo'
   | 'dlNo'
   | 'websiteEnabled'
+  | 'doctorQueueEnabled'
   | 'domain'
   | 'themePrimaryColor'
   | 'themeSecondaryColor'

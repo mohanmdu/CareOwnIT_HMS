@@ -1,0 +1,11 @@
+.queue-reason-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+  min-width: 340px;
+}
+
+.queue-reason-dialog-message {
+  margin: 0;
+  color: var(--hms-color-text-muted);
+}

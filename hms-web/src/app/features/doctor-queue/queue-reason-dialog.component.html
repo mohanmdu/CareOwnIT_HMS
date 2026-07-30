@@ -1,0 +1,25 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+
+<mat-dialog-content class="queue-reason-dialog-content">
+  @if (data.message) {
+    <p class="queue-reason-dialog-message">{{ data.message }}</p>
+  }
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>{{ data.reasonLabel ?? 'Reason' }}{{ data.reasonRequired ? '' : ' (optional)' }}</mat-label>
+    <textarea matInput rows="3" [(ngModel)]="reason" [required]="data.reasonRequired" cdkFocusInitial></textarea>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close>Back</button>
+  <button
+    mat-flat-button
+    [color]="data.destructive ? 'warn' : 'primary'"
+    type="button"
+    [disabled]="!isValid"
+    (click)="submit()"
+  >
+    {{ data.confirmLabel }}
+  </button>
+</mat-dialog-actions>

@@ -45,6 +45,17 @@ export interface NavGroup {
  * intentionally left out rather than stubbed - see moduleKey/package-config.ts
  * for how this list is filtered per package tier.
  */
+/**
+ * The 3 screens belonging to the Doctor Queue Management add-on (see Clinic
+ * Settings' "Feature Add-Ons" toggle) - hidden from the sidenav and blocked
+ * by auth.guard.ts when a deployment has this feature turned off. Kept as an
+ * explicit list rather than a new ModuleKey/package-tier entry since this is
+ * a runtime, admin-editable toggle (ClinicSettings.doctorQueueEnabled), not a
+ * build-time package tier - see package-config.ts's own note on that
+ * distinction.
+ */
+export const DOCTOR_QUEUE_ROUTES: string[] = ['/doctor-queue/reception', '/doctor-queue/dashboard', '/doctor-queue/audit-logs'];
+
 /** All NavItem routes whose effective moduleKey (item override, or its group's) equals the given key - used for the Role permission picker's per-module submenu, and for "has this module's page-level access ever been restricted" checks (see package-config.ts / auth.guard.ts). */
 export function routesForModule(moduleKey: ModuleKey): string[] {
   const routes: string[] = [];
@@ -95,12 +106,15 @@ export const NAV_GROUPS: NavGroup[] = [
     icon: 'calendar_month',
     items: [
       { label: 'Book Appointment', route: '/appointments/book', icon: 'event_available' },
+      { label: 'Reception Check-In', route: '/doctor-queue/reception', icon: 'confirmation_number' },
+      { label: 'Doctor Dashboard', route: '/doctor-queue/dashboard', icon: 'monitor_heart' },
       { label: 'OP Direct Billing', route: '/appointments/direct-billing', icon: 'point_of_sale' },
       { label: 'Appointments', route: '/appointments', icon: 'event' },
       { label: 'Patient Prescription', route: '/appointments/prescriptions', icon: 'description' },
       { label: 'Collection Report', route: '/appointments/reports/collection', icon: 'summarize' },
       { label: 'Refund & Report', route: '/appointments/refunds', icon: 'currency_exchange' },
-      { label: 'Appointment Audit Logs', route: '/appointments/audit-logs', icon: 'history' }
+      { label: 'Appointment Audit Logs', route: '/appointments/audit-logs', icon: 'history' },
+      { label: 'Doctor Queue Audit Logs', route: '/doctor-queue/audit-logs', icon: 'history' }
     ]
   },
   {

@@ -22,6 +22,8 @@ public record ConsultantDto(
         String address,
         Boolean acceptingAppointments,
         String imageUrl,
+        String queueTokenPrefix,
+        String consultingRoomLabel,
         Boolean active,
         Boolean publishedToWeb,
         Instant createdAt,

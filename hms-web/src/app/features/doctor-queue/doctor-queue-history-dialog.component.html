@@ -1,0 +1,30 @@
+<h2 mat-dialog-title>History - {{ data.patientName }}</h2>
+
+<mat-dialog-content class="history-dialog-content">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  } @else if (logs().length === 0) {
+    <app-empty-state icon="history" title="No history yet" message="No status changes have been recorded for this entry." />
+  } @else {
+    <ul class="history-list">
+      @for (log of logs(); track log.id) {
+        <li class="history-item">
+          <div class="history-item-header">
+            <strong>{{ log.operation }}</strong>
+            <span class="history-item-time">{{ log.performedAt | date: 'medium' }}</span>
+          </div>
+          <div class="history-item-body">
+            <span class="history-item-value">{{ log.previousValue ?? '—' }}</span>
+            <span class="history-item-arrow">→</span>
+            <span class="history-item-value">{{ log.newValue ?? '—' }}</span>
+          </div>
+          <span class="history-item-by">by {{ log.performedBy ?? 'system' }}</span>
+        </li>
+      }
+    </ul>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close>Close</button>
+</mat-dialog-actions>

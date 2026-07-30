@@ -51,6 +51,10 @@ public class ClinicSettings {
     @Column(name = "website_enabled", nullable = false)
     private boolean websiteEnabled = false;
 
+    /** Add-on toggle for the Doctor Queue Management module (Reception Check-In, Doctor Dashboard) - some clients don't need it. */
+    @Column(name = "doctor_queue_enabled", nullable = false)
+    private boolean doctorQueueEnabled = true;
+
     private String domain;
 
     @Column(name = "theme_primary_color", length = 9)

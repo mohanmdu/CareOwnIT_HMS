@@ -1,0 +1,114 @@
+.dashboard-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hms-space-4);
+  padding: var(--hms-space-4);
+}
+
+.now-calling-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hms-space-5);
+  padding: var(--hms-space-5);
+}
+
+.now-calling-token {
+  font-size: 3rem;
+  font-weight: var(--hms-font-weight-semibold);
+  color: var(--hms-color-primary);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.now-calling-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-1);
+  flex: 1;
+  min-width: 200px;
+}
+
+.now-calling-meta {
+  color: var(--hms-color-text-muted);
+  font-size: var(--hms-font-size-sm);
+}
+
+.now-calling-badges {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  flex-wrap: wrap;
+  margin-top: var(--hms-space-1);
+}
+
+.now-calling-elapsed,
+.now-calling-recalls {
+  font-size: var(--hms-font-size-xs);
+  color: var(--hms-color-text-muted);
+}
+
+.now-calling-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hms-space-2);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--hms-space-4);
+}
+
+.up-next-section h4 {
+  margin: 0 0 var(--hms-space-3);
+}
+
+.up-next-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+}
+
+.up-next-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-2) var(--hms-space-3);
+  border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+  border-radius: var(--hms-radius-md, 8px);
+  flex-wrap: wrap;
+}
+
+.up-next-row-emergency {
+  border-color: var(--hms-color-danger, #b3261e);
+  background: var(--hms-color-danger-container, rgba(179, 38, 30, 0.08));
+}
+
+.up-next-rank {
+  color: var(--hms-color-text-muted);
+  min-width: 1.5em;
+  text-align: right;
+}
+
+.up-next-token {
+  font-weight: var(--hms-font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.up-next-name {
+  flex: 1;
+  min-width: 120px;
+}
+
+.up-next-scheduled {
+  font-size: var(--hms-font-size-xs);
+  color: var(--hms-color-text-muted);
+}
+
+.up-next-spacer {
+  flex: 1;
+}

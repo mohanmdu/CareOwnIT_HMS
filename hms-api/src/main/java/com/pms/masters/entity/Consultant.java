@@ -74,4 +74,15 @@ public class Consultant extends Auditable {
 
     @Column(name = "published_to_web", nullable = false)
     private boolean publishedToWeb = false;
+
+    // Configurable Doctor Queue token prefix (e.g. "K" in "K001") - defaults
+    // to the doctor's name-initial if left blank, see ConsultantService.
+    @Column(name = "queue_token_prefix", nullable = false, length = 10)
+    private String queueTokenPrefix;
+
+    // Optional consulting room/cabin label (e.g. "Room 3") shown on this
+    // doctor's Doctor Queue display board - unlike queueTokenPrefix, blank
+    // is a valid "no room set" state, so there's no default-resolution logic.
+    @Column(name = "consulting_room_label", length = 50)
+    private String consultingRoomLabel;
 }

@@ -28,6 +28,17 @@
   grid-column: 1 / -1;
 }
 
+.clinic-feature-toggle {
+  grid-column: 1 / -1;
+}
+
+.clinic-feature-hint {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
+  font-size: 0.875rem;
+}
+
 .clinic-favicon-row {
   display: flex;
   align-items: center;
