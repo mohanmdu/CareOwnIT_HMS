@@ -6,10 +6,7 @@
   } @else {
     <div class="grid grid-3">
       @for (department of departments(); track department.id) {
-        <a class="card department-card" [routerLink]="['/doctors']" [queryParams]="{ departmentId: department.id }">
-          <h3>{{ department.name }}</h3>
-          <span class="department-card-link">View doctors &rarr;</span>
-        </a>
+        <app-department-card [department]="department" />
       }
     </div>
   }

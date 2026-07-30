@@ -1,18 +1,22 @@
 @if (slides().length > 0) {
-  <section class="hero">
+  <section class="hero hero-cms">
     @for (slide of slides(); track slide.id; let i = $index) {
       <div class="hero-slide" [class.hero-slide-active]="i === activeSlide()">
         @if (slide.imageUrl) {
           <img [src]="slide.imageUrl" [alt]="slide.title" class="hero-image" />
         }
+        <div class="hero-scrim"></div>
         <div class="hero-caption container">
           <h1>{{ slide.title }}</h1>
           @if (slide.subtitle) {
             <p>{{ slide.subtitle }}</p>
           }
-          @if (slide.linkUrl) {
-            <a [href]="slide.linkUrl" class="btn btn-primary">Learn More</a>
-          }
+          <div class="hero-cta-row">
+            @if (slide.linkUrl) {
+              <a [href]="slide.linkUrl" class="btn btn-accent">Learn More</a>
+            }
+            <a routerLink="/book-appointment" class="btn btn-white"><app-icon name="calendar" /> Book Appointment</a>
+          </div>
         </div>
       </div>
     }
@@ -33,48 +37,167 @@
       </div>
     }
   </section>
+} @else {
+  <!-- No CMS banner slides configured yet - a designed fallback rather than an empty gap. -->
+  <section class="hero hero-fallback">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <span class="section-eyebrow"><app-icon name="shield" /> Multi-Specialty Care</span>
+        <h1>{{ siteContent()?.homeIntroTitle || (config()?.name ?? 'Compassionate care, advanced medicine.') }}</h1>
+        <p class="hero-lede">
+          {{
+            siteContent()?.homeIntroBody ||
+              'From routine check-ups to complex specialist care, our team is here for every stage of your health journey.'
+          }}
+        </p>
+        <div class="hero-cta-row">
+          <a routerLink="/book-appointment" class="btn btn-primary"><app-icon name="calendar" /> Book an Appointment</a>
+          <a routerLink="/departments" class="btn btn-outline"><app-icon name="building" /> Explore Departments</a>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-blob"></div>
+        <div class="hero-card hero-card-book">
+          <span class="card-label">Quick Booking</span>
+          <div class="book-row"><app-icon name="calendar" /> Book in under a minute</div>
+          <a routerLink="/book-appointment" class="btn btn-accent btn-sm btn-block">Get Started</a>
+        </div>
+        <div class="hero-card hero-card-emergency">
+          <span class="icon-badge icon-badge-gradient"><app-icon name="ambulance" /></span>
+          <div>
+            <strong>24/7 Emergency</strong><br />
+            <span class="hero-card-meta">Always here for you</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 }
 
-@if (siteContent(); as content) {
-  @if (content.homeIntroTitle || content.homeIntroBody) {
-    <section class="section container home-intro">
-      @if (content.homeIntroTitle) {
-        <h2 class="section-title">{{ content.homeIntroTitle }}</h2>
-      }
-      @if (content.homeIntroBody) {
-        <p class="section-subtitle">{{ content.homeIntroBody }}</p>
-      }
-    </section>
-  }
+@if (departmentsLoaded()) {
+  <section class="stats">
+    <div class="container stats-grid">
+      <app-stat-item icon="building" [value]="departments().length + '+'" label="Departments" />
+      <app-stat-item icon="users" [value]="doctors().length + '+'" label="Specialists" />
+      <app-stat-item icon="ambulance" value="24/7" label="Emergency Care" />
+      <app-stat-item icon="calendar" value="Same-Day" label="Appointments" />
+    </div>
+  </section>
 }
 
-<section class="section container">
-  <div class="grid grid-4 quick-links">
-    <a routerLink="/departments" class="card quick-link-card">
-      <h3>Departments</h3>
-      <p>Explore our clinical departments</p>
-    </a>
-    <a routerLink="/doctors" class="card quick-link-card">
-      <h3>Our Doctors</h3>
-      <p>Meet our specialists</p>
-    </a>
-    <a routerLink="/health-packages" class="card quick-link-card">
-      <h3>Health Packages</h3>
-      <p>Preventive checkup packages</p>
-    </a>
-    <a routerLink="/book-appointment" class="card quick-link-card quick-link-cta">
-      <h3>Book Appointment</h3>
-      <p>Schedule a visit with us</p>
-    </a>
+@if (homeDepartments().length > 0) {
+  <section class="section container">
+    <div class="section-head">
+      <span class="section-eyebrow"><app-icon name="building" /> Our Specialties</span>
+      <h2 class="section-title">Care across every stage of life</h2>
+      <p class="section-subtitle">Purpose-built departments staffed by experienced specialists.</p>
+    </div>
+    <div class="grid grid-3">
+      @for (department of homeDepartments(); track department.id) {
+        <app-department-card [department]="department" />
+      }
+    </div>
+    @if (departments().length > homeDepartments().length) {
+      <p class="home-view-all"><a routerLink="/departments">View all departments &rarr;</a></p>
+    }
+  </section>
+}
+
+<section class="section why">
+  <div class="container why-grid">
+    <div>
+      <span class="section-eyebrow"><app-icon name="award" /> Why Choose Us</span>
+      <h2>Trusted care, built on transparency</h2>
+      <p class="why-intro">Every part of your visit is designed to be clear, fast, and centered on you.</p>
+      <div class="why-list">
+        <div class="why-item">
+          <span class="icon-badge"><app-icon name="stetho" /></span>
+          <div class="why-item-text"><h4>Experienced Specialists</h4><p>Consultants across every department, many trained internationally.</p></div>
+          <app-icon name="arrow" class="why-item-arrow" />
+        </div>
+        <div class="why-item">
+          <span class="icon-badge"><app-icon name="calendar" /></span>
+          <div class="why-item-text"><h4>Same-Day Appointments</h4><p>Book online in under a minute — walk-ins welcome.</p></div>
+          <app-icon name="arrow" class="why-item-arrow" />
+        </div>
+        <div class="why-item">
+          <span class="icon-badge"><app-icon name="check" /></span>
+          <div class="why-item-text"><h4>Transparent Billing</h4><p>Upfront estimates and itemized invoices — no surprise charges.</p></div>
+          <app-icon name="arrow" class="why-item-arrow" />
+        </div>
+        <div class="why-item">
+          <span class="icon-badge"><app-icon name="ambulance" /></span>
+          <div class="why-item-text"><h4>24/7 Emergency Care</h4><p>Round-the-clock support with a dedicated response team.</p></div>
+          <app-icon name="arrow" class="why-item-arrow" />
+        </div>
+      </div>
+      <a routerLink="/about" class="why-cta-bar">
+        <span><app-icon name="shield" /> Your health. Our priority.</span>
+        <span class="why-cta-link">Learn more about us <app-icon name="arrow" /></span>
+      </a>
+    </div>
+    <div class="why-visual">
+      <div class="why-photo-frame">
+        <img src="/images/why-choose-us-doctor.png" alt="A doctor and clinical team at MC Hospital" />
+      </div>
+      <div class="why-panel">
+        <div class="why-panel-header">
+          <span class="icon-badge why-panel-icon"><app-icon name="shield" /></span>
+          <div><strong>Patient Safety First</strong><span class="why-panel-subtitle">Every visit, every time.</span></div>
+        </div>
+        <div class="why-panel-divider"></div>
+        <div class="why-panel-stats">
+          <div class="why-panel-stat">
+            <app-icon name="users" />
+            <strong>{{ doctors().length }}+</strong>
+            <span>Specialists</span>
+          </div>
+          @if (satisfactionPercent(); as pct) {
+            <div class="why-panel-stat">
+              <app-icon name="star" />
+              <strong>{{ pct }}%</strong>
+              <span>Patient Satisfaction</span>
+            </div>
+          }
+          <div class="why-panel-stat">
+            <app-icon name="building" />
+            <strong>{{ departments().length }}+</strong>
+            <span>Specialties</span>
+          </div>
+          <div class="why-panel-stat">
+            <app-icon name="ambulance" />
+            <strong>24/7</strong>
+            <span>Care &amp; Support</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
+@if (homeDoctors().length > 0) {
+  <section class="section">
+    <div class="container section-head">
+      <span class="section-eyebrow"><app-icon name="users" /> Meet Our Team</span>
+      <h2 class="section-title">Specialists you can trust</h2>
+    </div>
+    <div class="container">
+      <div class="scroll-row">
+        @for (doctor of homeDoctors(); track doctor.id) {
+          <app-doctor-card [doctor]="doctor" />
+        }
+      </div>
+    </div>
+    <p class="home-view-all"><a routerLink="/doctors">View all doctors &rarr;</a></p>
+  </section>
+}
+
 @if (news().length > 0) {
   <section class="section container">
-    <h2 class="section-title">News & Events</h2>
+    <h2 class="section-title">News &amp; Events</h2>
     <div class="grid grid-3">
       @for (item of news(); track item.id) {
-        <article class="card">
+        <article class="card-elevated">
           @if (item.imageUrl) {
             <img [src]="item.imageUrl" [alt]="item.title" class="home-news-image" />
           }
@@ -82,21 +205,41 @@
         </article>
       }
     </div>
-    <p class="home-view-all"><a routerLink="/news-events">View all news & events &rarr;</a></p>
+    <p class="home-view-all"><a routerLink="/news-events">View all news &amp; events &rarr;</a></p>
   </section>
 }
 
 @if (testimonials().length > 0) {
-  <section class="section container">
-    <h2 class="section-title">What Our Patients Say</h2>
+  <section class="section testimonials container">
+    <div class="section-head center">
+      <span class="section-eyebrow" style="justify-content:center"><app-icon name="star" /> Patient Stories</span>
+      <h2 class="section-title">What our patients say</h2>
+    </div>
     <div class="grid grid-3">
       @for (testimonial of testimonials(); track testimonial.id) {
-        <div class="card">
-          <p class="home-testimonial-quote">&ldquo;{{ testimonial.quote }}&rdquo;</p>
-          <p class="home-testimonial-name">{{ testimonial.patientName }}</p>
-        </div>
+        <app-testimonial-card [testimonial]="testimonial" />
       }
     </div>
     <p class="home-view-all"><a routerLink="/testimonials">View all testimonials &rarr;</a></p>
   </section>
 }
+
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="cta-banner">
+      @if (config()?.phone) {
+        <span class="section-eyebrow" style="color:rgba(255,255,255,.85); justify-content:center;">
+          <app-icon name="ambulance" /> Emergency? Call {{ config()?.phone }}
+        </span>
+      }
+      <h2>Ready to prioritize your health?</h2>
+      <p>Book a consultation with our specialists today.</p>
+      <div class="cta-actions">
+        <a routerLink="/book-appointment" class="btn btn-white"><app-icon name="calendar" /> Book an Appointment</a>
+        @if (config()?.phone) {
+          <a [href]="'tel:' + config()?.phone" class="btn btn-cta-outline"><app-icon name="phone" /> Call Us Now</a>
+        }
+      </div>
+    </div>
+  </div>
+</section>

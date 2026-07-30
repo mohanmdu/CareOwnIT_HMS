@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SiteConfigService } from '../../core/services/site-config.service';
+import { IconComponent } from '../../shared/icon/icon.component';
 
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, IconComponent],
   templateUrl: './footer.component.html',
   styleUrl: './footer.component.scss'
 })

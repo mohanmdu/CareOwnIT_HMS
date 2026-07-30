@@ -16,18 +16,7 @@
   } @else {
     <div class="grid grid-3">
       @for (doctor of doctors(); track doctor.id) {
-        <a class="card doctor-card" [routerLink]="['/doctors', doctor.id]">
-          @if (doctor.imageUrl) {
-            <img [src]="doctor.imageUrl" [alt]="doctor.name" class="doctor-photo" />
-          } @else {
-            <div class="doctor-photo doctor-photo-placeholder" aria-hidden="true">{{ doctor.name.charAt(0) }}</div>
-          }
-          <h3>{{ doctor.name }}</h3>
-          @if (doctor.specializationName) {
-            <p class="doctor-specialization">{{ doctor.specializationName }}</p>
-          }
-          <p class="doctor-department">{{ doctor.departmentName }}</p>
-        </a>
+        <app-doctor-card [doctor]="doctor" />
       }
     </div>
   }

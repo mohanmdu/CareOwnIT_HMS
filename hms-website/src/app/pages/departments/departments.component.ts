@@ -1,13 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { PublicDepartmentService } from '../../core/services/public-department.service';
 import { PublicDepartment } from '../../core/models/public.model';
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
+import { DepartmentCardComponent } from '../../shared/department-card/department-card.component';
 
 @Component({
   selector: 'app-departments',
   standalone: true,
-  imports: [RouterLink, PageHeaderComponent],
+  imports: [PageHeaderComponent, DepartmentCardComponent],
   templateUrl: './departments.component.html',
   styleUrl: './departments.component.scss'
 })

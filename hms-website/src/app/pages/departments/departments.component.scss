@@ -1,15 +1,1 @@
-.department-card {
-  text-decoration: none;
-  color: var(--color-text);
-  transition: box-shadow 0.2s ease;
-
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-}
-
-.department-card-link {
-  color: var(--theme-primary);
-  font-weight: 600;
-  font-size: 0.9rem;
-}
+/* Card styling now lives in DepartmentCardComponent - this page just lays out the grid. */

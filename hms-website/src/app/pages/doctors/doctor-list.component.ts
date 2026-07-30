@@ -1,15 +1,15 @@
-import { DecimalPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PublicConsultantService } from '../../core/services/public-consultant.service';
 import { PublicDepartmentService } from '../../core/services/public-department.service';
 import { PublicConsultant, PublicDepartment } from '../../core/models/public.model';
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
+import { DoctorCardComponent } from '../../shared/doctor-card/doctor-card.component';
 
 @Component({
   selector: 'app-doctor-list',
   standalone: true,
-  imports: [DecimalPipe, RouterLink, PageHeaderComponent],
+  imports: [PageHeaderComponent, DoctorCardComponent],
   templateUrl: './doctor-list.component.html',
   styleUrl: './doctor-list.component.scss'
 })

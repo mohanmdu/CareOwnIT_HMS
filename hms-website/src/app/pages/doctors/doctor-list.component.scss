@@ -13,45 +13,9 @@
     border-radius: var(--radius);
     border: 1px solid var(--color-border);
     font-size: 1rem;
+    background: var(--color-bg);
+    color: var(--color-text);
   }
 }
 
-.doctor-card {
-  text-decoration: none;
-  color: var(--color-text);
-  text-align: center;
-  transition: box-shadow 0.2s ease;
-
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-}
-
-.doctor-photo {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin: 0 auto var(--space-3);
-}
-
-.doctor-photo-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--theme-primary);
-  color: #fff;
-  font-size: 2rem;
-  font-weight: 700;
-}
-
-.doctor-specialization {
-  color: var(--theme-primary);
-  font-weight: 600;
-  margin-bottom: var(--space-1);
-}
-
-.doctor-department {
-  color: var(--color-text-muted);
-  margin: 0;
-}
+/* Card styling now lives in DoctorCardComponent - this page just lays out the grid. */

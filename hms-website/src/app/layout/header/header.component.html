@@ -1,27 +1,55 @@
 <a class="skip-link" href="#main-content">Skip to content</a>
 
 <header class="site-header">
+  <div class="container header-topbar">
+    <div class="header-topbar-contact">
+      @if (config()?.phone) {
+        <a [href]="'tel:' + config()?.phone"><app-icon name="phone" /> {{ config()?.phone }}</a>
+      }
+      @if (config()?.email) {
+        <a [href]="'mailto:' + config()?.email"><app-icon name="mail" /> {{ config()?.email }}</a>
+      }
+    </div>
+    <nav class="header-topbar-links" aria-label="Secondary">
+      @for (link of secondaryNavLinks; track link.path) {
+        <a [routerLink]="link.path" routerLinkActive="active">{{ link.label }}</a>
+      }
+    </nav>
+  </div>
+
   <div class="container site-header-bar">
     <a routerLink="/" class="site-brand" (click)="closeNav()">
       @if (config()?.logoUrl) {
         <img [src]="config()!.logoUrl" [alt]="config()?.name ?? 'Hospital logo'" class="site-brand-logo" />
+      } @else {
+        <span class="site-brand-mark"><app-icon name="heart" /></span>
       }
-      <span class="site-brand-name">{{ config()?.name ?? 'Hospital' }}</span>
+      <span class="site-brand-text">
+        <span class="site-brand-name">{{ config()?.name ?? 'Hospital' }}</span>
+        <span class="site-brand-tagline">Multi-Specialty Care</span>
+      </span>
     </a>
 
     <button type="button" class="nav-toggle" [attr.aria-expanded]="navOpen()" aria-label="Toggle navigation" (click)="toggleNav()">
-      <span></span>
-      <span></span>
-      <span></span>
+      <app-icon [name]="navOpen() ? 'close' : 'menu'" />
     </button>
 
     <nav class="site-nav" [class.site-nav-open]="navOpen()">
-      @for (link of navLinks; track link.path) {
-        <a [routerLink]="link.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: link.path === '/' }" (click)="closeNav()">{{
-          link.label
-        }}</a>
+      @for (link of primaryNavLinks; track link.path) {
+        <a class="nav-primary-link" [routerLink]="link.path" routerLinkActive="active" (click)="closeNav()">{{ link.label }}</a>
       }
-      <a routerLink="/book-appointment" class="btn btn-primary nav-cta" (click)="closeNav()">Book Appointment</a>
+      <span class="nav-divider" aria-hidden="true"></span>
+      @for (link of secondaryNavLinks; track link.path) {
+        <a class="nav-secondary-link" [routerLink]="link.path" routerLinkActive="active" (click)="closeNav()">{{ link.label }}</a>
+      }
+      @if (config()?.phone) {
+        <a [href]="'tel:' + config()?.phone" class="header-phone nav-secondary-link">
+          <app-icon name="phone" /> {{ config()?.phone }}
+        </a>
+      }
+      <a routerLink="/book-appointment" class="btn btn-primary btn-sm nav-cta" (click)="closeNav()">
+        <app-icon name="calendar" /> Book Appointment
+      </a>
     </nav>
   </div>
 </header>

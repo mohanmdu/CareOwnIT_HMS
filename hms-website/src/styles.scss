@@ -4,18 +4,28 @@
   --theme-tertiary: #1c8c7a;
   --color-bg: #ffffff;
   --color-surface: #f5f8f7;
+  --color-surface-alt: #eaf2ef;
   --color-text: #16241f;
   --color-text-muted: #55655f;
+  --color-text-faint: #7c8d89;
   --color-border: #e0e6e3;
-  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-heading: Georgia, 'Times New Roman', serif;
+  --font-body: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-heading: 'Fraunces', Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+
+  // A warm accent that never gets overridden by ClinicSettings (which only
+  // ever sets primary/secondary/tertiary) - the counterpoint the previous
+  // single-hue palette had no room for. See the redesign discussion for why
+  // gold rather than a second blue/teal.
+  --theme-accent: #e3a625;
+  --theme-accent-dark: #b87f14;
+  --theme-accent-light: #fbf0d9;
 
   // Header/footer background default to the existing generic surface colors -
   // ClinicSettings.headerBackgroundColor/footerBackgroundColor (SiteConfigService)
   // override these independently of the theme colors when a client sets them,
   // so a deployment with no customization looks unchanged.
   --theme-header-bg: var(--color-bg);
-  --theme-footer-bg: var(--color-surface);
+  --theme-footer-bg: #0e1f1b;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -23,9 +33,36 @@
   --space-4: 1.5rem;
   --space-5: 2.5rem;
   --space-6: 4rem;
+  --space-7: 6rem;
+
+  // Radius/shadow are now a real scale rather than one flat value each -
+  // ClinicSettings.cornerRadiusStyle (SiteConfigService) still only maps to
+  // --radius (the "md" step); sm/lg/pill scale proportionally from it via
+  // the clamp()s below rather than needing their own theme override.
   --radius: 8px;
+  --radius-sm: 10px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  --shadow-sm: 0 1px 2px rgba(14, 31, 27, 0.06), 0 1px 1px rgba(14, 31, 27, 0.04);
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 24px -8px rgba(14, 31, 27, 0.16), 0 2px 8px -2px rgba(14, 31, 27, 0.08);
+  --shadow-lg: 0 24px 48px -12px rgba(14, 31, 27, 0.22), 0 8px 16px -4px rgba(14, 31, 27, 0.1);
+  --shadow-glow: 0 12px 28px -8px rgba(15, 110, 95, 0.4);
+
   --max-width: 1160px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 * {
@@ -38,11 +75,15 @@ body {
   padding: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-body);
   color: var(--color-text);
   background: var(--color-bg);
-  line-height: 1.55;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -51,7 +92,9 @@ h2,
 h3,
 h4 {
   font-family: var(--font-heading);
-  line-height: 1.2;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
   margin: 0 0 var(--space-3);
   color: var(--color-text);
 }
@@ -79,8 +122,28 @@ img {
   padding: var(--space-6) 0;
 }
 
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--theme-primary);
+  margin-bottom: var(--space-3);
+
+  &::before {
+    content: '';
+    width: 20px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--theme-accent);
+  }
+}
+
 .section-title {
-  font-size: 2rem;
+  font-size: clamp(1.85rem, 3.2vw, 2.5rem);
   text-align: center;
   margin-bottom: var(--space-2);
 }
@@ -90,6 +153,7 @@ img {
   color: var(--color-text-muted);
   max-width: 640px;
   margin: 0 auto var(--space-5);
+  font-size: 1.05rem;
 }
 
 .card {
@@ -100,44 +164,178 @@ img {
   padding: var(--space-4);
 }
 
+// Premium card variant - white surface, deeper shadow scale, lift-on-hover.
+// Used by the new DepartmentCard/DoctorCard/TestimonialCard/service-card
+// patterns; .card above is left untouched so pages not yet migrated keep
+// their existing look.
+.card-elevated {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+  transition:
+    transform 0.35s var(--ease),
+    box-shadow 0.35s var(--ease),
+    border-color 0.35s var(--ease);
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+    border-color: transparent;
+  }
+}
+
+.icon {
+  width: 1em;
+  height: 1em;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+.icon-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  background: var(--color-surface-alt);
+  color: var(--theme-primary);
+}
+
+.icon-badge-gradient {
+  color: #fff;
+  background: linear-gradient(135deg, var(--theme-primary), color-mix(in srgb, var(--theme-primary) 65%, black));
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.35s var(--ease);
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
   padding: 0.75rem 1.5rem;
-  border-radius: var(--radius);
+  border-radius: var(--radius-pill);
   font-weight: 600;
   text-decoration: none;
   border: 2px solid var(--theme-primary);
   cursor: pointer;
   font-size: 1rem;
+  transition:
+    transform 0.28s var(--ease),
+    box-shadow 0.28s var(--ease),
+    background-color 0.28s var(--ease),
+    color 0.28s var(--ease);
 }
 
 .btn-primary {
-  background: var(--theme-primary);
+  background: linear-gradient(135deg, var(--theme-primary), color-mix(in srgb, var(--theme-primary) 70%, black));
+  border-color: transparent;
   color: #fff;
+  box-shadow: var(--shadow-glow);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px -8px color-mix(in srgb, var(--theme-primary) 55%, transparent);
+  }
+}
+
+.btn-accent {
+  background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-dark));
+  border-color: transparent;
+  color: #241a04;
+  box-shadow: 0 12px 24px -8px color-mix(in srgb, var(--theme-accent) 55%, transparent);
+
+  &:hover {
+    transform: translateY(-2px);
+  }
 }
 
 .btn-outline {
   background: transparent;
   color: var(--theme-primary);
+
+  &:hover {
+    background: var(--color-surface-alt);
+    transform: translateY(-2px);
+  }
 }
 
+.btn-white {
+  background: #fff;
+  border-color: transparent;
+  color: color-mix(in srgb, var(--theme-primary) 70%, black);
+  box-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.35);
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.btn-sm {
+  padding: 0.55rem 1.15rem;
+  font-size: 0.85rem;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+// Flexbox-with-wrap rather than CSS Grid's auto-fit: grid computes one fixed
+// column count for the whole container, so a last row with fewer items than
+// that count just leaves empty tracks on the right (looks broken/lopsided
+// with a dynamic item count like department/doctor lists). Flex-wrap
+// naturally centers a short last row instead.
 .grid {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-4);
 }
 
-.grid-2 {
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+// flex-grow: 0 deliberately - some cards (e.g. DoctorCardComponent) already
+// carry their own fixed width for the home page's horizontal scroll-row, so
+// letting the grid grow items would stretch the wrapper while the fixed-width
+// card inside stays put, shifting it off-center within its own row. Keeping
+// grow at 0 means every card stays the same size in every row; only wrapping
+// and centering change.
+.grid-2 > * {
+  flex: 0 1 280px;
 }
 
-.grid-3 {
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+.grid-3 > * {
+  flex: 0 1 240px;
 }
 
-.grid-4 {
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+.grid-4 > * {
+  flex: 0 1 200px;
+}
+
+.scroll-row {
+  display: flex;
+  gap: var(--space-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: var(--space-2);
+
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 99px;
+  }
+
+  > * {
+    scroll-snap-align: start;
+    flex: 0 0 auto;
+  }
 }
 
 .empty-state {

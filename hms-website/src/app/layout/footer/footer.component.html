@@ -1,15 +1,45 @@
 <footer class="site-footer">
   <div class="container footer-grid">
-    <div>
+    <div class="footer-brand">
       <h3 class="footer-heading">{{ config()?.name ?? 'Hospital' }}</h3>
+      <p class="footer-tagline">Multi-specialty healthcare with a human touch.</p>
       @if (config()?.address) {
-        <p>{{ config()?.address }}</p>
+        <p class="footer-contact-item"><app-icon name="pin" /> {{ config()?.address }}</p>
       }
       @if (config()?.phone) {
-        <p><a [href]="'tel:' + config()?.phone">{{ config()?.phone }}</a></p>
+        <p class="footer-contact-item">
+          <app-icon name="phone" /> <a [href]="'tel:' + config()?.phone">{{ config()?.phone }}</a>
+        </p>
       }
       @if (config()?.email) {
-        <p><a [href]="'mailto:' + config()?.email">{{ config()?.email }}</a></p>
+        <p class="footer-contact-item">
+          <app-icon name="mail" /> <a [href]="'mailto:' + config()?.email">{{ config()?.email }}</a>
+        </p>
+      }
+
+      @if (config()?.whatsappNumber || config()?.socialFacebookUrl || config()?.socialInstagramUrl || config()?.socialYoutubeUrl) {
+        <div class="footer-social">
+          @if (config()?.whatsappNumber) {
+            <a [href]="whatsappLink(config()!.whatsappNumber!)" target="_blank" rel="noopener" aria-label="WhatsApp">
+              <app-icon name="whatsapp" />
+            </a>
+          }
+          @if (config()?.socialFacebookUrl) {
+            <a [href]="config()?.socialFacebookUrl" target="_blank" rel="noopener" aria-label="Facebook">
+              <app-icon name="fb" />
+            </a>
+          }
+          @if (config()?.socialInstagramUrl) {
+            <a [href]="config()?.socialInstagramUrl" target="_blank" rel="noopener" aria-label="Instagram">
+              <app-icon name="ig" />
+            </a>
+          }
+          @if (config()?.socialYoutubeUrl) {
+            <a [href]="config()?.socialYoutubeUrl" target="_blank" rel="noopener" aria-label="YouTube">
+              <app-icon name="yt" />
+            </a>
+          }
+        </div>
       }
     </div>
 
@@ -25,20 +55,13 @@
     </div>
 
     <div>
-      <h3 class="footer-heading">Connect</h3>
+      <h3 class="footer-heading">More</h3>
       <ul class="footer-links">
-        @if (config()?.whatsappNumber) {
-          <li><a [href]="whatsappLink(config()!.whatsappNumber!)" target="_blank" rel="noopener">WhatsApp</a></li>
-        }
-        @if (config()?.socialFacebookUrl) {
-          <li><a [href]="config()?.socialFacebookUrl" target="_blank" rel="noopener">Facebook</a></li>
-        }
-        @if (config()?.socialInstagramUrl) {
-          <li><a [href]="config()?.socialInstagramUrl" target="_blank" rel="noopener">Instagram</a></li>
-        }
-        @if (config()?.socialYoutubeUrl) {
-          <li><a [href]="config()?.socialYoutubeUrl" target="_blank" rel="noopener">YouTube</a></li>
-        }
+        <li><a routerLink="/about">About Us</a></li>
+        <li><a routerLink="/gallery">Gallery</a></li>
+        <li><a routerLink="/news-events">News &amp; Events</a></li>
+        <li><a routerLink="/testimonials">Testimonials</a></li>
+        <li><a routerLink="/blog">Blog</a></li>
       </ul>
     </div>
   </div>
