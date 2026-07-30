@@ -5,16 +5,26 @@
     <p class="empty-state">No health packages have been published yet.</p>
   } @else {
     <div class="grid grid-3">
-      @for (pkg of packages(); track pkg.id) {
-        <div class="card health-package-card">
+      @for (pkg of packages(); track pkg.id; let i = $index) {
+        <div class="card-elevated health-package-card" [style.--pkg-color]="colorFor(i)">
+          <span class="health-package-icon"><app-icon [name]="iconFor(pkg.name)" /></span>
           <h3>{{ pkg.name }}</h3>
           @if (pkg.description) {
-            <p>{{ pkg.description }}</p>
+            <p class="health-package-description">{{ pkg.description }}</p>
           }
-          @if (pkg.includes) {
-            <p class="health-package-includes"><strong>Includes:</strong> {{ pkg.includes }}</p>
+          @if (includesList(pkg.includes); as items) {
+            @if (items.length > 0) {
+              <ul class="health-package-includes">
+                @for (item of items; track item) {
+                  <li><app-icon name="check" />{{ item }}</li>
+                }
+              </ul>
+            }
           }
-          <p class="health-package-price">{{ pkg.price | number: '1.0-2' }}</p>
+          <div class="health-package-footer">
+            <span class="health-package-price">₹{{ pkg.price | number: '1.0-2' }}</span>
+            <a routerLink="/book-appointment" class="btn btn-sm btn-outline">Book Now</a>
+          </div>
         </div>
       }
     </div>

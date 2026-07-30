@@ -1,13 +1,14 @@
 import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PublicConsultant } from '../../core/models/public.model';
+import { departmentColor } from '../department-icon/department-icon';
 
 @Component({
   selector: 'app-doctor-card',
   standalone: true,
   imports: [RouterLink],
   template: `
-    <a [routerLink]="['/doctors', doctor().id]" class="card-elevated doctor-card">
+    <a [routerLink]="['/doctors', doctor().id]" class="card-elevated doctor-card" [style.--dept-color]="color()">
       @if (doctor().imageUrl) {
         <img [src]="doctor().imageUrl" [alt]="doctor().name" class="doctor-photo" />
       } @else {
@@ -39,6 +40,7 @@ import { PublicConsultant } from '../../core/models/public.model';
         object-fit: cover;
         margin-bottom: var(--space-2);
         box-shadow: var(--shadow-sm);
+        border: 3px solid color-mix(in srgb, var(--dept-color) 30%, white);
       }
       .doctor-avatar {
         width: 84px;
@@ -51,7 +53,7 @@ import { PublicConsultant } from '../../core/models/public.model';
         font-weight: 700;
         font-size: 1.5rem;
         color: #fff;
-        background: linear-gradient(135deg, var(--theme-primary), color-mix(in srgb, var(--theme-primary) 65%, black));
+        background: linear-gradient(135deg, var(--dept-color), color-mix(in srgb, var(--dept-color) 65%, black));
         margin-bottom: var(--space-2);
         box-shadow: var(--shadow-sm);
       }
@@ -64,8 +66,8 @@ import { PublicConsultant } from '../../core/models/public.model';
         display: inline-block;
         font-size: 0.74rem;
         font-weight: 700;
-        color: var(--theme-primary);
-        background: var(--color-surface-alt);
+        color: var(--dept-color);
+        background: color-mix(in srgb, var(--dept-color) 12%, white);
         padding: 0.25rem 0.7rem;
         border-radius: var(--radius-pill);
       }
@@ -78,6 +80,8 @@ import { PublicConsultant } from '../../core/models/public.model';
 })
 export class DoctorCardComponent {
   doctor = input.required<PublicConsultant>();
+
+  readonly color = computed(() => departmentColor(this.doctor().departmentName ?? ''));
 
   readonly initials = computed(() =>
     this.doctor()

@@ -4,20 +4,49 @@
   @if (content(); as c) {
     @if (c.aboutUsBody) {
       <section class="about-block">
+        <span class="section-eyebrow">Our Story</span>
         <h2>Who We Are</h2>
-        <p>{{ c.aboutUsBody }}</p>
+        <p class="about-body">{{ c.aboutUsBody }}</p>
       </section>
+    }
+
+    @if (departmentCount() !== null || doctorCount() !== null) {
+      <div class="about-stats">
+        @if (departmentCount() !== null) {
+          <div class="about-stat">
+            <span class="about-stat-icon"><app-icon name="building" /></span>
+            <div class="about-stat-value">{{ departmentCount() }}</div>
+            <div class="about-stat-label">Departments</div>
+          </div>
+        }
+        @if (doctorCount() !== null) {
+          <div class="about-stat">
+            <span class="about-stat-icon"><app-icon name="users" /></span>
+            <div class="about-stat-value">{{ doctorCount() }}</div>
+            <div class="about-stat-label">Specialist Doctors</div>
+          </div>
+        }
+        @if (satisfactionPercent(); as pct) {
+          <div class="about-stat">
+            <span class="about-stat-icon"><app-icon name="star" /></span>
+            <div class="about-stat-value">{{ pct }}%</div>
+            <div class="about-stat-label">Patient Satisfaction</div>
+          </div>
+        }
+      </div>
     }
 
     <div class="grid grid-2 about-mission-vision">
       @if (c.missionBody) {
-        <div class="card">
+        <div class="card-elevated about-value-card">
+          <span class="about-value-icon"><app-icon name="heart" /></span>
           <h2>Our Mission</h2>
           <p>{{ c.missionBody }}</p>
         </div>
       }
       @if (c.visionBody) {
-        <div class="card">
+        <div class="card-elevated about-value-card about-value-card--accent">
+          <span class="about-value-icon"><app-icon name="star" /></span>
           <h2>Our Vision</h2>
           <p>{{ c.visionBody }}</p>
         </div>

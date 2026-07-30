@@ -4,29 +4,41 @@
   @if (config(); as c) {
     <div class="grid grid-3 contact-grid">
       @if (c.address) {
-        <div class="card">
+        <div class="card-elevated contact-card" style="--tile-color: #0f6e5f">
+          <span class="contact-icon"><app-icon name="pin" /></span>
           <h3>Address</h3>
           <p>{{ c.address }}</p>
         </div>
       }
       @if (c.phone) {
-        <div class="card">
+        <div class="card-elevated contact-card" style="--tile-color: #2f9bd9">
+          <span class="contact-icon"><app-icon name="phone" /></span>
           <h3>Phone</h3>
           <p><a [href]="'tel:' + c.phone">{{ c.phone }}</a></p>
         </div>
       }
       @if (c.email) {
-        <div class="card">
+        <div class="card-elevated contact-card" style="--tile-color: #d98a2b">
+          <span class="contact-icon"><app-icon name="mail" /></span>
           <h3>Email</h3>
           <p><a [href]="'mailto:' + c.email">{{ c.email }}</a></p>
         </div>
       }
       @if (c.whatsappNumber) {
-        <div class="card">
+        <div class="card-elevated contact-card" style="--tile-color: #25d366">
+          <span class="contact-icon"><app-icon name="whatsapp" /></span>
           <h3>WhatsApp</h3>
           <p><a [href]="whatsappLink(c.whatsappNumber)" target="_blank" rel="noopener">Chat with us</a></p>
         </div>
       }
+    </div>
+
+    <div class="contact-cta">
+      <h2>Prefer to skip the call?</h2>
+      <p>Book your appointment online in under a minute - no login required.</p>
+      <a routerLink="/book-appointment" class="btn btn-primary">
+        <app-icon name="calendar" /> Book Appointment
+      </a>
     </div>
   }
 </div>

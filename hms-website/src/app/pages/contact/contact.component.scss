@@ -1,3 +1,43 @@
-.contact-grid .card {
+.contact-card {
   text-align: center;
+  border-top: 4px solid var(--tile-color);
+}
+
+.contact-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-3);
+  font-size: 1.6rem;
+  color: var(--tile-color);
+  background: color-mix(in srgb, var(--tile-color) 14%, white);
+}
+
+.contact-card a {
+  font-weight: 600;
+}
+
+.contact-cta {
+  margin-top: var(--space-6);
+  padding: var(--space-6) var(--space-5);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  background:
+    radial-gradient(60% 140% at 85% 0%, color-mix(in srgb, var(--theme-accent) 16%, transparent) 0%, transparent 60%),
+    radial-gradient(70% 140% at 10% 100%, color-mix(in srgb, var(--theme-primary) 14%, transparent) 0%, transparent 65%),
+    var(--color-surface);
+  border: 1px solid var(--color-border);
+
+  h2 {
+    margin-bottom: var(--space-2);
+  }
+
+  p {
+    color: var(--color-text-muted);
+    max-width: 480px;
+    margin: 0 auto var(--space-4);
+  }
 }
