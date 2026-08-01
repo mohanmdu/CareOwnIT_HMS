@@ -3,9 +3,11 @@
 This folder contains the target-state modernization of the legacy Struts2/Hibernate3
 Hospital Management System at `d:/project/Navjeevan/Navjeenna`.
 
-- [`docs/HMS-Struts-to-Angular-SpringBoot-Migration.md`](docs/HMS-Struts-to-Angular-SpringBoot-Migration.md) - full as-is architecture analysis, Struts→Angular/Spring Boot mapping, target architecture, and step-by-step migration plan (read this first).
-- [`hms-web/`](hms-web) - Angular 18 SPA (standalone components, lazy-loaded feature routes).
+- [`docs/local-development.md`](docs/local-development.md) - how local dev config relates to
+  the `careownitsolutions.com` production deploy (read this if you're setting up locally).
+- [`hms-web/`](hms-web) - Angular 18 SPA, admin/staff-facing HMS UI (standalone components, lazy-loaded feature routes).
 - [`hms-api/`](hms-api) - Spring Boot 4 REST API (Java 17, Spring Data JPA, Flyway, Spring Security).
+- [`hms-website/`](hms-website) - Angular 18 SSR app, the patient-facing public hospital site.
 
 Both projects currently contain one complete, working vertical slice - **Departments**
 (`hms-api`: `com.pms.masters.*`, `hms-web`: `features/masters-admin/departments`) - as
@@ -24,9 +26,10 @@ cd hms-api
 
 Configure the datasource via environment variables (`DB_URL`, `DB_USER`, `DB_PASSWORD`)
 or edit `src/main/resources/application.properties` directly. Do not point this at the
-live `Navjeevan` database until you've read migration doc §7 Phase 0/3 - `ddl-auto` is
-set to `validate`, not `update`, and Flyway's `V1__baseline.sql` is a placeholder that
-must be replaced with a real export of the live schema first.
+live legacy `Navjeevan` database - `ddl-auto` is set to `validate`, not `update`, and
+Flyway's `V1__baseline.sql` is a placeholder that was never reconciled against a real
+export of that live schema. See [`docs/local-development.md`](docs/local-development.md)
+for the full list of env vars and their local-dev defaults.
 
 **Frontend**:
 
@@ -36,5 +39,7 @@ npm start
 ```
 
 Serves on `http://localhost:4200`, proxying API calls to `http://localhost:8080/api`
-(see `src/environments/environment.development.ts`). Dev login uses the credentials
-configured on the backend (`DEV_USER`/`DEV_PASSWORD`, default `admin`/`admin`).
+(see `src/environments/environment.development.ts`). Auth is real DB-backed JWT login
+(see `com.pms.security`) - use whatever account you've created via the backend, or the
+seeded bootstrap account (`superadmin`, password rotated on every real deployment,
+`must_change_password` enforced).
