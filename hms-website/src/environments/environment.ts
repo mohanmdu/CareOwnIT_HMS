@@ -5,5 +5,7 @@ export const environment = {
   // "Book Appointment" links out to its booking module rather than
   // duplicating anonymous booking logic on the public site. Set per
   // deployment (e.g. a subdomain or path the reverse proxy routes to hms-web).
-  hmsAppUrl: '/hms'
+  // Local path-based value, uncomment to test that routing style again:
+  // hmsAppUrl: '/hms'
+  hmsAppUrl: 'https://admin.careownitsolutions.com'
 };

@@ -3,7 +3,9 @@ package com.pms.config;
 import com.pms.security.JwtAuthenticationFilter;
 import com.pms.security.JwtService;
 import com.pms.security.ModuleAuthorizationManager;
+import java.util.Arrays;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -33,6 +35,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final List<String> corsAllowedOrigins;
+
+    public SecurityConfig(
+            @Value("${app.security.cors-allowed-origins:http://localhost:*}") String corsAllowedOrigins) {
+        this.corsAllowedOrigins =
+                Arrays.stream(corsAllowedOrigins.split(",")).map(String::trim).toList();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -68,20 +78,24 @@ public class SecurityConfig {
         response.getWriter().write("{\"status\":" + status + ",\"message\":\"" + message + "\"}");
     }
 
-    // Dev-only: allows either Angular dev server (hms-web, hms-website) to
-    // call this API directly, whichever port it actually lands on. A fixed
-    // origin list doesn't work here - when hms-web already holds 4200, the
-    // Angular/Vite dev server for hms-website falls back to a random free
-    // port instead of a predictable second one, so an allowlist of specific
-    // ports is a losing game. setAllowedOriginPatterns (not
-    // setAllowedOrigins) is required to combine a wildcard with
-    // allowCredentials(true) - Spring rejects a literal "*" origin under
-    // credentialed CORS, but a pattern is evaluated per-request instead of
-    // matched statically, so it's allowed. Tighten to the real deployed
-    // origin(s) outside local development.
+    // Externalized via app.security.cors-allowed-origins (see
+    // application.properties) rather than hardcoded, so the same jar works
+    // in both places without a source change:
+    //  - local dev default (http://localhost:*): a fixed origin list doesn't
+    //    work here - when hms-web already holds 4200, the Angular/Vite dev
+    //    server for hms-website falls back to a random free port instead of
+    //    a predictable second one, so an allowlist of specific ports is a
+    //    losing game.
+    //  - production (CORS_ALLOWED_ORIGINS env var): a comma-separated list
+    //    of the real deployed origins, e.g.
+    //    https://careownitsolutions.com,https://admin.careownitsolutions.com
+    // setAllowedOriginPatterns (not setAllowedOrigins) is required either
+    // way to combine a wildcard/list with allowCredentials(true) - Spring
+    // rejects a literal "*" origin under credentialed CORS, but a pattern is
+    // evaluated per-request instead of matched statically, so it's allowed.
     private CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:*"));
+        configuration.setAllowedOriginPatterns(corsAllowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
