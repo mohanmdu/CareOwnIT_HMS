@@ -48,7 +48,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           source: 'hms-api/target/hms-api-0.0.1-SNAPSHOT.jar'
-          target: '/home/deploy/incoming/'
+          target: '/home/ci/incoming/'
           strip_components: 2
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v1.0.3
@@ -56,7 +56,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          script: sudo /home/CareOwn_HMS/scripts/deploy-hms-api.sh /home/deploy/incoming/hms-api-0.0.1-SNAPSHOT.jar
+          script: sudo /home/CareOwn_HMS/scripts/deploy-hms-api.sh /home/ci/incoming/hms-api-0.0.1-SNAPSHOT.jar
 
   deploy-web:
     needs: changes
@@ -81,7 +81,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           source: 'hms-ui.tar.gz'
-          target: '/home/deploy/incoming/'
+          target: '/home/ci/incoming/'
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -89,9 +89,9 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            rm -rf /home/deploy/incoming/hms-ui && mkdir -p /home/deploy/incoming/hms-ui
-            tar xzf /home/deploy/incoming/hms-ui.tar.gz -C /home/deploy/incoming/hms-ui
-            sudo /home/CareOwn_HMS/scripts/deploy-hms-ui.sh /home/deploy/incoming/hms-ui
+            rm -rf /home/ci/incoming/hms-ui && mkdir -p /home/ci/incoming/hms-ui
+            tar xzf /home/ci/incoming/hms-ui.tar.gz -C /home/ci/incoming/hms-ui
+            sudo /home/CareOwn_HMS/scripts/deploy-hms-ui.sh /home/ci/incoming/hms-ui
 
   deploy-website:
     needs: changes
@@ -116,7 +116,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           source: 'hms-website.tar.gz'
-          target: '/home/deploy/incoming/'
+          target: '/home/ci/incoming/'
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -124,6 +124,6 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            rm -rf /home/deploy/incoming/hms-website-dist && mkdir -p /home/deploy/incoming/hms-website-dist
-            tar xzf /home/deploy/incoming/hms-website.tar.gz -C /home/deploy/incoming/hms-website-dist
-            sudo /home/CareOwn_HMS/scripts/deploy-hms-website.sh /home/deploy/incoming/hms-website-dist
+            rm -rf /home/ci/incoming/hms-website-dist && mkdir -p /home/ci/incoming/hms-website-dist
+            tar xzf /home/ci/incoming/hms-website.tar.gz -C /home/ci/incoming/hms-website-dist
+            sudo /home/CareOwn_HMS/scripts/deploy-hms-website.sh /home/ci/incoming/hms-website-dist
