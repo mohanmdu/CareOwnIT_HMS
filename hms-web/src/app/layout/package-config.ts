@@ -65,8 +65,30 @@ export const PACKAGES: Record<PackageTier, ModuleKey[]> = {
   ]
 };
 
-/** Exported for the Role permission picker (see roles/role-permission-picker), which must only offer checkboxes for modules the deployment is actually licensed for. */
+/**
+ * The signed-in user's actual licensed modules (see the JWT's
+ * licensedModules claim), set by AuthService whenever it decodes a token -
+ * including on construction from sessionStorage, so a page refresh doesn't
+ * lose this. Null when signed out, or before AuthService has run yet - see
+ * activeModuleKeys()'s tier-based fallback for that window.
+ *
+ * A module-level variable rather than reading AuthService directly inside
+ * activeModuleKeys() below, so every existing caller of that function keeps
+ * working as a plain synchronous call with no DI/injection-context
+ * requirement - see AuthService.setLicensedModuleKeys().
+ */
+let licensedModuleKeys: ModuleKey[] | null = null;
+
+/** Called by AuthService whenever it decodes a token (login, change-password, logout -> null, or construction from sessionStorage) - see auth.service.ts. */
+export function setLicensedModuleKeys(keys: ModuleKey[] | null): void {
+  licensedModuleKeys = keys;
+}
+
+/** Exported for the Role permission picker (see roles/role-permission-picker), which must only offer checkboxes for modules actually licensed - either the signed-in user's client (multi-tenant mode) or the deployment's package tier (fallback, unchanged pre-licensing behavior). */
 export function activeModuleKeys(): ModuleKey[] {
+  if (licensedModuleKeys) {
+    return licensedModuleKeys;
+  }
   const tier = (environment as { activePackage?: PackageTier }).activePackage ?? 'PREMIUM';
   return PACKAGES[tier] ?? PACKAGES.PREMIUM;
 }

@@ -7,11 +7,33 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    // Without this, a @Valid failure (e.g. a @Pattern-annotated field like
+    // mobileNumber) was never actually handled anywhere in this app -
+    // Spring's default handling forwards it to /error, which re-enters the
+    // security filter chain; JwtAuthenticationFilter (a OncePerRequestFilter)
+    // correctly skips re-running on that forward, but AuthorizationFilter
+    // does not, so ModuleAuthorizationManager evaluates the forwarded
+    // request against an anonymous authentication and the client sees a
+    // misleading 401 "Authentication required" instead of the actual
+    // validation error. Never noticed before because every existing
+    // @Valid-validated field already has matching frontend validation that
+    // blocks the request before it reaches the API - this endpoint's new
+    // mobile-number check was the first path to actually exercise it.
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .findFirst()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .orElse("Validation failed.");
+        return build(HttpStatus.BAD_REQUEST, message, request);
+    }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ApiError> handleNotFound(EntityNotFoundException ex, HttpServletRequest request) {

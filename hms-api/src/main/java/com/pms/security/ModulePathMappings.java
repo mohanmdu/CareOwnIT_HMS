@@ -33,8 +33,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ModulePathMappings {
 
-    public static final Set<String> PUBLIC_PREFIXES =
-            Set.of("/api/public/", "/api/auth/login", "/actuator/health", "/actuator/info", "/uploads/");
+    public static final Set<String> PUBLIC_PREFIXES = Set.of(
+            "/api/public/",
+            "/api/auth/login",
+            "/api/super-admin/auth/login",
+            "/actuator/health",
+            "/actuator/info",
+            "/uploads/");
 
     private static final Map<String, ModuleKey> PREFIX_TO_MODULE = buildTable();
 

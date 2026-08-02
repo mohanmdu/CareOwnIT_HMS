@@ -38,14 +38,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 Claims claims = jwtService.parse(header.substring(7));
                 List<GrantedAuthority> authorities = new ArrayList<>();
-                List<?> modules = claims.get("modules", List.class);
-                if (modules != null) {
-                    for (Object module : modules) {
-                        authorities.add(new SimpleGrantedAuthority("MODULE_" + module));
+                if (Boolean.TRUE.equals(claims.get("superAdmin", Boolean.class))) {
+                    // Wholly separate claim shape (see JwtService.issueSuperAdmin) -
+                    // no modules/clientId here, so this branch never runs the
+                    // tenant logic below at all, not just "happens to skip" it.
+                    authorities.add(new SimpleGrantedAuthority("SUPER_ADMIN"));
+                } else {
+                    List<?> modules = claims.get("modules", List.class);
+                    if (modules != null) {
+                        for (Object module : modules) {
+                            authorities.add(new SimpleGrantedAuthority("MODULE_" + module));
+                        }
                     }
-                }
-                if (Boolean.TRUE.equals(claims.get("mustChangePassword", Boolean.class))) {
-                    authorities.add(new SimpleGrantedAuthority("MUST_CHANGE_PASSWORD"));
+                    if (Boolean.TRUE.equals(claims.get("mustChangePassword", Boolean.class))) {
+                        authorities.add(new SimpleGrantedAuthority("MUST_CHANGE_PASSWORD"));
+                    }
+                    // Read by ModuleAuthorizationManager for the license check -
+                    // see the multi-tenant licensing plan §A.4.
+                    Long clientId = claims.get("clientId", Long.class);
+                    if (clientId != null) {
+                        request.setAttribute("clientId", clientId);
+                    }
                 }
                 var authentication = new UsernamePasswordAuthenticationToken(claims.getSubject(), null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);

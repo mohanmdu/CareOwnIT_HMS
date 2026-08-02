@@ -1,0 +1,80 @@
+// Deliberately not a reskin of login.component.scss's hospital-facing
+// gradient - a dark/slate palette signals "platform console, not a tenant
+// screen" at a glance, consistent with this area being structurally (not
+// just visually) separate from the tenant app - see super-admin.guard.ts.
+.sa-login-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 20% 20%, #1e293b 0%, #0b1120 65%);
+  padding: var(--hms-space-4);
+}
+
+.sa-login-card {
+  width: 100%;
+  max-width: 380px;
+  background: #121a2c;
+  border: 1px solid #2a3550;
+  border-radius: var(--hms-radius-lg);
+  box-shadow: var(--hms-shadow-lg);
+  padding: var(--hms-space-8) var(--hms-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-6);
+}
+
+.sa-login-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-3);
+
+  h1 {
+    font-size: var(--hms-font-size-lg);
+    margin: 2px 0 0;
+    color: #e7eaf3;
+  }
+}
+
+.sa-login-eyebrow {
+  margin: 0;
+  font-size: var(--hms-font-size-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #818cf8;
+  font-weight: var(--hms-font-weight-bold);
+}
+
+.sa-login-brand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--hms-radius-md);
+  background: #211e52;
+  color: #a5b4fc;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+}
+
+.sa-login-field {
+  width: 100%;
+}
+
+.sa-login-submit {
+  margin-top: var(--hms-space-2);
+  height: 44px;
+}
+
+.sa-login-error {
+  margin: 0;
+  color: #fb7185;
+  font-size: var(--hms-font-size-sm);
+}

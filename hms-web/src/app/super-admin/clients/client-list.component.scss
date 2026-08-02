@@ -1,0 +1,132 @@
+.sa-clients {
+  color: #e7eaf3;
+}
+
+.sa-create {
+  padding: var(--hms-space-5);
+}
+
+.sa-create-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-4);
+}
+
+.sa-create-field {
+  min-width: 220px;
+}
+
+.sa-create-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  padding-top: var(--hms-space-1);
+}
+
+.sa-license {
+  padding: var(--hms-space-5);
+}
+
+.sa-license-title {
+  margin: 0 0 var(--hms-space-1);
+  font-size: var(--hms-font-size-lg);
+}
+
+.sa-license-subtitle {
+  margin: 0 0 var(--hms-space-4);
+  color: var(--hms-color-text-muted);
+  font-size: var(--hms-font-size-sm);
+}
+
+.sa-license-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--hms-space-2) var(--hms-space-4);
+  margin-bottom: var(--hms-space-5);
+}
+
+.sa-license-always-on {
+  color: var(--hms-color-text-muted);
+  font-size: var(--hms-font-size-xs);
+  margin-left: var(--hms-space-1);
+}
+
+.sa-license-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+}
+
+.sa-list {
+  overflow-x: auto;
+}
+
+.sa-search {
+  display: block;
+  padding: var(--hms-space-4) var(--hms-space-2) 0;
+}
+
+.sa-list-body {
+  padding: var(--hms-space-4) 0 var(--hms-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+}
+
+.sa-table {
+  width: 100%;
+  table-layout: fixed;
+
+  // Keep every cell a plain table-cell (Angular Material's native <table
+  // mat-table> variant already renders td/th this way) and centered on the
+  // same baseline - the actions column used to override its own <td> to
+  // display:flex directly, which desynced its row-height/vertical-alignment
+  // from the other table-cell siblings in the same <tr> and made the button
+  // pair drift relative to the rest of that row. The flex layout now lives
+  // on an inner wrapper (.sa-actions-inner) instead, so the <td> itself
+  // never breaks out of normal table layout.
+  td,
+  th {
+    vertical-align: middle;
+  }
+}
+
+// table-layout:fixed only respects explicit widths - any column left
+// unspecified shares the *remainder* equally regardless of how little it
+// actually needs, which is what starved the actions column before. Giving
+// every other column a deliberate budget leaves Name (the one genuinely
+// variable-length field) as the only flexible column, and keeps the total
+// comfortably inside the viewport instead of relying on .sa-list's
+// overflow-x:auto as anything but a narrow-viewport fallback.
+.sa-code-header {
+  width: 130px;
+}
+
+.sa-status-header {
+  width: 120px;
+}
+
+.sa-modules-header {
+  width: 150px;
+}
+
+.sa-actions-header {
+  // Wide enough for "Manage" + "Add Admin" + "Reactivate" (the longest of
+  // the toggle labels) side by side without wrapping - table-layout:fixed
+  // enforces this width strictly, so anything narrower gets visually
+  // clipped rather than wrapping to a second line.
+  width: 400px;
+  white-space: nowrap;
+}
+
+.sa-actions-cell {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.sa-actions-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+}

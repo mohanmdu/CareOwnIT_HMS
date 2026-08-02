@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import type { ModuleKey } from '../../layout/package-config';
+import { setLicensedModuleKeys } from '../../layout/package-config';
 
 const STORAGE_KEY = 'hms_auth';
 
@@ -14,6 +15,10 @@ interface DecodedToken {
   routes: string[];
   defaultRoute: string | null;
   mustChangePassword: boolean;
+  /** Present in both deployment modes (see hms-api's JwtService.issue) - which Client this user belongs to. Not otherwise used by the frontend today; kept for parity with the claim itself. */
+  clientId: number;
+  /** UI convenience only - see package-config.ts's activeModuleKeys(). The backend re-checks the license fresh on every request regardless of what this claim says. */
+  licensedModules: ModuleKey[];
   exp: number;
 }
 
@@ -39,7 +44,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiBaseUrl}/auth`;
 
-  private readonly decoded = signal<DecodedToken | null>(readStoredToken());
+  private readonly decoded = signal<DecodedToken | null>(this.setDecoded(readStoredToken()));
 
   readonly currentUsername = computed(() => this.decoded()?.sub ?? null);
   readonly roleName = computed(() => this.decoded()?.roleName ?? null);
@@ -54,11 +59,12 @@ export class AuthService {
     return !!decoded && decoded.exp * 1000 > Date.now();
   }
 
-  login(username: string, password: string): Observable<void> {
-    return this.http.post<{ token: string }>(`${this.baseUrl}/login`, { username, password }).pipe(
+  /** clientCode is ignored by the backend in single-tenant mode (see environment.deploymentMode / login.component) - always safe to pass through. */
+  login(username: string, password: string, clientCode?: string): Observable<void> {
+    return this.http.post<{ token: string }>(`${this.baseUrl}/login`, { clientCode, username, password }).pipe(
       tap((response) => {
         sessionStorage.setItem(STORAGE_KEY, response.token);
-        this.decoded.set(decodeToken(response.token));
+        this.decoded.set(this.setDecoded(decodeToken(response.token)));
       }),
       map(() => undefined)
     );
@@ -72,7 +78,7 @@ export class AuthService {
         // returns, or a page refresh would re-decode the stale claim from
         // sessionStorage and bounce the user back into this screen forever.
         sessionStorage.setItem(STORAGE_KEY, response.token);
-        this.decoded.set(decodeToken(response.token));
+        this.decoded.set(this.setDecoded(decodeToken(response.token)));
       }),
       map(() => undefined)
     );
@@ -80,10 +86,16 @@ export class AuthService {
 
   logout(): void {
     sessionStorage.removeItem(STORAGE_KEY);
-    this.decoded.set(null);
+    this.decoded.set(this.setDecoded(null));
   }
 
   getToken(): string | null {
     return sessionStorage.getItem(STORAGE_KEY);
+  }
+
+  /** Keeps package-config.ts's activeModuleKeys() in sync with whatever token this service just decoded (including null, on logout) - see setLicensedModuleKeys()'s own doc comment for why this is a plain module-level setter rather than DI. Returns its input so it can be used inline in the decoded signal's initializer. */
+  private setDecoded(decoded: DecodedToken | null): DecodedToken | null {
+    setLicensedModuleKeys(decoded?.licensedModules ?? null);
+    return decoded;
   }
 }

@@ -1,17 +1,21 @@
 package com.pms.masters.entity;
 
 import com.pms.common.Auditable;
+import com.pms.tenant.entity.Client;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.Getter;
@@ -24,7 +28,7 @@ import lombok.Setter;
  * schema is actually an audit-log table, not a user-profile/role table.
  */
 @Entity
-@Table(name = "role")
+@Table(name = "role", uniqueConstraints = @UniqueConstraint(columnNames = {"client_id", "name"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -34,11 +38,17 @@ public class Role extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    /** Unique per client (uq_role_client_name, see V90), not globally - same treatment as GeneralUser.username (V89), added after the same cross-tenant gap was found there. */
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
     private boolean active = true;
+
+    /** The tenant this role belongs to - see GeneralUser.client for the identical pattern and the multi-tenant licensing plan's Phase A scope. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id", nullable = false)
+    private Client client;
 
     /**
      * Which sidenav groups (NAV_GROUPS in nav-config.ts) this role can see -

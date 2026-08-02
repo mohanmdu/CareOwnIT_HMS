@@ -1,0 +1,40 @@
+.sa-shell {
+  min-height: 100vh;
+  background: #0b1120;
+}
+
+.sa-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--hms-space-3) var(--hms-space-6);
+  background: #121a2c;
+  border-bottom: 1px solid #2a3550;
+}
+
+.sa-topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  color: #e7eaf3;
+  font-weight: var(--hms-font-weight-bold);
+}
+
+.sa-topbar-icon {
+  color: #a5b4fc;
+}
+
+.sa-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-4);
+}
+
+.sa-topbar-user {
+  color: #94a0be;
+  font-size: var(--hms-font-size-sm);
+}
+
+.sa-content {
+  padding: var(--hms-space-6);
+}

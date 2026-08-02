@@ -5,6 +5,8 @@ import com.pms.masters.dto.RoleDto;
 import com.pms.masters.entity.ModuleKey;
 import com.pms.masters.entity.Role;
 import com.pms.masters.repository.RoleRepository;
+import com.pms.tenant.repository.ClientRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,13 +18,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class RoleService {
 
     private final RoleRepository repository;
+    private final ClientRepository clientRepository;
+    private final HttpServletRequest request;
 
-    public RoleService(RoleRepository repository) {
+    public RoleService(RoleRepository repository, ClientRepository clientRepository, HttpServletRequest request) {
         this.repository = repository;
+        this.clientRepository = clientRepository;
+        this.request = request;
     }
 
     public List<RoleDto> findAll() {
-        return repository.findAll().stream().map(this::toDto).toList();
+        return repository.findByClientId(currentClientId()).stream().map(this::toDto).toList();
     }
 
     public RoleDto findById(Long id) {
@@ -31,10 +37,12 @@ public class RoleService {
 
     @Transactional
     public RoleDto create(RoleDto dto) {
-        if (repository.existsByNameIgnoreCase(dto.name())) {
+        Long clientId = currentClientId();
+        if (repository.existsByClientIdAndNameIgnoreCase(clientId, dto.name())) {
             throw new IllegalArgumentException("Role already exists: " + dto.name());
         }
         Role role = new Role();
+        role.setClient(clientRepository.getReferenceById(clientId));
         role.setName(dto.name());
         role.setActive(true);
         role.setPermittedModules(toModuleKeys(dto.permittedModules()));
@@ -46,6 +54,10 @@ public class RoleService {
     @Transactional
     public RoleDto update(Long id, RoleDto dto) {
         Role role = getOrThrow(id);
+        if (!role.getName().equalsIgnoreCase(dto.name())
+                && repository.existsByClientIdAndNameIgnoreCase(role.getClient().getId(), dto.name())) {
+            throw new IllegalArgumentException("Role already exists: " + dto.name());
+        }
         role.setName(dto.name());
         role.setPermittedModules(toModuleKeys(dto.permittedModules()));
         role.setPermittedRoutes(toRoutes(dto.permittedRoutes()));
@@ -60,8 +72,22 @@ public class RoleService {
         repository.save(role);
     }
 
+    /** See com.pms.masters.service.GeneralUserService.currentClientId() - same reasoning: straight from the verified JWT claim, never re-derived by a lookup that could be ambiguous across clients. */
+    private Long currentClientId() {
+        Long clientId = (Long) request.getAttribute("clientId");
+        if (clientId == null) {
+            throw new IllegalStateException("No client context on this request.");
+        }
+        return clientId;
+    }
+
+    /** Every id-based operation (findById/update/deactivate) funnels through here - see GeneralUserService.getOrThrow() for why this is a 404, not a 403. */
     private Role getOrThrow(Long id) {
-        return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Role not found: " + id));
+        Role role = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Role not found: " + id));
+        if (!role.getClient().getId().equals(currentClientId())) {
+            throw new EntityNotFoundException("Role not found: " + id);
+        }
+        return role;
     }
 
     /**

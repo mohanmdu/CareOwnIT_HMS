@@ -1,0 +1,47 @@
+<div class="sa-login-shell">
+  <section class="sa-login-card">
+    <div class="sa-login-brand">
+      <span class="sa-login-brand-icon" aria-hidden="true">◆</span>
+      <div>
+        <p class="sa-login-eyebrow">Platform Admin</p>
+        <h1>CareOwn Super Admin</h1>
+      </div>
+    </div>
+
+    <form (ngSubmit)="login()">
+      <mat-form-field appearance="outline" class="sa-login-field">
+        <mat-label>Username</mat-label>
+        <input matInput name="username" [(ngModel)]="username" required autocomplete="username" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="sa-login-field">
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          name="password"
+          [type]="hidePassword() ? 'password' : 'text'"
+          [(ngModel)]="password"
+          required
+          autocomplete="current-password"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+          (click)="togglePasswordVisibility()"
+        >
+          <mat-icon aria-hidden="true">{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+      </mat-form-field>
+
+      @if (errorMessage()) {
+        <p class="sa-login-error" role="alert">{{ errorMessage() }}</p>
+      }
+
+      <button mat-flat-button color="primary" type="submit" class="sa-login-submit" [disabled]="submitting()">
+        {{ submitting() ? 'Signing in…' : 'Sign in' }}
+      </button>
+    </form>
+  </section>
+</div>

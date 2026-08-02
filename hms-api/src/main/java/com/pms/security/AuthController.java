@@ -3,6 +3,7 @@ package com.pms.security;
 import com.pms.security.dto.ChangePasswordRequest;
 import com.pms.security.dto.LoginRequest;
 import com.pms.security.dto.LoginResponse;
+import com.pms.tenant.DeploymentModeProperties;
 import jakarta.validation.Valid;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,13 +16,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final LoginService loginService;
+    private final DeploymentModeProperties deploymentMode;
 
-    public AuthController(LoginService loginService) {
+    public AuthController(LoginService loginService, DeploymentModeProperties deploymentMode) {
         this.loginService = loginService;
+        this.deploymentMode = deploymentMode;
     }
 
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
+        if (deploymentMode.isMultiTenant()) {
+            return new LoginResponse(loginService.login(request.clientCode(), request.username(), request.password()));
+        }
         return new LoginResponse(loginService.login(request.username(), request.password()));
     }
 

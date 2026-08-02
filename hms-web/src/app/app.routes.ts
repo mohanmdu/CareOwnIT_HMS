@@ -1,11 +1,31 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { AppShellComponent } from './layout/app-shell/app-shell.component';
+import { superAdminGuard } from './super-admin/super-admin.guard';
 
 export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () => import('./features/auth/login/login.component').then((m) => m.LoginComponent)
+  },
+  {
+    // Wholly separate namespace from the tenant app above/below - own login,
+    // own guard, own shell, never reachable from or visible to a tenant
+    // session. See the multi-tenant licensing plan §A.6.
+    path: 'super-admin/login',
+    loadComponent: () => import('./super-admin/login/super-admin-login.component').then((m) => m.SuperAdminLoginComponent)
+  },
+  {
+    path: 'super-admin',
+    loadComponent: () => import('./super-admin/super-admin-shell.component').then((m) => m.SuperAdminShellComponent),
+    canActivate: [superAdminGuard],
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'clients' },
+      {
+        path: 'clients',
+        loadComponent: () => import('./super-admin/clients/client-list.component').then((m) => m.ClientListComponent)
+      }
+    ]
   },
   {
     // Unauthenticated by design - a kiosk display board for a TV/monitor

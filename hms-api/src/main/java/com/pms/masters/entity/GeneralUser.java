@@ -1,6 +1,7 @@
 package com.pms.masters.entity;
 
 import com.pms.common.Auditable;
+import com.pms.tenant.entity.Client;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,7 +23,7 @@ import lombok.Setter;
  * (see com.pms.security.LoginService) looks this entity up by username.
  */
 @Entity
-@Table(name = "general_user")
+@Table(name = "general_user", uniqueConstraints = @UniqueConstraint(columnNames = {"client_id", "username"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -44,10 +46,16 @@ public class GeneralUser extends Auditable {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+    /** The tenant this user belongs to (Phase A of the multi-tenant licensing plan) - set once at creation (see GeneralUserService.create()) from the creating admin's own client, never changed afterward. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id", nullable = false)
+    private Client client;
+
     @Column(nullable = false)
     private boolean active = true;
 
-    @Column(nullable = false, unique = true)
+    /** Unique per client (uq_general_user_client_username, see V89), not globally - see the multi-tenant licensing plan's Decisions Confirmed §1. */
+    @Column(nullable = false)
     private String username;
 
     @Column(name = "password_hash", nullable = false)

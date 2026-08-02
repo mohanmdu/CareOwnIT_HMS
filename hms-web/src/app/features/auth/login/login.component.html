@@ -9,6 +9,13 @@
     </div>
 
     <form (ngSubmit)="login()">
+      @if (showClientCode) {
+        <mat-form-field appearance="outline" class="login-field">
+          <mat-label>Client Code</mat-label>
+          <input matInput name="clientCode" [(ngModel)]="clientCode" required autocomplete="organization" />
+        </mat-form-field>
+      }
+
       <mat-form-field appearance="outline" class="login-field">
         <mat-label>Username</mat-label>
         <input matInput name="username" [(ngModel)]="username" required autocomplete="username" />

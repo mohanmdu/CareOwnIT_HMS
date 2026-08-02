@@ -1,0 +1,20 @@
+<div class="sa-shell">
+  <header class="sa-topbar">
+    <div class="sa-topbar-brand">
+      <span class="sa-topbar-icon" aria-hidden="true">◆</span>
+      <span>CareOwn Super Admin</span>
+    </div>
+    <div class="sa-topbar-actions">
+      @if (currentUsername()) {
+        <span class="sa-topbar-user">{{ currentUsername() }}</span>
+      }
+      <button mat-stroked-button type="button" (click)="logout()">
+        <mat-icon aria-hidden="true">logout</mat-icon>
+        Sign out
+      </button>
+    </div>
+  </header>
+  <main class="sa-content">
+    <router-outlet />
+  </main>
+</div>

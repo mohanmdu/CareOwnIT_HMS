@@ -69,6 +69,19 @@
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
+		<!-- Short-TTL license cache (see com.pms.tenant.service.ClientLicenseService /
+		     CacheConfig.licenseCacheManager) - ConcurrentMapCacheManager (used
+		     elsewhere in CacheConfig) has no expiry, but license freshness needs one. -->
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+		</dependency>
+		<!-- Houses org.springframework.cache.caffeine.CaffeineCacheManager - not
+		     transitively pulled in by any starter already on this classpath. -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+		</dependency>
 		<!-- JWT issuance/validation for real authentication (see com.pms.security) -
 		     this app is both issuer and validator, so a small self-owned JwtService
 		     is simpler than pulling in spring-boot-starter-oauth2-resource-server,
