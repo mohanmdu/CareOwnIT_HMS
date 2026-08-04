@@ -1,83 +1,85 @@
 <h2 mat-dialog-title>{{ isEdit ? 'Edit Consultant' : 'Add Consultant' }}</h2>
 
 <mat-dialog-content class="consultant-form-dialog-content">
-  <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
-    <mat-label>Consultant's name</mat-label>
-    <input matInput name="name" [(ngModel)]="form.name" required cdkFocusInitial />
-  </mat-form-field>
+  <div class="consultant-form-grid">
+    <mat-form-field appearance="outline" class="consultant-dialog-field span-2" subscriptSizing="dynamic">
+      <mat-label>Consultant's name</mat-label>
+      <input matInput name="name" [(ngModel)]="form.name" required cdkFocusInitial />
+    </mat-form-field>
 
-  <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
-    <mat-label>Specialization</mat-label>
-    <mat-select name="specializationId" [(ngModel)]="form.specializationId" required>
-      @for (specialization of specializations; track specialization.id) {
-        <mat-option [value]="specialization.id">{{ specialization.name }}</mat-option>
+    <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
+      <mat-label>Specialization</mat-label>
+      <mat-select name="specializationId" [(ngModel)]="form.specializationId" required>
+        @for (specialization of specializations; track specialization.id) {
+          <mat-option [value]="specialization.id">{{ specialization.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
+      <mat-label>Department</mat-label>
+      <mat-select name="departmentId" [(ngModel)]="form.departmentId" required>
+        @for (department of departments; track department.id) {
+          <mat-option [value]="department.id">{{ department.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="consultant-dialog-field span-2" subscriptSizing="dynamic">
+      <mat-label>Profile</mat-label>
+      <textarea matInput name="profile" rows="4" [(ngModel)]="form.profile"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="consultant-dialog-field span-2" subscriptSizing="dynamic">
+      <mat-label>Address</mat-label>
+      <textarea matInput name="address" rows="3" [(ngModel)]="form.address"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
+      <mat-label>Mobile number</mat-label>
+      <input
+        matInput
+        name="mobileNumber"
+        inputmode="numeric"
+        maxlength="10"
+        [ngModel]="form.mobileNumber"
+        (input)="onMobileInput($event)"
+      />
+      @if (form.mobileNumber && form.mobileNumber.length !== 10) {
+        <mat-hint>Must be exactly 10 digits</mat-hint>
       }
-    </mat-select>
-  </mat-form-field>
+    </mat-form-field>
 
-  <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
-    <mat-label>Department</mat-label>
-    <mat-select name="departmentId" [(ngModel)]="form.departmentId" required>
-      @for (department of departments; track department.id) {
-        <mat-option [value]="department.id">{{ department.name }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+    <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
+      <mat-label>E-Mail ID</mat-label>
+      <input matInput name="email" type="email" [(ngModel)]="form.email" />
+    </mat-form-field>
 
-  <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
-    <mat-label>Profile</mat-label>
-    <textarea matInput name="profile" rows="4" [(ngModel)]="form.profile"></textarea>
-  </mat-form-field>
+    <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
+      <mat-label>Consulting fee</mat-label>
+      <input matInput name="consultationFee" type="number" min="0" [(ngModel)]="form.consultationFee" />
+    </mat-form-field>
 
-  <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
-    <mat-label>Address</mat-label>
-    <textarea matInput name="address" rows="3" [(ngModel)]="form.address"></textarea>
-  </mat-form-field>
+    <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
+      <mat-label>Queue token prefix</mat-label>
+      <input matInput name="queueTokenPrefix" maxlength="3" [ngModel]="form.queueTokenPrefix" (input)="onQueueTokenPrefixInput($event)" placeholder="e.g. K" />
+      <mat-hint>Optional - defaults to the first letter of the doctor's name if left blank.</mat-hint>
+    </mat-form-field>
 
-  <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
-    <mat-label>Mobile number</mat-label>
-    <input
-      matInput
-      name="mobileNumber"
-      inputmode="numeric"
-      maxlength="10"
-      [ngModel]="form.mobileNumber"
-      (input)="onMobileInput($event)"
-    />
-    @if (form.mobileNumber && form.mobileNumber.length !== 10) {
-      <mat-hint>Must be exactly 10 digits</mat-hint>
-    }
-  </mat-form-field>
+    <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
+      <mat-label>Consulting room / cabin</mat-label>
+      <input matInput name="consultingRoomLabel" maxlength="50" [(ngModel)]="form.consultingRoomLabel" placeholder="e.g. Room 3" />
+      <mat-hint>Optional - shown on this doctor's Doctor Queue display board.</mat-hint>
+    </mat-form-field>
 
-  <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
-    <mat-label>E-Mail ID</mat-label>
-    <input matInput name="email" type="email" [(ngModel)]="form.email" />
-  </mat-form-field>
-
-  <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
-    <mat-label>Consulting fee</mat-label>
-    <input matInput name="consultationFee" type="number" min="0" [(ngModel)]="form.consultationFee" />
-  </mat-form-field>
-
-  <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
-    <mat-label>Queue token prefix</mat-label>
-    <input matInput name="queueTokenPrefix" maxlength="3" [ngModel]="form.queueTokenPrefix" (input)="onQueueTokenPrefixInput($event)" placeholder="e.g. K" />
-    <mat-hint>Optional - defaults to the first letter of the doctor's name if left blank.</mat-hint>
-  </mat-form-field>
-
-  <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
-    <mat-label>Consulting room / cabin</mat-label>
-    <input matInput name="consultingRoomLabel" maxlength="50" [(ngModel)]="form.consultingRoomLabel" placeholder="e.g. Room 3" />
-    <mat-hint>Optional - shown on this doctor's Doctor Queue display board.</mat-hint>
-  </mat-form-field>
-
-  <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
-    <mat-label>Appointment status</mat-label>
-    <mat-select name="acceptingAppointments" [(ngModel)]="form.acceptingAppointments">
-      <mat-option [value]="true">Yes</mat-option>
-      <mat-option [value]="false">No</mat-option>
-    </mat-select>
-  </mat-form-field>
+    <mat-form-field appearance="outline" class="consultant-dialog-field" subscriptSizing="dynamic">
+      <mat-label>Appointment status</mat-label>
+      <mat-select name="acceptingAppointments" [(ngModel)]="form.acceptingAppointments">
+        <mat-option [value]="true">Yes</mat-option>
+        <mat-option [value]="false">No</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
 
   @if (form.acceptingAppointments) {
     <div class="consultant-availability-section">

@@ -23,11 +23,16 @@
   min-width: 860px;
 }
 
+// Inherits the header <th>'s own on-primary text color (not a hardcoded
+// muted gray meant for a light background) so it stays legible against
+// whatever header/primary color a clinic picks - dimmed via opacity, not a
+// separate color, to still read as subordinate to the session label above it.
 .availability-session-range {
   display: block;
   font-weight: 400;
   font-size: 0.7rem;
-  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
+  color: inherit;
+  opacity: 0.8;
 }
 
 .availability-table th,

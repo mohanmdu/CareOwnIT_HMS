@@ -135,12 +135,16 @@
   }
 }
 
+// Only the label goes to the active/primary color - the icon badge below
+// keeps its own fixed tone (bg + fg pair from .shell-nav-icon-badge.tone-*)
+// regardless of active state. This used to also override the icon's color
+// to --hms-menu-active-text (white, meant for an icon sitting on a solid
+// purple active pill - see .shell-nav-active) - on this badge, whose
+// background is a pale tone-container color, that made the icon glyph
+// itself nearly invisible (white-on-near-white) whenever a submenu route
+// was active.
 .shell-nav-group-header-active {
   color: var(--hms-menu-active-text, var(--hms-color-primary));
-
-  .shell-nav-group-icon {
-    color: var(--hms-menu-active-text, var(--hms-color-primary));
-  }
 }
 
 .shell-nav-group-icon {

@@ -172,7 +172,13 @@ export class ConsultantListComponent {
   private openFormDialog(consultant?: Consultant): void {
     this.dialog
       .open(ConsultantFormDialogComponent, {
-        width: '760px',
+        // Wide enough for the embedded availability table's own natural
+        // content width (same table as ConsultantTimingsDialogComponent,
+        // same 1040px sizing reasoning - see its own dialog.open() call in
+        // this file) to avoid a horizontal scrollbar; .consultant-dialog-field
+        // caps the plain single-line fields above it at a sensible reading
+        // width so they don't just stretch to fill the extra room.
+        width: '1040px',
         maxWidth: '95vw',
         data: { consultant, departments: this.departments(), specializations: this.specializations() }
       })
@@ -216,7 +222,11 @@ export class ConsultantListComponent {
       return;
     }
     this.dialog.open(ConsultantTimingsDialogComponent, {
-      width: '960px',
+      // 960px used to be 26px too narrow for the availability table's own
+      // natural content width once its content padding was accounted for,
+      // forcing a horizontal scrollbar on every open regardless of screen
+      // size - see consultant-availability-form.component.scss's table.
+      width: '1040px',
       maxWidth: '95vw',
       data: { consultantId: consultant.id, consultantName: consultant.name }
     });

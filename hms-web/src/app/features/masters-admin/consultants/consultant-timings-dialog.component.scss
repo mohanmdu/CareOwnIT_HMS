@@ -4,7 +4,11 @@
   gap: var(--hms-space-3);
 }
 
+// Matches mat-dialog-title's own horizontal padding (24px) so the doctor's
+// name lines up directly under the dialog title's text instead of sitting
+// flush against the dialog's left edge, 24px further left than the title.
 .timings-dialog-subtitle {
   margin: 0 0 var(--hms-space-2);
+  padding: 0 24px;
   font-weight: 600;
 }

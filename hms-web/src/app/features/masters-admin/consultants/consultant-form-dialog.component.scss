@@ -15,6 +15,31 @@
   margin: 0 0 var(--hms-space-2);
 }
 
+// Two fields per row rather than one long single column - the dialog is
+// wide enough to fit the embedded availability table below (see
+// consultant-list.component.ts's dialog.open() width) without a horizontal
+// scrollbar, and a single column of short fields (name, email, mobile...)
+// left most of that width empty. Capped below the dialog's own full content
+// width so a text field doesn't get uncomfortably wide either.
+.consultant-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--hms-space-2) var(--hms-space-4);
+  max-width: 880px;
+  // Grid's default stretch makes a field with no mat-hint match the height
+  // of its taller row-mate (one with a hint below it), inflating its
+  // outline box around empty space instead of hugging its own content -
+  // e.g. Consulting fee next to Queue token prefix's two-line hint. Each
+  // field keeps its own natural height instead; rows still align at the top.
+  align-items: start;
+}
+
+// Profile/Address (free-text) and the name field read better spanning both
+// columns instead of being squeezed into a half-width cell.
+.span-2 {
+  grid-column: span 2;
+}
+
 .consultant-dialog-field {
   width: 100%;
 }
