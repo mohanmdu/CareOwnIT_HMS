@@ -58,9 +58,10 @@ test('bill a walk-in OP Direct Billing charge end to end', async ({ page }) => {
     await page.getByRole('option', { name: categoryName }).click();
     await page.getByLabel('Component').click();
     await page.getByRole('option', { name: componentName }).click();
-    await page.getByRole('button', { name: 'Add', exact: true }).click();
 
-    await expect(page.getByRole('cell', { name: componentName, exact: true })).toBeVisible();
+    // Single-item direct-submit form, no separate "Add to list" step -
+    // Quantity defaults to 1 and Amount auto-fills from the Component's
+    // price (see OpDirectBillingComponent.onComponentChange()).
     await page.getByRole('button', { name: 'Submit' }).click();
 
     await expect(page.getByRole('heading', { name: 'OP Direct Billing Receipt' })).toBeVisible();

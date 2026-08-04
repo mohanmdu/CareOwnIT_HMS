@@ -22,13 +22,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * The tenant record (Phase A of the multi-tenant licensing plan) - a
- * hospital client of the shared multi-tenant deployment. A single-tenant/
- * offline install (app.deployment.mode=single-tenant, the default - see
- * com.pms.tenant.DeploymentModeProperties) has exactly one Client, seeded by
- * V87/V88 with every module licensed, so nothing about this entity is
- * visible to that deployment's own users; only Super Admin (see
- * com.pms.superadmin) ever manages Client rows directly.
+ * The tenant record - lives in the master database (Phase B - see the
+ * "Database-per-Client Architecture" plan), never in a tenant's own
+ * database. A single-tenant/offline install (app.deployment.mode=
+ * single-tenant, the default - see com.pms.tenant.DeploymentModeProperties)
+ * has exactly one Client row in its own local master database, so nothing
+ * about this entity is visible to that deployment's own tenant-side users;
+ * only Super Admin (see com.pms.superadmin) ever manages Client rows
+ * directly. See ClientDatabase for which physical database this Client's
+ * data actually lives in.
  */
 @Entity
 @Table(name = "client")
@@ -51,6 +53,11 @@ public class Client extends Auditable {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ClientStatus status = ClientStatus.ACTIVE;
+
+    /** Reporting metadata only - see DeploymentType's own doc comment. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "deployment_type", nullable = false)
+    private DeploymentType deploymentType = DeploymentType.CLOUD;
 
     /**
      * Which modules this client has purchased - checked fresh on every

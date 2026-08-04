@@ -87,6 +87,26 @@ button:focus-visible,
   box-shadow: var(--hms-shadow-sm);
 }
 
+// A mat-form-field's label should never be able to intercept a click meant
+// for the control it labels - that's the whole point of clicking a label
+// (it delegates to the control). Angular Material's own outline-appearance
+// label isn't consistently getting pointer-events:none applied to it in
+// this app (confirmed by inspecting a live page: getComputedStyle reported
+// pointer-events:all on <mat-label>) - normally invisible because a resting
+// label's box rarely overlaps its own control's clickable area, but it does
+// on selects whose option list becomes non-empty only after a sibling field
+// changes (e.g. a Component select filtered by a just-picked Category) -
+// see op-direct-billing.component.html, where this caused a real,
+// reproducible click failure. Fixing it globally, not per-component, since
+// the underlying gap is Material-wide, not specific to that one screen.
+.mat-mdc-form-field mat-label,
+.mat-mdc-form-field .mdc-floating-label {
+  // !important needed - Angular Material's own compiled MDC CSS sets
+  // pointer-events on .mdc-floating-label with equal-or-higher specificity,
+  // so a plain override loses; same root cause/fix as .mat-accent below.
+  pointer-events: none !important;
+}
+
 // padding-top gives an outline mat-form-field's floated label (which sits
 // above the field's own top border) clearance from whatever sits right above
 // this grid - without it, a dialog's title/header can clip the top of the

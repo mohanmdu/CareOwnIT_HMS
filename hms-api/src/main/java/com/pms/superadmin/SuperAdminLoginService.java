@@ -8,9 +8,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Wholly separate credential store/JWT shape from com.pms.security.LoginService - see JwtService.issueSuperAdmin. */
+/**
+ * Wholly separate credential store/JWT shape from com.pms.security.LoginService - see JwtService.issueSuperAdmin.
+ *
+ * Explicitly qualified to masterTransactionManager - see ClientService's
+ * own doc comment for why (tenant holds @Primary now).
+ */
 @Service
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, transactionManager = "masterTransactionManager")
 public class SuperAdminLoginService {
 
     private final SuperAdminUserRepository repository;

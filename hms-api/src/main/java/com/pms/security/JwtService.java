@@ -34,7 +34,14 @@ public class JwtService {
         this.licenseService = licenseService;
     }
 
-    public String issue(GeneralUser user) {
+    /**
+     * clientId is passed explicitly, not read off GeneralUser - Client now
+     * lives in the master database (Phase B), a separate EntityManagerFactory
+     * from GeneralUser's tenant one, so no @ManyToOne can span the two (see
+     * the "Database-per-Client Architecture" plan's "Entity-level
+     * consequence"). The caller (LoginService) resolves it via ClientRepository.
+     */
+    public String issue(GeneralUser user, Long clientId) {
         Instant now = Instant.now();
         Instant expiry = now.plus(expirationMinutes, ChronoUnit.MINUTES);
         List<String> modules = user.getRole().getPermittedModules().stream().map(ModuleKey::key).toList();
@@ -44,7 +51,7 @@ public class JwtService {
         // re-checks ClientLicenseService fresh, never trusts this claim. See
         // the multi-tenant licensing plan's "License freshness" decision.
         List<String> licensedModules =
-                licenseService.licensedModuleKeys(user.getClient().getId()).stream().map(ModuleKey::key).toList();
+                licenseService.licensedModuleKeys(clientId).stream().map(ModuleKey::key).toList();
         return Jwts.builder()
                 .subject(user.getUsername())
                 .claim("roleName", user.getRole().getName())
@@ -54,7 +61,7 @@ public class JwtService {
                 // most roles have no override, so this keeps their tokens clean.
                 .claim("defaultRoute", user.getRole().getDefaultRoute())
                 .claim("mustChangePassword", user.isMustChangePassword())
-                .claim("clientId", user.getClient().getId())
+                .claim("clientId", clientId)
                 .claim("licensedModules", licensedModules)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiry))

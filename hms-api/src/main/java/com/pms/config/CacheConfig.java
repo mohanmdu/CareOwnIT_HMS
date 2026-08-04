@@ -14,13 +14,16 @@ import org.springframework.context.annotation.Primary;
  * Two cache managers, deliberately: clinicSettings is read-forever-until-
  * explicitly-evicted (see ClinicSettingsService's @CacheEvict-on-write
  * pattern), which ConcurrentMapCacheManager already does correctly with no
- * TTL. clientLicense (see ClientLicenseService) instead needs a genuine
- * short TTL - see the multi-tenant licensing plan's "License freshness"
- * decision - so a revoked module stops working within seconds even without
- * relying solely on an explicit evict call, which ConcurrentMapCacheManager
- * cannot do. @Primary keeps every existing unqualified @Cacheable (i.e.
- * ClinicSettingsService) resolving to the same bean as before this class
- * changed - zero impact on it.
+ * TTL. clientLicense/clientFeatureFlag (see ClientLicenseService/
+ * ClientFeatureFlagService) instead need a genuine short TTL - see the
+ * multi-tenant licensing plan's "License freshness" decision - so a
+ * revoked module/flag stops working within seconds even without relying
+ * solely on an explicit evict call, which ConcurrentMapCacheManager cannot
+ * do. Both share this one Caffeine manager/TTL - same freshness
+ * requirement, no reason for two near-identical beans. @Primary keeps
+ * every existing unqualified @Cacheable (i.e. ClinicSettingsService)
+ * resolving to the same bean as before this class changed - zero impact
+ * on it.
  */
 @Configuration
 @EnableCaching
@@ -34,7 +37,7 @@ public class CacheConfig {
 
     @Bean
     public CacheManager licenseCacheManager() {
-        CaffeineCacheManager manager = new CaffeineCacheManager("clientLicense");
+        CaffeineCacheManager manager = new CaffeineCacheManager("clientLicense", "clientFeatureFlag");
         manager.setCaffeine(Caffeine.newBuilder().expireAfterWrite(45, TimeUnit.SECONDS));
         return manager;
     }

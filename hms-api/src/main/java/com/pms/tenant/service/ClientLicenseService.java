@@ -23,9 +23,12 @@ import org.springframework.transaction.annotation.Transactional;
  * evict explicitly on write - see its @CacheEvict - but the TTL is the
  * backstop for "a revoked module stops working within seconds" even if
  * that ever isn't true).
+ *
+ * Explicitly qualified to masterTransactionManager - see ClientService's
+ * own doc comment for why (tenant holds @Primary now).
  */
 @Service
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, transactionManager = "masterTransactionManager")
 public class ClientLicenseService {
 
     private final ClientRepository repository;

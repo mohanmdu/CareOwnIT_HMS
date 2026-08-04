@@ -1,7 +1,6 @@
 package com.pms.masters.entity;
 
 import com.pms.common.Auditable;
-import com.pms.tenant.entity.Client;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,7 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,9 +19,16 @@ import lombok.Setter;
  * "General Users Master" record that also doubles as the login credential
  * since V73 (username/passwordHash/mustChangePassword). Real authentication
  * (see com.pms.security.LoginService) looks this entity up by username.
+ *
+ * No client/tenant reference on this entity - see the "Database-per-Client
+ * Architecture" plan (Phase B). Each client has its own dedicated database,
+ * so every row in this table already implicitly belongs to exactly one
+ * client by construction; a client_id column would be redundant (this
+ * briefly existed as Phase A's client_id, reverted once Phase B's
+ * database-per-client model made it unnecessary).
  */
 @Entity
-@Table(name = "general_user", uniqueConstraints = @UniqueConstraint(columnNames = {"client_id", "username"}))
+@Table(name = "general_user")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -46,16 +51,10 @@ public class GeneralUser extends Auditable {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
-    /** The tenant this user belongs to (Phase A of the multi-tenant licensing plan) - set once at creation (see GeneralUserService.create()) from the creating admin's own client, never changed afterward. */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id", nullable = false)
-    private Client client;
-
     @Column(nullable = false)
     private boolean active = true;
 
-    /** Unique per client (uq_general_user_client_username, see V89), not globally - see the multi-tenant licensing plan's Decisions Confirmed §1. */
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String username;
 
     @Column(name = "password_hash", nullable = false)

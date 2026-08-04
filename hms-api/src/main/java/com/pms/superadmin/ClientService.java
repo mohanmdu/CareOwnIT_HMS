@@ -13,9 +13,16 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Super Admin-only (see ModuleAuthorizationManager's SUPER_ADMIN branch) - CRUD for Client and its module license. */
+/**
+ * Super Admin-only (see ModuleAuthorizationManager's SUPER_ADMIN branch) -
+ * CRUD for Client and its module license.
+ *
+ * Explicitly qualified to masterTransactionManager - tenant holds @Primary
+ * (see TenantJpaConfig), so an unqualified @Transactional here would bind to
+ * the wrong EntityManagerFactory for this service's master-only repository.
+ */
 @Service
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, transactionManager = "masterTransactionManager")
 public class ClientService {
 
     /**
@@ -43,7 +50,7 @@ public class ClientService {
         return toDto(getOrThrow(id));
     }
 
-    @Transactional
+    @Transactional(transactionManager = "masterTransactionManager")
     public ClientDto create(ClientDto dto) {
         if (repository.existsByCodeIgnoreCase(dto.code())) {
             throw new IllegalArgumentException("Client code already in use: " + dto.code());
@@ -56,7 +63,7 @@ public class ClientService {
         return toDto(repository.save(client));
     }
 
-    @Transactional
+    @Transactional(transactionManager = "masterTransactionManager")
     public ClientDto updateStatus(Long id, String status) {
         Client client = getOrThrow(id);
         client.setStatus(ClientStatus.valueOf(status));
@@ -71,7 +78,7 @@ public class ClientService {
      * cache immediately (see ClientLicenseService) rather than waiting out
      * its ~45s TTL, so a revoked module stops working right away.
      */
-    @Transactional
+    @Transactional(transactionManager = "masterTransactionManager")
     @CacheEvict(cacheNames = "clientLicense", cacheManager = "licenseCacheManager", key = "#id")
     public ClientDto updateModules(Long id, Map<String, Boolean> modules) {
         Client client = getOrThrow(id);

@@ -9,8 +9,6 @@ import com.pms.masters.entity.Role;
 import com.pms.masters.repository.GeneralUserAuditLogRepository;
 import com.pms.masters.repository.GeneralUserRepository;
 import com.pms.masters.repository.RoleRepository;
-import com.pms.tenant.repository.ClientRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
  * IpBillingCategoryService.update() vs updateRevenueBucket() from the CEO
  * dashboard work - a plain profile edit must never silently reset a
  * sensitive field the caller didn't mean to touch).
+ *
+ * No client-scoping here - see GeneralUser's own doc comment. Each tenant
+ * has its own dedicated database (Phase B), so every row in this table
+ * already belongs to exactly one client by construction.
  */
 @Service
 @Transactional(readOnly = true)
@@ -44,35 +46,28 @@ public class GeneralUserService {
     private final RoleRepository roleRepository;
     private final GeneralUserAuditLogRepository auditLogRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ClientRepository clientRepository;
-    private final HttpServletRequest request;
 
     public GeneralUserService(
             GeneralUserRepository repository,
             RoleRepository roleRepository,
             GeneralUserAuditLogRepository auditLogRepository,
-            PasswordEncoder passwordEncoder,
-            ClientRepository clientRepository,
-            HttpServletRequest request) {
+            PasswordEncoder passwordEncoder) {
         this.repository = repository;
         this.roleRepository = roleRepository;
         this.auditLogRepository = auditLogRepository;
         this.passwordEncoder = passwordEncoder;
-        this.clientRepository = clientRepository;
-        this.request = request;
     }
 
     public List<GeneralUserDto> findActive() {
-        return toDtos(repository.findByClientIdAndActiveTrueOrderByIdAsc(currentClientId()));
+        return toDtos(repository.findByActiveTrueOrderByIdAsc());
     }
 
     public List<GeneralUserDto> findInactive() {
-        return toDtos(repository.findByClientIdAndActiveFalseOrderByUpdatedAtDesc(currentClientId()));
+        return toDtos(repository.findByActiveFalseOrderByUpdatedAtDesc());
     }
 
     public List<GeneralUserAuditLogDto> auditLogs() {
-        List<Long> clientUserIds = repository.findByClientId(currentClientId()).stream().map(GeneralUser::getId).toList();
-        return auditLogRepository.findAllByGeneralUserIdInOrderByPerformedAtDesc(clientUserIds).stream()
+        return auditLogRepository.findAllByOrderByPerformedAtDesc().stream()
                 .map(log -> new GeneralUserAuditLogDto(
                         log.getId(), log.getOperation(), log.getGeneralUserName(), log.getPerformedBy(), log.getPerformedAt()))
                 .toList();
@@ -87,12 +82,10 @@ public class GeneralUserService {
         if (dto.initialPassword() == null || dto.initialPassword().isBlank()) {
             throw new IllegalArgumentException("An initial password is required to create a login.");
         }
-        Long clientId = currentClientId();
-        if (repository.existsByClientIdAndUsernameIgnoreCase(clientId, dto.username())) {
+        if (repository.existsByUsernameIgnoreCase(dto.username())) {
             throw new IllegalArgumentException("Username already taken: " + dto.username());
         }
         GeneralUser user = new GeneralUser();
-        user.setClient(clientRepository.getReferenceById(clientId));
         applyFields(user, dto);
         user.setActive(true);
         user.setPasswordHash(passwordEncoder.encode(dto.initialPassword()));
@@ -105,8 +98,7 @@ public class GeneralUserService {
     @Transactional
     public GeneralUserDto update(Long id, GeneralUserDto dto) {
         GeneralUser user = getOrThrow(id);
-        if (!user.getUsername().equalsIgnoreCase(dto.username())
-                && repository.existsByClientIdAndUsernameIgnoreCase(user.getClient().getId(), dto.username())) {
+        if (!user.getUsername().equalsIgnoreCase(dto.username()) && repository.existsByUsernameIgnoreCase(dto.username())) {
             throw new IllegalArgumentException("Username already taken: " + dto.username());
         }
         applyFields(user, dto);
@@ -147,14 +139,6 @@ public class GeneralUserService {
     private void applyFields(GeneralUser user, GeneralUserDto dto) {
         Role role = roleRepository.findById(dto.roleId())
                 .orElseThrow(() -> new EntityNotFoundException("Role not found: " + dto.roleId()));
-        // Without this check, a client could assign a role belonging to a
-        // different client to their own users - Role now carries client_id
-        // too (see V90), so this needs the same ownership check as
-        // getOrThrow() below, just inline since applyFields() isn't
-        // fetching by Role id via that helper.
-        if (!role.getClient().getId().equals(currentClientId())) {
-            throw new EntityNotFoundException("Role not found: " + dto.roleId());
-        }
         user.setName(dto.name());
         user.setMobileNumber(dto.mobileNumber());
         user.setEmail(dto.email());
@@ -171,25 +155,6 @@ public class GeneralUserService {
         return authentication != null ? authentication.getName() : "system";
     }
 
-    /**
-     * The authenticated request's client id, straight from the verified
-     * JWT's clientId claim (see JwtAuthenticationFilter, which stamps this
-     * request attribute on every tenant request in both deployment modes).
-     * Deliberately NOT re-derived by looking the caller up by username -
-     * usernames are only unique per-client (see the multi-tenant licensing
-     * plan's Decisions Confirmed §1), so two different clients' admins can
-     * share a username (e.g. both named "admin"), which would make a
-     * username-based lookup here ambiguous or, worse, silently resolve to
-     * the wrong client.
-     */
-    private Long currentClientId() {
-        Long clientId = (Long) request.getAttribute("clientId");
-        if (clientId == null) {
-            throw new IllegalStateException("No client context on this request.");
-        }
-        return clientId;
-    }
-
     private List<GeneralUserDto> toDtos(List<GeneralUser> users) {
         Map<Long, GeneralUserAuditLog> createdBy = latestByUser(CREATE);
         Map<Long, GeneralUserAuditLog> deactivatedBy = latestByUser(DEACTIVATE);
@@ -202,14 +167,8 @@ public class GeneralUserService {
                 .collect(HashMap::new, (map, log) -> map.putIfAbsent(log.getGeneralUserId(), log), HashMap::putAll);
     }
 
-    /** Every id-based operation (findById/update/resetPassword/deactivate/restore) funnels through here, so this single ownership check is what stops one client from reading or modifying another client's users - a 404, not a 403, so a guessed/enumerated id from another client doesn't even confirm it exists. */
     private GeneralUser getOrThrow(Long id) {
-        GeneralUser user = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("General user not found: " + id));
-        if (!user.getClient().getId().equals(currentClientId())) {
-            throw new EntityNotFoundException("General user not found: " + id);
-        }
-        return user;
+        return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("General user not found: " + id));
     }
 
     private GeneralUserDto toDto(

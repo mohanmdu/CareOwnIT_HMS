@@ -2,7 +2,12 @@ package com.pms.superadmin;
 
 import com.pms.superadmin.dto.ClientAdminBootstrapRequest;
 import com.pms.superadmin.dto.ClientAdminBootstrapResponse;
+import com.pms.superadmin.dto.ClientDatabaseDto;
 import com.pms.superadmin.dto.ClientDto;
+import com.pms.tenant.entity.ClientDatabase;
+import com.pms.tenant.repository.ClientDatabaseRepository;
+import com.pms.tenant.service.TenantProvisioningService;
+import com.pms.common.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -24,10 +29,18 @@ public class ClientController {
 
     private final ClientService service;
     private final ClientAdminBootstrapService bootstrapService;
+    private final TenantProvisioningService provisioningService;
+    private final ClientDatabaseRepository clientDatabaseRepository;
 
-    public ClientController(ClientService service, ClientAdminBootstrapService bootstrapService) {
+    public ClientController(
+            ClientService service,
+            ClientAdminBootstrapService bootstrapService,
+            TenantProvisioningService provisioningService,
+            ClientDatabaseRepository clientDatabaseRepository) {
         this.service = service;
         this.bootstrapService = bootstrapService;
+        this.provisioningService = provisioningService;
+        this.clientDatabaseRepository = clientDatabaseRepository;
     }
 
     @GetMapping
@@ -67,5 +80,32 @@ public class ClientController {
     @ResponseStatus(HttpStatus.CREATED)
     public ClientAdminBootstrapResponse bootstrapAdmin(@PathVariable Long id, @Valid @RequestBody ClientAdminBootstrapRequest request) {
         return bootstrapService.bootstrap(id, request);
+    }
+
+    /**
+     * Provisions this client's dedicated database - CREATE DATABASE/USER,
+     * the full tenant Flyway migration set, then flips ClientDatabase.status
+     * to READY (see TenantProvisioningService's own doc comment). Synchronous
+     * and slow (a full 90+ migration run) by design - this is a rare,
+     * Super-Admin-only onboarding action, not something to hide behind a
+     * misleadingly-instant 202. Safe to call again for a client stuck in
+     * FAILED.
+     */
+    @PostMapping("/{id}/database")
+    public ClientDatabaseDto provisionDatabase(@PathVariable Long id) {
+        return toDto(provisioningService.provision(id));
+    }
+
+    @GetMapping("/{id}/database")
+    public ClientDatabaseDto getDatabase(@PathVariable Long id) {
+        return clientDatabaseRepository
+                .findByClientId(id)
+                .map(this::toDto)
+                .orElseThrow(() -> new EntityNotFoundException("No database provisioned yet for client " + id));
+    }
+
+    private ClientDatabaseDto toDto(ClientDatabase db) {
+        return new ClientDatabaseDto(
+                db.getClientId(), db.getHost(), db.getPort(), db.getSchemaName(), db.getStatus().name(), db.getSchemaVersion());
     }
 }

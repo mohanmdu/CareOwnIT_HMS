@@ -35,8 +35,22 @@ class ModulePathMappingsCoverageTest {
      * explicit path-equality check (module-independent, any authenticated
      * user). Its class-level base path ("/api/auth") is neither fully public
      * nor fully module-gated, so it can't be represented as one row here.
+     *
+     * SuperAdminAuthController is the same shape: /login is covered by
+     * PUBLIC_PREFIXES' "/api/super-admin/auth/login" entry, but that's
+     * longer than this controller's own class-level base path
+     * ("/api/super-admin/auth"), so basePath::startsWith can't match it
+     * either.
+     *
+     * ClientController (and every future Super Admin-only controller) is
+     * different again: its whole "/api/super-admin/clients" base path is
+     * authorized by ModuleAuthorizationManager's dedicated SUPER_ADMIN_PREFIX
+     * branch (a SUPER_ADMIN authority check, evaluated before
+     * ModulePathMappings.resolve() is ever reached) - not public, and not
+     * gated by any per-module entry in this table either.
      */
-    private static final Set<String> METHOD_LEVEL_SPECIAL_CASES = Set.of("AuthController");
+    private static final Set<String> METHOD_LEVEL_SPECIAL_CASES =
+            Set.of("AuthController", "SuperAdminAuthController", "ClientController");
 
     @Test
     void everyControllerBasePathIsMappedOrPublic() throws ClassNotFoundException {
