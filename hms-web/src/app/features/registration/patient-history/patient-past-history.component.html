@@ -9,7 +9,7 @@
     <section class="hms-card-surface patient-info-header">
       <div class="patient-info-photo">
         @if (patient()!.photoPath) {
-          <img [src]="patient()!.photoPath" alt="" class="patient-info-photo-image" />
+          <img [appPrivateImage]="patient()!.photoPath" alt="" class="patient-info-photo-image" />
         } @else {
           <div class="patient-info-photo-placeholder">
             <mat-icon aria-hidden="true">person</mat-icon>

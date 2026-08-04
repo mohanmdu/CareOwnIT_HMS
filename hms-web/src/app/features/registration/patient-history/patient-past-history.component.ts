@@ -13,6 +13,7 @@ import { EmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.
 import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
 import { StatusBadgeComponent, StatusBadgeTone } from '../../../shared/ui/status-badge/status-badge.component';
 import { PatientSearchComponent } from '../../../shared/ui/patient-search/patient-search.component';
+import { PrivateImageDirective } from '../../../shared/directives/private-image.directive';
 import { Appointment } from '../../appointments/booking/appointment.model';
 import { OpCaseSheetViewDialogComponent } from '../../appointments/prescriptions/op-case-sheet-view-dialog.component';
 import { LabRequisition } from '../../lab/requisitions/lab-requisition.model';
@@ -95,7 +96,8 @@ interface CancelledRow {
     PageHeaderComponent,
     EmptyStateComponent,
     StatusBadgeComponent,
-    PatientSearchComponent
+    PatientSearchComponent,
+    PrivateImageDirective
   ],
   templateUrl: './patient-past-history.component.html',
   styleUrl: './patient-past-history.component.scss'

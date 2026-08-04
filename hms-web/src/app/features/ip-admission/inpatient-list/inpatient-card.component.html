@@ -3,7 +3,7 @@
 <article class="ip-card">
   <div class="ip-card-section ip-card-patient">
     @if (a.photoPath) {
-      <img [src]="a.photoPath" alt="" class="ip-card-avatar" />
+      <img [appPrivateImage]="a.photoPath" alt="" class="ip-card-avatar" />
     } @else {
       <div class="ip-card-avatar ip-card-avatar-placeholder" aria-hidden="true">{{ initials() }}</div>
     }

@@ -23,6 +23,11 @@ export class PatientReportService {
     return this.http.get<PatientReport>(`${this.baseUrl}/${id}`);
   }
 
+  /** A time-limited, unauthenticated URL for this one report - see JwtService.issueReportShareToken() on the backend. */
+  createShareLink(id: number): Observable<{ url: string }> {
+    return this.http.post<{ url: string }>(`${this.baseUrl}/${id}/share-link`, {});
+  }
+
   getActiveFiles(patientId: number): Observable<PatientReport[]> {
     return this.http.get<PatientReport[]>(`${this.baseUrl}/active`, { params: { patientId } });
   }

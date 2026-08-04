@@ -3,6 +3,8 @@ package com.pms.common;
 import com.pms.security.InvalidCredentialsException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
@@ -10,9 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     // Without this, a @Valid failure (e.g. a @Pattern-annotated field like
     // mobileNumber) was never actually handled anywhere in this app -
@@ -64,6 +69,35 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrityViolation(DataIntegrityViolationException ex, HttpServletRequest request) {
         return build(HttpStatus.CONFLICT, "This record conflicts with an existing one - please refresh and retry.", request);
+    }
+
+    // A missing file under /uploads/** (e.g. a stale/old-format link) throws
+    // this rather than going through Spring's older /error-forward behavior -
+    // confirmed live against this app's actual Spring Boot 4.1/Spring 7
+    // version. A real 404, safe to expose as-is (it reveals nothing beyond
+    // "this path doesn't exist", the same information the request itself
+    // already carried).
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiError> handleMissingStaticResource(NoResourceFoundException ex, HttpServletRequest request) {
+        return build(HttpStatus.NOT_FOUND, "Not found.", request);
+    }
+
+    // The catch-all - every @ExceptionHandler above targets a specific,
+    // anticipated failure mode; anything else (IllegalStateException,
+    // NullPointerException, ClassCastException, DateTimeParseException,
+    // FlywayException, ...) used to fall through to Spring's default
+    // handling, which forwards to /error and produces the exact same
+    // misleading 401 the MethodArgumentNotValidException handler above was
+    // added to prevent - just for every OTHER exception type instead of
+    // just that one. Logged server-side at ERROR (the client only ever
+    // sees a generic message - this exception's real content might be
+    // exactly the kind of internal detail that shouldn't leak in a response
+    // body) so it's still diagnosable from the logs, unlike the misleading
+    // 401 it replaces.
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleUnexpected(Exception ex, HttpServletRequest request) {
+        log.error("Unhandled exception on {} {}", request.getMethod(), request.getRequestURI(), ex);
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong. Please try again or contact support.", request);
     }
 
     private ResponseEntity<ApiError> build(HttpStatus status, String message, HttpServletRequest request) {

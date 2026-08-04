@@ -1,10 +1,13 @@
 package com.pms.cashier.controller;
 
 import com.pms.cashier.dto.AdvanceReportRowDto;
+import com.pms.cashier.dto.ApprovePaymentRequestDto;
+import com.pms.cashier.dto.CancelPaymentRequestDto;
 import com.pms.cashier.dto.CancellationRequestRowDto;
+import com.pms.cashier.dto.CreatePaymentRequestDto;
 import com.pms.cashier.dto.IpPaymentRequestDto;
-import com.pms.cashier.entity.PaymentRequestType;
 import com.pms.cashier.service.IpPaymentRequestService;
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -40,17 +43,13 @@ public class IpPaymentRequestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public IpPaymentRequestDto create(@RequestBody Map<String, Object> body) {
-        Long admissionId = ((Number) body.get("admissionId")).longValue();
-        PaymentRequestType requestType = PaymentRequestType.valueOf((String) body.get("requestType"));
-        double amount = ((Number) body.get("amount")).doubleValue();
-        String description = (String) body.get("description");
-        return service.create(admissionId, requestType, amount, description);
+    public IpPaymentRequestDto create(@Valid @RequestBody CreatePaymentRequestDto body) {
+        return service.create(body.admissionId(), body.requestType(), body.amount(), body.description());
     }
 
     @PatchMapping("/{id}/approve")
-    public IpPaymentRequestDto approve(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        return service.approve(id, body.get("paymentMode"));
+    public IpPaymentRequestDto approve(@PathVariable Long id, @Valid @RequestBody ApprovePaymentRequestDto body) {
+        return service.approve(id, body.paymentMode());
     }
 
     @GetMapping("/advance-report")
@@ -66,7 +65,7 @@ public class IpPaymentRequestController {
     }
 
     @PatchMapping("/{id}/cancel")
-    public IpPaymentRequestDto cancel(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        return service.cancel(id, body.get("reason"));
+    public IpPaymentRequestDto cancel(@PathVariable Long id, @Valid @RequestBody CancelPaymentRequestDto body) {
+        return service.cancel(id, body.reason());
     }
 }

@@ -48,9 +48,15 @@ class ModulePathMappingsCoverageTest {
      * branch (a SUPER_ADMIN authority check, evaluated before
      * ModulePathMappings.resolve() is ever reached) - not public, and not
      * gated by any per-module entry in this table either.
+     *
+     * PrivateFileController is the AuthController shape again: its three
+     * categories map to three different modules (UPLOAD_REPORTS,
+     * PATIENT_REGISTRATION, IP_ADMISSION), each longer than this
+     * controller's own class-level base path ("/api/files"), so
+     * basePath::startsWith can't match any single one of them either.
      */
     private static final Set<String> METHOD_LEVEL_SPECIAL_CASES =
-            Set.of("AuthController", "SuperAdminAuthController", "ClientController");
+            Set.of("AuthController", "SuperAdminAuthController", "ClientController", "PrivateFileController");
 
     @Test
     void everyControllerBasePathIsMappedOrPublic() throws ClassNotFoundException {

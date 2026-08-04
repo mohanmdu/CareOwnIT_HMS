@@ -417,7 +417,7 @@
       <!-- Sidebar -->
       <aside class="ip-billing-sidebar hms-card-surface">
         @if (admission.photoPath) {
-          <img [src]="admission.photoPath" alt="" class="ip-billing-avatar" />
+          <img [appPrivateImage]="admission.photoPath" alt="" class="ip-billing-avatar" />
         } @else {
           <div class="ip-billing-avatar ip-billing-avatar-placeholder" aria-hidden="true">{{ initials() }}</div>
         }

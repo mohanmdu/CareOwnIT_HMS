@@ -35,6 +35,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final String REPORT_SHARE_SUBJECT = "report-share";
+
     private final JwtService jwtService;
 
     public JwtAuthenticationFilter(JwtService jwtService) {
@@ -49,32 +51,40 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (header != null && header.startsWith("Bearer ")) {
                 try {
                     Claims claims = jwtService.parse(header.substring(7));
-                    List<GrantedAuthority> authorities = new ArrayList<>();
-                    if (Boolean.TRUE.equals(claims.get("superAdmin", Boolean.class))) {
-                        // Wholly separate claim shape (see JwtService.issueSuperAdmin) -
-                        // no modules/clientId here, so this branch never runs the
-                        // tenant logic below at all, not just "happens to skip" it.
-                        authorities.add(new SimpleGrantedAuthority("SUPER_ADMIN"));
+                    if (REPORT_SHARE_SUBJECT.equals(claims.getSubject())) {
+                        // A JwtService.issueReportShareToken() token, misdirected onto
+                        // this header - it's only ever meant to be read from a URL path
+                        // segment and validated directly by PublicPatientReportController.
+                        // Leave unauthenticated, same as any other unrecognized token,
+                        // rather than authenticating a real-but-permission-less principal.
                     } else {
-                        List<?> modules = claims.get("modules", List.class);
-                        if (modules != null) {
-                            for (Object module : modules) {
-                                authorities.add(new SimpleGrantedAuthority("MODULE_" + module));
+                        List<GrantedAuthority> authorities = new ArrayList<>();
+                        if (Boolean.TRUE.equals(claims.get("superAdmin", Boolean.class))) {
+                            // Wholly separate claim shape (see JwtService.issueSuperAdmin) -
+                            // no modules/clientId here, so this branch never runs the
+                            // tenant logic below at all, not just "happens to skip" it.
+                            authorities.add(new SimpleGrantedAuthority("SUPER_ADMIN"));
+                        } else {
+                            List<?> modules = claims.get("modules", List.class);
+                            if (modules != null) {
+                                for (Object module : modules) {
+                                    authorities.add(new SimpleGrantedAuthority("MODULE_" + module));
+                                }
+                            }
+                            if (Boolean.TRUE.equals(claims.get("mustChangePassword", Boolean.class))) {
+                                authorities.add(new SimpleGrantedAuthority("MUST_CHANGE_PASSWORD"));
+                            }
+                            // Read by ModuleAuthorizationManager for the license check -
+                            // see the multi-tenant licensing plan §A.4.
+                            Long clientId = claims.get("clientId", Long.class);
+                            if (clientId != null) {
+                                request.setAttribute("clientId", clientId);
+                                TenantContext.set(clientId);
                             }
                         }
-                        if (Boolean.TRUE.equals(claims.get("mustChangePassword", Boolean.class))) {
-                            authorities.add(new SimpleGrantedAuthority("MUST_CHANGE_PASSWORD"));
-                        }
-                        // Read by ModuleAuthorizationManager for the license check -
-                        // see the multi-tenant licensing plan §A.4.
-                        Long clientId = claims.get("clientId", Long.class);
-                        if (clientId != null) {
-                            request.setAttribute("clientId", clientId);
-                            TenantContext.set(clientId);
-                        }
+                        var authentication = new UsernamePasswordAuthenticationToken(claims.getSubject(), null, authorities);
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
                     }
-                    var authentication = new UsernamePasswordAuthenticationToken(claims.getSubject(), null, authorities);
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 } catch (InvalidCredentialsException e) {
                     // Leave unauthenticated - falls through to the anonymous token, denied downstream.
                 }

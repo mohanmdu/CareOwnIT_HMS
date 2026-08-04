@@ -107,7 +107,7 @@ public class PatientService {
     @Transactional
     public PatientDto uploadPhoto(Long id, MultipartFile file) {
         Patient patient = getOrThrow(id);
-        String photoPath = fileStorageService.store(file, "patients");
+        String photoPath = fileStorageService.storePrivate(file, "patients");
         patient.setPhotoPath(photoPath);
         return toDto(repository.save(patient));
     }

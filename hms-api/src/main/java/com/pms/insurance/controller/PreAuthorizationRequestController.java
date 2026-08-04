@@ -2,6 +2,7 @@ package com.pms.insurance.controller;
 
 import com.pms.insurance.dto.PreAuthorizationRequestAmendDto;
 import com.pms.insurance.dto.PreAuthorizationRequestApproveDto;
+import com.pms.insurance.dto.PreAuthorizationRequestCancelDto;
 import com.pms.insurance.dto.PreAuthorizationRequestCreateDto;
 import com.pms.insurance.dto.PreAuthorizationRequestDto;
 import com.pms.insurance.dto.PreAuthorizationRequestRaiseDto;
@@ -10,7 +11,6 @@ import com.pms.insurance.service.PreAuthorizationRequestService;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -93,7 +93,7 @@ public class PreAuthorizationRequestController {
     }
 
     @PatchMapping("/{id}/cancel")
-    public PreAuthorizationRequestDto cancel(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        return service.cancel(id, body.get("reason"));
+    public PreAuthorizationRequestDto cancel(@PathVariable Long id, @Valid @RequestBody PreAuthorizationRequestCancelDto body) {
+        return service.cancel(id, body.reason());
     }
 }

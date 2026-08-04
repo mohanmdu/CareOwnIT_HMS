@@ -2,10 +2,10 @@ package com.pms.masters.controller;
 
 import com.pms.masters.dto.GeneralUserAuditLogDto;
 import com.pms.masters.dto.GeneralUserDto;
+import com.pms.masters.dto.ResetPasswordRequest;
 import com.pms.masters.service.GeneralUserService;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,8 +52,8 @@ public class GeneralUserController {
     }
 
     @PatchMapping("/{id}/reset-password")
-    public ResponseEntity<Void> resetPassword(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        service.resetPassword(id, body.get("newPassword"));
+    public ResponseEntity<Void> resetPassword(@PathVariable Long id, @Valid @RequestBody ResetPasswordRequest body) {
+        service.resetPassword(id, body.newPassword());
         return ResponseEntity.noContent().build();
     }
 

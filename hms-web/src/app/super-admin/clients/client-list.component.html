@@ -48,6 +48,21 @@
         <button mat-flat-button color="primary" type="button" (click)="saveModules()" [disabled]="savingModules()">Save License</button>
         <button mat-button type="button" (click)="cancelManage()">Cancel</button>
       </div>
+
+      <h2 class="sa-license-title">{{ client.name }} — Public Website Domain</h2>
+      <p class="sa-license-subtitle">
+        The domain visitors use to reach this client's public hospital website (e.g. clienta-hospital.com). Leave blank if this client
+        doesn't have one yet.
+      </p>
+      <form class="sa-create-form" (ngSubmit)="saveDomain()">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sa-create-field">
+          <mat-label>Domain</mat-label>
+          <input matInput name="domain" [(ngModel)]="domainForm.domain" placeholder="e.g. clienta-hospital.com" />
+        </mat-form-field>
+        <div class="sa-create-actions">
+          <button mat-flat-button color="primary" type="submit" [disabled]="savingDomain()">Save Domain</button>
+        </div>
+      </form>
     </section>
   }
 

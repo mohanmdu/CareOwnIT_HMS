@@ -88,6 +88,31 @@ public class JwtService {
                 .compact();
     }
 
+    /**
+     * A third, narrower claim shape again - not a login session at all, but a
+     * time-limited bearer token scoped to exactly one patient report, for
+     * sharing that one document with someone outside the system (e.g. the
+     * patient themselves, via WhatsApp - see PatientReportService.
+     * createShareLink()/PublicPatientReportController). clientId travels
+     * with it so the public endpoint can route to the correct tenant
+     * database with no session/JWT of its own to read it from otherwise.
+     * 24-hour expiry: long enough that the patient can actually open a link
+     * sent to them without it going stale, short enough that a forwarded
+     * link doesn't stay valid indefinitely.
+     */
+    public String issueReportShareToken(Long reportId, Long clientId) {
+        Instant now = Instant.now();
+        Instant expiry = now.plus(24, ChronoUnit.HOURS);
+        return Jwts.builder()
+                .subject("report-share")
+                .claim("reportId", reportId)
+                .claim("clientId", clientId)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiry))
+                .signWith(key)
+                .compact();
+    }
+
     public Claims parse(String token) {
         try {
             return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();

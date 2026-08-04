@@ -8,4 +8,6 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     Optional<Client> findByCodeIgnoreCase(String code);
 
     boolean existsByCodeIgnoreCase(String code);
+
+    Optional<Client> findByDomainIgnoreCase(String domain);
 }

@@ -90,9 +90,9 @@
                 <td>{{ row.file.uploadedBy ?? '—' }}</td>
                 <td>{{ row.file.comments ?? '—' }}</td>
                 <td>
-                  <a [href]="row.file.filePath" target="_blank" class="pf-view-link">
+                  <a href="#" [appPrivateLink]="row.file.filePath" class="pf-view-link">
                     @if (isImage(row.file)) {
-                      <img [src]="row.file.filePath" alt="" class="pf-thumbnail" />
+                      <img [appPrivateImage]="row.file.filePath" alt="" class="pf-thumbnail" />
                     } @else {
                       <mat-icon aria-hidden="true">description</mat-icon>
                     }
@@ -211,9 +211,9 @@
                 <td>{{ row.file.deletedBy ?? '—' }}</td>
                 <td>{{ row.file.deleteReason ?? '—' }}</td>
                 <td>
-                  <a [href]="row.file.filePath" target="_blank" class="pf-view-link">
+                  <a href="#" [appPrivateLink]="row.file.filePath" class="pf-view-link">
                     @if (isImage(row.file)) {
-                      <img [src]="row.file.filePath" alt="" class="pf-thumbnail" />
+                      <img [appPrivateImage]="row.file.filePath" alt="" class="pf-thumbnail" />
                     } @else {
                       <mat-icon aria-hidden="true">description</mat-icon>
                     }

@@ -27,6 +27,11 @@ export class ClientService {
     return this.http.put<ClientRecord>(`${this.baseUrl}/${id}/modules`, modules);
   }
 
+  /** Pass an empty string to clear the domain (stops this client's public site from being domain-routed). */
+  updateDomain(id: number, domain: string): Observable<ClientRecord> {
+    return this.http.patch<ClientRecord>(`${this.baseUrl}/${id}/domain`, { domain });
+  }
+
   /** One-time bootstrap for a brand-new client's very first user - see hms-api's ClientAdminBootstrapService. Every user after this one is created the normal way, by this admin, through the tenant's own General Users screen. */
   bootstrapAdmin(id: number, input: ClientAdminBootstrapInput): Observable<ClientAdminBootstrapResult> {
     return this.http.post<ClientAdminBootstrapResult>(`${this.baseUrl}/${id}/admin`, input);

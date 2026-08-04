@@ -90,6 +90,8 @@ export class ClientListComponent {
   managingClient = signal<ClientRecord | null>(null);
   savingModules = signal(false);
   selectedModules = new Set<ModuleKey>();
+  savingDomain = signal(false);
+  domainForm = { domain: '' };
 
   bootstrappingClient = signal<ClientRecord | null>(null);
   savingBootstrap = signal(false);
@@ -216,6 +218,7 @@ export class ClientListComponent {
   manageClient(client: ClientRecord): void {
     this.managingClient.set(client);
     this.selectedModules = new Set(client.licensedModules);
+    this.domainForm = { domain: client.domain ?? '' };
   }
 
   cancelManage(): void {
@@ -242,6 +245,25 @@ export class ClientListComponent {
       error: () => {
         this.savingModules.set(false);
         this.notification.error('Failed to update license.');
+      }
+    });
+  }
+
+  saveDomain(): void {
+    const client = this.managingClient();
+    if (!client) {
+      return;
+    }
+    this.savingDomain.set(true);
+    this.service.updateDomain(client.id, this.domainForm.domain.trim()).subscribe({
+      next: (updated) => {
+        this.savingDomain.set(false);
+        this.notification.success(updated.domain ? 'Domain updated.' : 'Domain cleared.');
+        this.refresh();
+      },
+      error: (err) => {
+        this.savingDomain.set(false);
+        this.notification.error(err.error?.message ?? 'Failed to update domain.');
       }
     });
   }

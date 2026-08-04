@@ -13,6 +13,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog.service';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { PromptDialogService } from '../../../shared/services/prompt-dialog.service';
+import { PrivateImageDirective } from '../../../shared/directives/private-image.directive';
 import { Consultant } from '../../masters-admin/consultants/consultant.model';
 import { ConsultantService } from '../../masters-admin/consultants/consultant.service';
 import { IpBillingCategory } from '../../masters-admin/ip-billing-categories/ip-billing-category.model';
@@ -63,7 +64,8 @@ const UNIT_OPTIONS = ['Each', 'Day', 'Hour', 'Session'];
     MatButtonModule,
     MatIconModule,
     MatProgressBarModule,
-    BarcodeComponent
+    BarcodeComponent,
+    PrivateImageDirective
   ],
   templateUrl: './ip-billing-workspace.component.html',
   styleUrl: './ip-billing-workspace.component.scss'

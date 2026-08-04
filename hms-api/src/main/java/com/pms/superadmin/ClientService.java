@@ -70,6 +70,14 @@ public class ClientService {
         return toDto(repository.save(client));
     }
 
+    /** Blank/null clears this client's custom-domain routing (see DomainTenantResolutionFilter) rather than leaving a stale value in place. */
+    @Transactional(transactionManager = "masterTransactionManager")
+    public ClientDto updateDomain(Long id, String domain) {
+        Client client = getOrThrow(id);
+        client.setDomain(domain == null || domain.isBlank() ? null : domain.trim().toLowerCase());
+        return toDto(repository.save(client));
+    }
+
     /**
      * Full replace of the submitted keys' enabled state - the Super Admin
      * license editor always submits every module checkbox's current state,
@@ -97,6 +105,12 @@ public class ClientService {
                 .map(entry -> entry.getKey().key())
                 .toList();
         return new ClientDto(
-                client.getId(), client.getName(), client.getCode(), client.getStatus().name(), licensed, client.getCreatedAt());
+                client.getId(),
+                client.getName(),
+                client.getCode(),
+                client.getStatus().name(),
+                licensed,
+                client.getDomain(),
+                client.getCreatedAt());
     }
 }

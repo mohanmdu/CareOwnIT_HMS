@@ -59,6 +59,10 @@ public class Client extends Auditable {
     @Column(name = "deployment_type", nullable = false)
     private DeploymentType deploymentType = DeploymentType.CLOUD;
 
+    /** This client's public-website domain (e.g. clienta-hospital.com), if configured - see DomainTenantResolutionFilter. Null until Super Admin sets it via ClientController's dedicated /domain endpoint. */
+    @Column(unique = true)
+    private String domain;
+
     /**
      * Which modules this client has purchased - checked fresh on every
      * request by ClientLicenseService (short-TTL cached), never trusted

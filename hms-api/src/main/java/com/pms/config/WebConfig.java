@@ -10,9 +10,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Serves uploaded consultant photos (see app.upload-dir) as static files
- * under /uploads/** - the Angular dev server proxy.conf.json forwards that
- * path alongside /api.
+ * Serves the PUBLIC half of uploaded files (consultant photos, CMS images,
+ * clinic branding - see FileStorageService) as static files under
+ * /uploads/** - the Angular dev server proxy.conf.json forwards that path
+ * alongside /api. Deliberately scoped to app.upload-dir's "public"
+ * subdirectory only, not the whole upload root - the "private" half (patient
+ * photos, admission photos, patient report documents) must never be
+ * reachable through this unauthenticated static handler; see
+ * PrivateFileController for how those are served instead.
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -32,7 +37,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String location = Path.of(uploadDir).toAbsolutePath().normalize().toUri().toString();
+        String location = Path.of(uploadDir).resolve("public").toAbsolutePath().normalize().toUri().toString();
         registry.addResourceHandler("/uploads/**").addResourceLocations(location);
     }
 

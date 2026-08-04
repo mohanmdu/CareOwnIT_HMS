@@ -9,6 +9,8 @@ import { ConfirmDialogService } from '../../shared/services/confirm-dialog.servi
 import { NotificationService } from '../../shared/services/notification.service';
 import { PromptDialogService } from '../../shared/services/prompt-dialog.service';
 import { TablePagination } from '../../shared/table/table-pagination';
+import { PrivateImageDirective } from '../../shared/directives/private-image.directive';
+import { PrivateLinkDirective } from '../../shared/directives/private-link.directive';
 import { ClinicSettingsService } from '../masters-admin/clinic-settings/clinic-settings.service';
 import { Patient } from '../registration/patients/patient.model';
 import { PatientService } from '../registration/patients/patient.service';
@@ -38,7 +40,7 @@ function matches(value: string, term: string): boolean {
 @Component({
   selector: 'app-patient-files',
   standalone: true,
-  imports: [DatePipe, FormsModule, MatButtonModule, MatIconModule, MatProgressBarModule],
+  imports: [DatePipe, FormsModule, MatButtonModule, MatIconModule, MatProgressBarModule, PrivateImageDirective, PrivateLinkDirective],
   templateUrl: './patient-files.component.html',
   styleUrl: './patient-files.component.scss'
 })
@@ -199,12 +201,21 @@ export class PatientFilesComponent {
     if (!patient) {
       return;
     }
-    const digitsOnly = patient.mobileNumber.replace(/\D/g, '');
-    const fileUrl = `${location.origin}${file.filePath}`;
-    const message = encodeURIComponent(
-      `Hello ${patient.firstName}, your medical report (${file.originalFileName}) is available: ${fileUrl}. Please contact ${this.clinicName} for details.`
-    );
-    window.open(`https://wa.me/${digitsOnly}?text=${message}`, '_blank');
+    // The report itself is private (see PrivateFileController) - a raw
+    // file.filePath would 401 for the patient, who has no HMS login at all.
+    // Mint a time-limited, unauthenticated link scoped to just this one
+    // report instead - see PatientReportService.createShareLink() on the backend.
+    this.reportService.createShareLink(file.id).subscribe({
+      next: ({ url }) => {
+        const digitsOnly = patient.mobileNumber.replace(/\D/g, '');
+        const fileUrl = `${location.origin}${url}`;
+        const message = encodeURIComponent(
+          `Hello ${patient.firstName}, your medical report (${file.originalFileName}) is available: ${fileUrl}. Please contact ${this.clinicName} for details.`
+        );
+        window.open(`https://wa.me/${digitsOnly}?text=${message}`, '_blank');
+      },
+      error: () => this.notification.error('Failed to create a share link for this file.')
+    });
   }
 
   deleteFile(file: PatientReport): void {

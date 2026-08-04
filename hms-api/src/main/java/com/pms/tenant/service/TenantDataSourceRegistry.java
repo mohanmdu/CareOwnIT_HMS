@@ -11,6 +11,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.time.Duration;
 import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,24 +19,21 @@ import org.springframework.transaction.annotation.Transactional;
  * clientId -> HikariDataSource, lazily built and bounded (see the
  * "Database-per-Client Architecture" plan's Dynamic Database Routing
  * design). A Caffeine cache, same library ClientLicenseService's cache
- * already uses (see CacheConfig) - capped at 150 pools, idle-evicted after
- * 30 minutes so an inactive tenant doesn't hold connections forever. Each
- * pool is deliberately small (maximumPoolSize=5, minimumIdle=0 - an idle
- * tenant holds zero physical connections) and fail-fast
- * (connectionTimeout=5s - one unreachable tenant DB never blocks others).
- *
- * Resource ceiling note (see the plan's Risks section): MySQL's default
- * max_connections=151 will not survive more than ~20-25 concurrently-
- * saturated tenant pools at this sizing - fine for today's single
- * registered tenant, needs revisiting before real multi-tenant volume.
+ * already uses (see CacheConfig) - capped at app.tenant-registry.max-pools
+ * (default 150), idle-evicted after app.tenant-registry.idle-eviction-minutes
+ * (default 30) so an inactive tenant doesn't hold connections forever. Each
+ * pool is deliberately small (app.tenant-registry.pool-max-size, default 5;
+ * minimumIdle is always 0 - an idle tenant holds zero physical connections)
+ * and fail-fast (app.tenant-registry.connection-timeout-ms, default 5000 -
+ * one unreachable tenant DB never blocks others). All four tunable without a
+ * redeploy as tenant volume grows - see the properties file's own comment
+ * for the resource-ceiling math (MySQL's default max_connections=151 won't
+ * survive many concurrently-saturated tenant pools at the defaults above),
+ * which raising these numbers alone doesn't fix - see client_database.host/
+ * port sharding instead once that ceiling is actually being approached.
  */
 @Service
 public class TenantDataSourceRegistry {
-
-    private static final int MAX_POOLS = 150;
-    private static final Duration IDLE_EVICTION = Duration.ofMinutes(30);
-    private static final int POOL_MAX_SIZE = 5;
-    private static final int CONNECTION_TIMEOUT_MS = 5000;
 
     /** Matches the row every deployment seeds at V87 - see LoginService's own copy of this constant for the same reasoning. */
     private static final String DEFAULT_CLIENT_CODE = "DEFAULT";
@@ -43,16 +41,26 @@ public class TenantDataSourceRegistry {
     private final ClientDatabaseRepository clientDatabaseRepository;
     private final ClientRepository clientRepository;
     private final TenantSecretService secretService;
+    private final int poolMaxSize;
+    private final int connectionTimeoutMs;
     private final Cache<Long, HikariDataSource> pools;
 
     public TenantDataSourceRegistry(
-            ClientDatabaseRepository clientDatabaseRepository, ClientRepository clientRepository, TenantSecretService secretService) {
+            ClientDatabaseRepository clientDatabaseRepository,
+            ClientRepository clientRepository,
+            TenantSecretService secretService,
+            @Value("${app.tenant-registry.max-pools:150}") int maxPools,
+            @Value("${app.tenant-registry.idle-eviction-minutes:30}") long idleEvictionMinutes,
+            @Value("${app.tenant-registry.pool-max-size:5}") int poolMaxSize,
+            @Value("${app.tenant-registry.connection-timeout-ms:5000}") int connectionTimeoutMs) {
         this.clientDatabaseRepository = clientDatabaseRepository;
         this.clientRepository = clientRepository;
         this.secretService = secretService;
+        this.poolMaxSize = poolMaxSize;
+        this.connectionTimeoutMs = connectionTimeoutMs;
         this.pools = Caffeine.newBuilder()
-                .maximumSize(MAX_POOLS)
-                .expireAfterAccess(IDLE_EVICTION)
+                .maximumSize(maxPools)
+                .expireAfterAccess(Duration.ofMinutes(idleEvictionMinutes))
                 .<Long, HikariDataSource>evictionListener((clientId, pool, cause) -> {
                     if (pool != null) {
                         pool.close();
@@ -83,9 +91,9 @@ public class TenantDataSourceRegistry {
         config.setJdbcUrl(clientDatabase.jdbcUrl());
         config.setUsername(clientDatabase.getUsername());
         config.setPassword(password);
-        config.setMaximumPoolSize(POOL_MAX_SIZE);
+        config.setMaximumPoolSize(poolMaxSize);
         config.setMinimumIdle(0);
-        config.setConnectionTimeout(CONNECTION_TIMEOUT_MS);
+        config.setConnectionTimeout(connectionTimeoutMs);
         config.setPoolName("tenant-" + clientId);
         return new HikariDataSource(config);
     }

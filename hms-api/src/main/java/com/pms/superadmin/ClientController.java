@@ -3,7 +3,9 @@ package com.pms.superadmin;
 import com.pms.superadmin.dto.ClientAdminBootstrapRequest;
 import com.pms.superadmin.dto.ClientAdminBootstrapResponse;
 import com.pms.superadmin.dto.ClientDatabaseDto;
+import com.pms.superadmin.dto.ClientDomainUpdateRequest;
 import com.pms.superadmin.dto.ClientDto;
+import com.pms.superadmin.dto.ClientStatusUpdateRequest;
 import com.pms.tenant.entity.ClientDatabase;
 import com.pms.tenant.repository.ClientDatabaseRepository;
 import com.pms.tenant.service.TenantProvisioningService;
@@ -60,14 +62,19 @@ public class ClientController {
     }
 
     @PatchMapping("/{id}/status")
-    public ClientDto updateStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        return service.updateStatus(id, body.get("status"));
+    public ClientDto updateStatus(@PathVariable Long id, @Valid @RequestBody ClientStatusUpdateRequest body) {
+        return service.updateStatus(id, body.status().name());
     }
 
     /** Body: { "lab": true, "pharmacy": false, ... } - kebab-case ModuleKey.key() values, same wire format as RoleDto.permittedModules. */
     @PutMapping("/{id}/modules")
     public ClientDto updateModules(@PathVariable Long id, @RequestBody Map<String, Boolean> modules) {
         return service.updateModules(id, modules);
+    }
+
+    @PatchMapping("/{id}/domain")
+    public ClientDto updateDomain(@PathVariable Long id, @Valid @RequestBody ClientDomainUpdateRequest body) {
+        return service.updateDomain(id, body.domain());
     }
 
     /**

@@ -112,6 +112,7 @@ public class TenantProvisioningService {
                     .baselineOnMigrate(true)
                     .load()
                     .migrate();
+            removeBootstrapSeed(clientDatabase.jdbcUrl(), tenantUsername, tenantPassword);
             clientDatabase.setSchemaVersion(result.targetSchemaVersion);
             clientDatabase.setStatus(ClientDatabaseStatus.READY);
         } catch (RuntimeException e) {
@@ -142,6 +143,45 @@ public class TenantProvisioningService {
             statement.executeUpdate("FLUSH PRIVILEGES");
         } catch (SQLException e) {
             throw new IllegalStateException("Failed to provision database/user for schema " + schemaName, e);
+        }
+    }
+
+    /**
+     * V74 unconditionally seeds a hardcoded 'superadmin'/'ChangeMe@123'
+     * account and an 'Administrator' role with a fixed module list into
+     * EVERY tenant schema that runs the shared classpath:db/migration set -
+     * exactly what a single-tenant/on-prem install needs (it has no Super
+     * Admin bootstrap flow at all, so V74's seed is its only way to get a
+     * first login - see V74's own doc comment), but wrong for a freshly
+     * provisioned Phase B multi-tenant client, which always gets its real
+     * first admin through ClientAdminBootstrapService.bootstrap() instead.
+     * Left in place, V74's seed is actively harmful there in two ways: (1)
+     * it leaves a well-known-credential account sitting in every new
+     * tenant's database indefinitely if nobody happens to log in as it, and
+     * (2) ClientAdminBootstrapService.bootstrap()'s
+     * findByNameIgnoreCase("Administrator") would always find V74's row
+     * first, silently pre-empting DefaultAdminRoleStrategyResolver (the
+     * per-client-customizable module list) for every new client's very
+     * first admin - the one time that resolver is actually supposed to run.
+     *
+     * Removing V74's seed here rather than editing/removing V74 itself:
+     * Flyway checksums an already-applied migration, so V74 must stay
+     * byte-for-byte unchanged for every single-tenant/on-prem install and
+     * any already-provisioned tenant that already ran it. This runs once,
+     * immediately after a fresh tenant's migration completes and before its
+     * ClientDatabase flips to READY (see provision()) - nothing has read or
+     * written to this brand-new schema yet, so the row shapes below are
+     * exactly and only what V74 itself inserted.
+     */
+    private void removeBootstrapSeed(String jdbcUrl, String username, String password) {
+        try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+                Statement statement = connection.createStatement()) {
+            statement.executeUpdate("DELETE FROM general_user WHERE username = 'superadmin'");
+            statement.executeUpdate(
+                    "DELETE FROM role_module_permission WHERE role_id = (SELECT id FROM role WHERE name = 'Administrator')");
+            statement.executeUpdate("DELETE FROM role WHERE name = 'Administrator'");
+        } catch (SQLException e) {
+            throw new IllegalStateException("Failed to remove V74's bootstrap seed for schema at " + jdbcUrl, e);
         }
     }
 

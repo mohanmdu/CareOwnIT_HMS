@@ -1,11 +1,10 @@
 package com.pms.masters.controller;
 
 import com.pms.masters.dto.IpBillingCategoryDto;
-import com.pms.masters.entity.RevenueBucket;
+import com.pms.masters.dto.RevenueBucketUpdateRequest;
 import com.pms.masters.service.IpBillingCategoryService;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,8 +41,8 @@ public class IpBillingCategoryController {
     }
 
     @PatchMapping("/{id}/revenue-bucket")
-    public IpBillingCategoryDto updateRevenueBucket(@PathVariable Long id, @RequestBody Map<String, RevenueBucket> body) {
-        return service.updateRevenueBucket(id, body.get("revenueBucket"));
+    public IpBillingCategoryDto updateRevenueBucket(@PathVariable Long id, @Valid @RequestBody RevenueBucketUpdateRequest body) {
+        return service.updateRevenueBucket(id, body.revenueBucket());
     }
 
     @PatchMapping("/{id}/deactivate")

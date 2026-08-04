@@ -7,6 +7,8 @@ export interface ClientRecord {
   status: 'ACTIVE' | 'SUSPENDED';
   /** Kebab-case ModuleKey.key() values - same wire format as Role.permittedModules. */
   licensedModules: ModuleKey[];
+  /** This client's public-website domain (e.g. clienta-hospital.com), or null if not yet configured - see hms-api's DomainTenantResolutionFilter. */
+  domain: string | null;
   createdAt: string;
 }
 

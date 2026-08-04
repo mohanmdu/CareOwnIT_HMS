@@ -3,6 +3,7 @@ package com.pms.registration.controller;
 import com.pms.registration.dto.PatientReportAuditLogRowDto;
 import com.pms.registration.dto.PatientReportDeleteRequestDto;
 import com.pms.registration.dto.PatientReportDto;
+import com.pms.registration.dto.ShareLinkDto;
 import com.pms.registration.service.PatientReportService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -42,6 +43,11 @@ public class PatientReportController {
     @GetMapping("/{id}")
     public PatientReportDto get(@PathVariable Long id) {
         return service.getById(id);
+    }
+
+    @PostMapping("/{id}/share-link")
+    public ShareLinkDto shareLink(@PathVariable Long id) {
+        return service.createShareLink(id);
     }
 
     @GetMapping("/active")

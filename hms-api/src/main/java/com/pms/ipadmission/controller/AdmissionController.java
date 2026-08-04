@@ -3,11 +3,14 @@ package com.pms.ipadmission.controller;
 import com.pms.cashier.entity.PaymentRequestType;
 import com.pms.cashier.service.IpPaymentRequestService;
 import com.pms.ipadmission.dto.AdmissionDto;
+import com.pms.ipadmission.dto.AdvancePaymentRequest;
+import com.pms.ipadmission.dto.CancelAdmissionRequest;
+import com.pms.ipadmission.dto.ChangeRoomRequest;
+import com.pms.ipadmission.dto.FinalizeDischargeRequest;
+import com.pms.ipadmission.dto.InitiateDischargeRequest;
 import com.pms.ipadmission.service.AdmissionService;
 import jakarta.validation.Valid;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -76,42 +79,34 @@ public class AdmissionController {
     }
 
     @PatchMapping("/{id}/advance-payment")
-    public AdmissionDto addAdvancePayment(@PathVariable Long id, @RequestBody Map<String, Double> body) {
+    public AdmissionDto addAdvancePayment(@PathVariable Long id, @Valid @RequestBody AdvancePaymentRequest body) {
         AdmissionDto current = service.findById(id);
         paymentRequestService.createPreApproved(
                 id,
                 PaymentRequestType.ADVANCE,
-                body.getOrDefault("amount", 0.0),
+                body.amount(),
                 "Advance",
                 current.paymentType() != null ? current.paymentType().name() : null);
         return service.findById(id);
     }
 
     @PatchMapping("/{id}/initiate-discharge")
-    public AdmissionDto initiateDischarge(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        Object rawDate = body.get("dischargeDate");
-        LocalDateTime dischargeDate = rawDate != null ? LocalDateTime.parse(rawDate.toString()) : null;
-        String dischargeType = (String) body.get("dischargeType");
-        return service.initiateDischarge(id, dischargeDate, dischargeType);
+    public AdmissionDto initiateDischarge(@PathVariable Long id, @Valid @RequestBody InitiateDischargeRequest body) {
+        return service.initiateDischarge(id, body.dischargeDate(), body.dischargeType());
     }
 
     @PatchMapping("/{id}/finalize-discharge")
-    public AdmissionDto finalizeDischarge(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        double totalBilled = ((Number) body.getOrDefault("totalBilled", 0)).doubleValue();
-        String dischargeSummary = (String) body.get("dischargeSummary");
-        return service.finalizeDischarge(id, totalBilled, dischargeSummary);
+    public AdmissionDto finalizeDischarge(@PathVariable Long id, @Valid @RequestBody FinalizeDischargeRequest body) {
+        return service.finalizeDischarge(id, body.totalBilled(), body.dischargeSummary());
     }
 
     @PatchMapping("/{id}/change-room")
-    public AdmissionDto changeRoom(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        Long roomId = ((Number) body.get("roomId")).longValue();
-        Object rawDate = body.get("changedAt");
-        LocalDateTime changedAt = rawDate != null ? LocalDateTime.parse(rawDate.toString()) : null;
-        return service.changeRoom(id, roomId, changedAt);
+    public AdmissionDto changeRoom(@PathVariable Long id, @Valid @RequestBody ChangeRoomRequest body) {
+        return service.changeRoom(id, body.roomId(), body.changedAt());
     }
 
     @PatchMapping("/{id}/cancel")
-    public AdmissionDto cancel(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        return service.cancelAdmission(id, body.get("reason"));
+    public AdmissionDto cancel(@PathVariable Long id, @Valid @RequestBody CancelAdmissionRequest body) {
+        return service.cancelAdmission(id, body.reason());
     }
 }

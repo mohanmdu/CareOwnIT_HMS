@@ -21,14 +21,30 @@ import org.springframework.stereotype.Component;
  * login endpoint itself, and uploaded static files) - never gate these
  * behind a module.
  *
- * /uploads/ specifically: every uploaded file (consultant photos, admission
- * photos, CMS images, patient reports) is referenced via plain <img src=...>
- * or direct download links in both hms-web and the public hms-website -
- * browsers never attach an Authorization header to those requests, so
- * gating this path behind the JWT/module check would just make every one
- * of those images silently 401 instead of rendering. Filenames are random
- * UUIDs (effectively unguessable), the same exposure model this app has
- * always used for these files, real auth or not.
+ * /uploads/ specifically: only the PUBLIC half of uploaded files now lives
+ * here (consultant photos, CMS images, clinic branding - see
+ * FileStorageService) - genuinely meant to be visible to anyone with the
+ * URL, referenced via plain <img src=...> in both hms-web and the public
+ * hms-website, where browsers never attach an Authorization header.
+ * PHI/PHI-adjacent uploads (patient photos, admission photos, patient
+ * report documents) are deliberately NOT under this prefix - see
+ * PrivateFileController and its /api/files/* entries below, which require
+ * the same authentication and per-module gating as everything else.
+ *
+ * /error is here for a different reason - it's Spring Boot's own internal
+ * error-rendering dispatch (BasicErrorController), reached via an internal
+ * forward whenever a request fails in a way that doesn't produce a real
+ * exception this app's own GlobalExceptionHandler can catch - most notably,
+ * a missing static resource under /uploads/** (e.g. a stale/old-format
+ * link). Without this entry, ModuleAuthorizationManager evaluates that
+ * forwarded /error request against an anonymous authentication (the
+ * original request's identity doesn't carry over) and denies it, turning
+ * an accurate 404 into a misleading 401 "Authentication required" -
+ * exactly the failure mode GlobalExceptionHandler's own MethodArgumentNotValidException
+ * handler was added to prevent for actual exceptions, generalized here to
+ * cover /error dispatches that were never a catchable exception at all.
+ * Public here doesn't leak anything - /error only ever renders whatever
+ * status/message the ORIGINAL failed request already revealed.
  */
 @Component
 public class ModulePathMappings {
@@ -39,7 +55,8 @@ public class ModulePathMappings {
             "/api/super-admin/auth/login",
             "/actuator/health",
             "/actuator/info",
-            "/uploads/");
+            "/uploads/",
+            "/error");
 
     private static final Map<String, ModuleKey> PREFIX_TO_MODULE = buildTable();
 
@@ -107,6 +124,12 @@ public class ModulePathMappings {
 
         // Website CMS (admin side - public side is under PUBLIC_PREFIXES)
         map.put("/api/masters/cms/", ModuleKey.WEBSITE_CMS);
+
+        // Private uploaded files (see PrivateFileController/FileStorageService.PRIVATE_CATEGORIES) -
+        // gated by the same module that owns each category's upload feature.
+        map.put("/api/files/patient-reports", ModuleKey.UPLOAD_REPORTS);
+        map.put("/api/files/patients", ModuleKey.PATIENT_REGISTRATION);
+        map.put("/api/files/admissions", ModuleKey.IP_ADMISSION);
 
         return map;
     }

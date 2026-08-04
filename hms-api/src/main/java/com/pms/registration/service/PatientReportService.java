@@ -4,14 +4,21 @@ import com.pms.common.EntityNotFoundException;
 import com.pms.common.FileStorageService;
 import com.pms.registration.dto.PatientReportAuditLogRowDto;
 import com.pms.registration.dto.PatientReportDto;
+import com.pms.registration.dto.ShareLinkDto;
 import com.pms.registration.entity.Patient;
 import com.pms.registration.entity.PatientReport;
 import com.pms.registration.repository.AppointmentRepository;
 import com.pms.registration.repository.PatientRepository;
 import com.pms.registration.repository.PatientReportRepository;
+import com.pms.security.JwtService;
+import com.pms.tenant.TenantContext;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,23 +41,26 @@ public class PatientReportService {
     private final PatientRepository patientRepository;
     private final AppointmentRepository appointmentRepository;
     private final FileStorageService fileStorageService;
+    private final JwtService jwtService;
 
     public PatientReportService(
             PatientReportRepository repository,
             PatientRepository patientRepository,
             AppointmentRepository appointmentRepository,
-            FileStorageService fileStorageService) {
+            FileStorageService fileStorageService,
+            JwtService jwtService) {
         this.repository = repository;
         this.patientRepository = patientRepository;
         this.appointmentRepository = appointmentRepository;
         this.fileStorageService = fileStorageService;
+        this.jwtService = jwtService;
     }
 
     @Transactional
     public PatientReportDto upload(Long patientId, String comments, MultipartFile file) {
         Patient patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new EntityNotFoundException("Patient not found: " + patientId));
-        String path = fileStorageService.storeDocument(file, "patient-reports");
+        String path = fileStorageService.storePrivateDocument(file, "patient-reports");
 
         PatientReport report = new PatientReport();
         report.setPatient(patient);
@@ -92,6 +102,39 @@ public class PatientReportService {
 
     private PatientReport getOrThrow(Long id) {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Patient report not found: " + id));
+    }
+
+    /**
+     * Mints a time-limited link for sharing this one report with someone
+     * outside the system (e.g. the patient via WhatsApp - see
+     * ReportsUploadFormComponent / patient-files.component's
+     * shareToWhatsApp()). The report itself stays private (see
+     * FileStorageService.PRIVATE_CATEGORIES) - this is the one deliberate,
+     * narrow, time-boxed exception, not a reopening of public access.
+     */
+    public ShareLinkDto createShareLink(Long id) {
+        getOrThrow(id);
+        Long clientId = TenantContext.get();
+        String token = jwtService.issueReportShareToken(id, clientId);
+        return new ShareLinkDto("/api/public/patient-reports/" + id + "/" + token);
+    }
+
+    /**
+     * Resolves the file for PublicPatientReportController - called from
+     * within TenantContext.runAs(tokenClientId, ...), after the caller has
+     * already validated the share token, so getOrThrow()/FileStorageService
+     * both correctly resolve against the SHARED report's own tenant, not
+     * whatever (if anything) TenantContext happened to hold before.
+     */
+    public Resource resolveFileForSharing(Long id) {
+        PatientReport report = getOrThrow(id);
+        String filePath = report.getFilePath();
+        String filename = filePath.substring(filePath.lastIndexOf('/') + 1);
+        Path file = fileStorageService.resolvePrivateFile("patient-reports", filename);
+        if (!Files.exists(file)) {
+            throw new EntityNotFoundException("Report file not found: " + id);
+        }
+        return new FileSystemResource(file);
     }
 
     private PatientReportDto toDto(PatientReport report) {

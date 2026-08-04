@@ -234,7 +234,7 @@ public class AdmissionService {
     @Transactional
     public AdmissionDto uploadPhoto(Long id, MultipartFile file) {
         Admission admission = getOrThrow(id);
-        String photoPath = fileStorageService.store(file, "admissions");
+        String photoPath = fileStorageService.storePrivate(file, "admissions");
         admission.setPhotoPath(photoPath);
         return toDto(repository.save(admission));
     }

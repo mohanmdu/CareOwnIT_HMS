@@ -1,5 +1,6 @@
 package com.pms.security;
 
+import com.pms.common.EntityNotFoundException;
 import com.pms.masters.entity.GeneralUser;
 import com.pms.masters.repository.GeneralUserRepository;
 import com.pms.tenant.TenantContext;
@@ -92,9 +93,11 @@ public class LoginService {
      * Then routes to that specific client's dedicated database (see
      * TenantContext/TenantRoutingDataSource) for the actual credential
      * check - a login attempt for a client with no provisioned database
-     * (status never reached READY) fails here with InvalidCredentialsException,
-     * same as a wrong password would, rather than silently falling back to
-     * another tenant's data.
+     * (status never reached READY) fails here the same generic way as a
+     * wrong password would (see the EntityNotFoundException catch below),
+     * rather than silently falling back to another tenant's data OR
+     * leaking via a distinguishable response that a given client code is
+     * registered-but-unprovisioned.
      */
     public String login(String clientCode, String username, String password) {
         Client client = clientRepository.findByCodeIgnoreCase(clientCode)
@@ -102,20 +105,27 @@ public class LoginService {
         if (client.getStatus() != ClientStatus.ACTIVE) {
             throw new InvalidCredentialsException("This organization's access has been suspended.");
         }
-        return TenantContext.runAs(client.getId(), () -> tenantReadOnlyTransaction.execute(status -> {
-            GeneralUser user = repository.findByUsernameIgnoreCase(username)
-                    .orElseThrow(() -> new InvalidCredentialsException("Invalid client code, username, or password."));
-            if (!user.isActive()) {
-                throw new InvalidCredentialsException("This account has been deactivated.");
-            }
-            if (!user.getRole().isActive()) {
-                throw new InvalidCredentialsException("This account's role has been deactivated.");
-            }
-            if (!passwordEncoder.matches(password, user.getPasswordHash())) {
-                throw new InvalidCredentialsException("Invalid client code, username, or password.");
-            }
-            return jwtService.issue(user, client.getId());
-        }));
+        try {
+            return TenantContext.runAs(client.getId(), () -> tenantReadOnlyTransaction.execute(status -> {
+                GeneralUser user = repository.findByUsernameIgnoreCase(username)
+                        .orElseThrow(() -> new InvalidCredentialsException("Invalid client code, username, or password."));
+                if (!user.isActive()) {
+                    throw new InvalidCredentialsException("This account has been deactivated.");
+                }
+                if (!user.getRole().isActive()) {
+                    throw new InvalidCredentialsException("This account's role has been deactivated.");
+                }
+                if (!passwordEncoder.matches(password, user.getPasswordHash())) {
+                    throw new InvalidCredentialsException("Invalid client code, username, or password.");
+                }
+                return jwtService.issue(user, client.getId());
+            }));
+        } catch (EntityNotFoundException e) {
+            // TenantDataSourceRegistry found no READY database for this
+            // client - same generic response as any other login failure,
+            // not a distinguishable one (see this method's own doc comment).
+            throw new InvalidCredentialsException("Invalid client code, username, or password.");
+        }
     }
 
     private Long defaultClientId() {

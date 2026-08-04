@@ -3,6 +3,9 @@ package com.pms.config;
 import com.pms.security.JwtAuthenticationFilter;
 import com.pms.security.JwtService;
 import com.pms.security.ModuleAuthorizationManager;
+import com.pms.tenant.DeploymentModeProperties;
+import com.pms.tenant.DomainTenantResolutionFilter;
+import com.pms.tenant.repository.ClientRepository;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,14 +58,24 @@ public class SecurityConfig {
     }
 
     @Bean
+    public DomainTenantResolutionFilter domainTenantResolutionFilter(
+            ClientRepository clientRepository, DeploymentModeProperties deploymentMode) {
+        return new DomainTenantResolutionFilter(clientRepository, deploymentMode);
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(
-            HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter, ModuleAuthorizationManager moduleAuthorizationManager)
+            HttpSecurity http,
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            DomainTenantResolutionFilter domainTenantResolutionFilter,
+            ModuleAuthorizationManager moduleAuthorizationManager)
             throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.anyRequest().access(moduleAuthorizationManager))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(domainTenantResolutionFilter, JwtAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> writeJsonError(
                                 response, 401, "Authentication required."))
