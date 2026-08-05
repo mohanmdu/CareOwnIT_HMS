@@ -23,10 +23,19 @@
   }
 }
 
+// display:flex + explicit line-height keep the glyph truly centered in its
+// box regardless of the icon font's own vertical metrics - relying on
+// font-size alone to fill a box (the previous approach) left the glyph
+// visibly off-center in some browsers/zoom levels.
 .clinic-logo-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 64px;
   height: 64px;
   font-size: 64px;
+  line-height: 1;
+  flex-shrink: 0;
   color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.3));
 }
 
