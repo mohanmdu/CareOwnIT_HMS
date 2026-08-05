@@ -19,12 +19,28 @@ import org.springframework.web.multipart.MultipartFile;
  * admin tweaking branding) - cached in-memory (see CacheConfig) and evicted
  * on every write so a saved change is visible on the next page load without
  * needing a restart.
+ *
+ * Every cache key below is explicitly TenantContext.get() (this JVM's
+ * current-request tenant, set by JwtAuthenticationFilter before this class
+ * ever runs - see TenantContext's own doc comment) - NOT the method's
+ * default no-args key. This app is one JVM process routing to many tenant
+ * databases (see the "Database-per-Client Architecture" plan); get() takes
+ * no parameters, so Spring's default SimpleKeyGenerator would produce the
+ * exact same cache key regardless of which tenant's database the
+ * underlying query actually hit. Without a tenant-qualified key here,
+ * whichever client's user called get() first would have their hospital
+ * name/logo/branding cached and served to every OTHER client's users too,
+ * until some unrelated client's own settings update happened to evict it -
+ * a real cross-tenant leak of exactly the branding data this whole screen
+ * exists to keep per-client, not a hypothetical one (confirmed via direct
+ * code inspection, not just guessed at).
  */
 @Service
 @Transactional(readOnly = true)
 public class ClinicSettingsService {
 
     private static final String CACHE_NAME = "clinicSettings";
+    private static final String CACHE_KEY = "T(com.pms.tenant.TenantContext).get()";
 
     private final ClinicSettingsRepository repository;
     private final FileStorageService fileStorageService;
@@ -34,13 +50,13 @@ public class ClinicSettingsService {
         this.fileStorageService = fileStorageService;
     }
 
-    @Cacheable(CACHE_NAME)
+    @Cacheable(value = CACHE_NAME, key = CACHE_KEY)
     public ClinicSettingsDto get() {
         return toDto(getOrThrow());
     }
 
     @Transactional
-    @CacheEvict(value = CACHE_NAME, allEntries = true)
+    @CacheEvict(value = CACHE_NAME, key = CACHE_KEY)
     public ClinicSettingsDto update(ClinicSettingsDto dto) {
         ClinicSettings settings = getOrThrow();
         settings.setName(dto.name());
@@ -80,7 +96,7 @@ public class ClinicSettingsService {
     }
 
     @Transactional
-    @CacheEvict(value = CACHE_NAME, allEntries = true)
+    @CacheEvict(value = CACHE_NAME, key = CACHE_KEY)
     public ClinicSettingsDto uploadLogo(MultipartFile file) {
         ClinicSettings settings = getOrThrow();
         settings.setLogoPath(fileStorageService.store(file, "clinic"));
@@ -88,7 +104,7 @@ public class ClinicSettingsService {
     }
 
     @Transactional
-    @CacheEvict(value = CACHE_NAME, allEntries = true)
+    @CacheEvict(value = CACHE_NAME, key = CACHE_KEY)
     public ClinicSettingsDto uploadFavicon(MultipartFile file) {
         ClinicSettings settings = getOrThrow();
         settings.setFaviconPath(fileStorageService.store(file, "clinic"));
