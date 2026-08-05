@@ -1,9 +1,13 @@
-<div class="login-shell">
+<div class="login-shell" [style.backgroundImage]="loginBackgroundImage()">
   <section class="login-card">
     <div class="login-brand">
-      <span class="login-brand-icon" aria-hidden="true">+</span>
+      @if (branding()?.logoUrl) {
+        <img [src]="branding()!.logoUrl" alt="" class="login-brand-logo" />
+      } @else {
+        <span class="login-brand-icon" aria-hidden="true">+</span>
+      }
       <div>
-        <h1> HMS</h1>
+        <h1>{{ branding()?.clinicName || 'HMS' }}</h1>
         <p>Hospital Management System</p>
       </div>
     </div>
@@ -12,7 +16,7 @@
       @if (showClientCode) {
         <mat-form-field appearance="outline" class="login-field">
           <mat-label>Client Code</mat-label>
-          <input matInput name="clientCode" [(ngModel)]="clientCode" required autocomplete="organization" />
+          <input matInput name="clientCode" [(ngModel)]="clientCode" (blur)="onClientCodeBlur()" required autocomplete="organization" />
         </mat-form-field>
       }
 

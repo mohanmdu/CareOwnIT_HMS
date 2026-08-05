@@ -24,6 +24,13 @@ import org.springframework.context.annotation.Primary;
  * every existing unqualified @Cacheable (i.e. ClinicSettingsService)
  * resolving to the same bean as before this class changed - zero impact
  * on it.
+ *
+ * publicBranding (see PublicBrandingService) rides on this same Caffeine
+ * manager rather than getting a third bean - it needs the identical
+ * short-TTL-self-expiring shape (an unauthenticated, cheap-to-call,
+ * per-clientCode lookup should never go stale for more than a few seconds,
+ * and unlike clinicSettings it's keyed by clientCode, not TenantContext, so
+ * it can't share that cache's own explicit-evict-only lifecycle).
  */
 @Configuration
 @EnableCaching
@@ -37,7 +44,7 @@ public class CacheConfig {
 
     @Bean
     public CacheManager licenseCacheManager() {
-        CaffeineCacheManager manager = new CaffeineCacheManager("clientLicense", "clientFeatureFlag");
+        CaffeineCacheManager manager = new CaffeineCacheManager("clientLicense", "clientFeatureFlag", "publicBranding");
         manager.setCaffeine(Caffeine.newBuilder().expireAfterWrite(45, TimeUnit.SECONDS));
         return manager;
     }

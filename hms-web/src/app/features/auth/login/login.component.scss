@@ -3,7 +3,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(160deg, var(--hms-color-primary) 0%, var(--hms-color-tertiary) 100%);
+  // The gradient is the default background-image; a resolved client's
+  // loginBackgroundImage (login.component.ts, bound via [style.backgroundImage])
+  // overrides just that one property via inline-style specificity, leaving
+  // size/position/repeat below in effect for either case.
+  background-image: linear-gradient(160deg, var(--hms-color-primary) 0%, var(--hms-color-tertiary) 100%);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   padding: var(--hms-space-4);
 }
 
@@ -47,6 +54,14 @@
   color: var(--hms-color-primary);
   font-size: 1.5rem;
   font-weight: var(--hms-font-weight-bold);
+  flex-shrink: 0;
+}
+
+.login-brand-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: var(--hms-radius-md);
   flex-shrink: 0;
 }
 

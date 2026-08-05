@@ -72,4 +72,10 @@ export class ClinicSettingsService {
     formData.append('file', file);
     return this.http.post<ClinicSettings>(`${this.baseUrl}/favicon`, formData);
   }
+
+  uploadLoginBackground(file: File): Observable<ClinicSettings> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<ClinicSettings>(`${this.baseUrl}/login-background`, formData);
+  }
 }

@@ -153,6 +153,45 @@
   color: var(--hms-color-danger, #b3261e);
 }
 
+.clinic-login-background-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--hms-space-4);
+
+  // Same "Change logo" wrapping fix - see .clinic-logo-row's own comment.
+  button {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
+
+.clinic-login-background-preview {
+  width: 96px;
+  height: 56px;
+  object-fit: cover;
+  border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+  border-radius: var(--hms-radius-md, 8px);
+}
+
+.clinic-login-background-fallback {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  width: 96px;
+  height: 56px;
+  padding: var(--hms-space-2);
+  border: 1px dashed var(--hms-color-border-strong);
+  border-radius: var(--hms-radius-md, 8px);
+  color: var(--hms-color-text-muted);
+  font-size: var(--hms-font-size-xs);
+
+  mat-icon {
+    flex-shrink: 0;
+  }
+}
+
 .theme-mode-row {
   display: flex;
   flex-wrap: wrap;

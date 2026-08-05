@@ -35,4 +35,9 @@ public class ClinicSettingsController {
     public ClinicSettingsDto uploadFavicon(@RequestParam("file") MultipartFile file) {
         return service.uploadFavicon(file);
     }
+
+    @PostMapping("/login-background")
+    public ClinicSettingsDto uploadLoginBackground(@RequestParam("file") MultipartFile file) {
+        return service.uploadLoginBackground(file);
+    }
 }

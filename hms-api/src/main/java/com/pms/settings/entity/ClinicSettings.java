@@ -142,4 +142,8 @@ public class ClinicSettings {
     /** Independent from menuIconColor - what a leaf nav item's icon becomes on hover (see V93's own doc comment). */
     @Column(name = "menu_hover_icon_color", length = 9)
     private String menuHoverIconColor;
+
+    /** Shown pre-authentication on the multi-tenant login screen - see V94's own doc comment and PublicBrandingController. */
+    @Column(name = "login_background_path", length = 255)
+    private String loginBackgroundPath;
 }

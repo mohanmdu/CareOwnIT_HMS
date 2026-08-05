@@ -42,5 +42,6 @@ public record ClinicSettingsDto(
         String menuHoverTextColor,
         FontSizeScale fontSizeScale,
         String brandTextColor,
-        String menuHoverIconColor) {
+        String menuHoverIconColor,
+        String loginBackgroundUrl) {
 }

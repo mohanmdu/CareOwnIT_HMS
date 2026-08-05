@@ -125,4 +125,6 @@ export interface ClinicSettings {
   brandTextColor: string | null;
   /** Independent from menuIconColor - what a leaf nav item's icon becomes on hover. */
   menuHoverIconColor: string | null;
+  /** Shown pre-authentication on the multi-tenant login screen - see PublicBrandingService (hms-api) and core/services/public-branding.service.ts. */
+  loginBackgroundUrl: string | null;
 }

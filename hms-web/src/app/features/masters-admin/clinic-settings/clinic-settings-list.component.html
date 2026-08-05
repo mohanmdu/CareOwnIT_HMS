@@ -313,6 +313,33 @@
           />
         </div>
 
+        <h4 class="theme-subheading">Login screen</h4>
+        <p class="theme-colors-hint">
+          Shown on the sign-in page before a user logs in - only relevant for multi-tenant deployments, where
+          each hospital's staff should see their own hospital's look before they've even signed in.
+        </p>
+        <div class="clinic-login-background-row">
+          @if (loginBackgroundUrl()) {
+            <img [src]="loginBackgroundUrl()" alt="" class="clinic-login-background-preview" />
+          } @else {
+            <div class="clinic-login-background-fallback">
+              <mat-icon aria-hidden="true">wallpaper</mat-icon>
+              <span>No custom background - the theme's gradient is used instead</span>
+            </div>
+          }
+          <button mat-stroked-button type="button" [disabled]="uploadingLoginBackground()" (click)="loginBackgroundInput.click()">
+            <mat-icon aria-hidden="true">upload</mat-icon>
+            {{ uploadingLoginBackground() ? 'Uploading…' : 'Change login background' }}
+          </button>
+          <input
+            #loginBackgroundInput
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            hidden
+            (change)="onLoginBackgroundSelected($event)"
+          />
+        </div>
+
         <button
           type="button"
           class="theme-advanced-toggle"

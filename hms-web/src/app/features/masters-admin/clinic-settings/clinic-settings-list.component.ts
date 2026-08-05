@@ -72,8 +72,10 @@ export class ClinicSettingsListComponent {
   saving = signal(false);
   uploadingLogo = signal(false);
   uploadingFavicon = signal(false);
+  uploadingLoginBackground = signal(false);
   logoUrl = signal<string | null>(null);
   faviconUrl = signal<string | null>(null);
+  loginBackgroundUrl = signal<string | null>(null);
   showAdvanced = signal(false);
   showJsonPanel = signal(false);
   pasteJsonText = signal('');
@@ -160,6 +162,7 @@ export class ClinicSettingsListComponent {
         };
         this.logoUrl.set(settings.logoUrl);
         this.faviconUrl.set(settings.faviconUrl);
+        this.loginBackgroundUrl.set(settings.loginBackgroundUrl);
         this.loading.set(false);
         this.themeHistory.reset(this.snapshotForm());
       },
@@ -355,6 +358,26 @@ export class ClinicSettingsListComponent {
       error: () => {
         this.uploadingFavicon.set(false);
         this.notification.error('Failed to upload favicon.');
+      }
+    });
+  }
+
+  onLoginBackgroundSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    if (!file) {
+      return;
+    }
+    this.uploadingLoginBackground.set(true);
+    this.service.uploadLoginBackground(file).subscribe({
+      next: (settings) => {
+        this.loginBackgroundUrl.set(settings.loginBackgroundUrl);
+        this.uploadingLoginBackground.set(false);
+        this.notification.success('Login background updated.');
+      },
+      error: () => {
+        this.uploadingLoginBackground.set(false);
+        this.notification.error('Failed to upload login background.');
       }
     });
   }

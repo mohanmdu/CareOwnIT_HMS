@@ -10,6 +10,7 @@ import com.pms.settings.entity.ThemeMode;
 import com.pms.settings.repository.ClinicSettingsRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -113,6 +114,24 @@ public class ClinicSettingsService {
         return toDto(repository.save(settings));
     }
 
+    /**
+     * Also evicts "publicBranding" (see PublicBrandingService) - that cache is
+     * keyed by clientCode, not by TenantContext, so this class's own
+     * CACHE_KEY can't target just this tenant's entry; allEntries=true is
+     * an acceptable blunt instrument here given that cache's short (45s)
+     * TTL and low write frequency (an admin changing the login background).
+     */
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = CACHE_NAME, key = CACHE_KEY),
+            @CacheEvict(value = "publicBranding", allEntries = true, cacheManager = "licenseCacheManager")
+    })
+    public ClinicSettingsDto uploadLoginBackground(MultipartFile file) {
+        ClinicSettings settings = getOrThrow();
+        settings.setLoginBackgroundPath(fileStorageService.store(file, "clinic"));
+        return toDto(repository.save(settings));
+    }
+
     private ClinicSettings getOrThrow() {
         return repository.findById(ClinicSettings.SINGLETON_ID)
                 .orElseThrow(() -> new EntityNotFoundException("Clinic settings not found"));
@@ -156,6 +175,7 @@ public class ClinicSettingsService {
                 settings.getMenuHoverTextColor(),
                 settings.getFontSizeScale(),
                 settings.getBrandTextColor(),
-                settings.getMenuHoverIconColor());
+                settings.getMenuHoverIconColor(),
+                settings.getLoginBackgroundPath());
     }
 }
