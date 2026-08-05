@@ -2,6 +2,9 @@ import { inject, Injectable } from '@angular/core';
 import { catchError, of } from 'rxjs';
 import { ClinicSettingsService } from '../../features/masters-admin/clinic-settings/clinic-settings.service';
 import { CornerRadiusStyle, FontSizeScale, ThemeMode } from '../../features/masters-admin/clinic-settings/clinic-settings.model';
+import { bumpChartThemeVersion } from './chart-theme.signal';
+
+const DEFAULT_FAVICON_URL = 'favicon.ico';
 
 export interface ThemeSettings {
   themePrimaryColor?: string | null;
@@ -23,6 +26,7 @@ export interface ThemeSettings {
   fontSizeScale?: FontSizeScale;
   brandTextColor?: string | null;
   menuHoverIconColor?: string | null;
+  faviconUrl?: string | null;
 }
 
 /**
@@ -225,6 +229,33 @@ export class ThemeService {
     root.setProperty('--hms-font-scale', FONT_SCALE_MAP[settings.fontSizeScale ?? 'COMFORTABLE']);
 
     this.applyThemeMode(settings.themeMode);
+    this.applyFavicon(settings);
+    bumpChartThemeVersion();
+  }
+
+  /**
+   * Swaps the browser tab icon at runtime - faviconUrl is already stored/
+   * uploadable (see ClinicSettingsService), this was the missing last step
+   * that actually applies it. Falls back to the compiled-in default rather
+   * than removing the tag, so a client that never uploaded one keeps the
+   * app's own icon instead of a blank tab.
+   *
+   * Checked via 'in', not just reading the property: the live-preview path
+   * (clinic-settings-list.component.ts's applyThemeSettings) sends a
+   * partial ThemeSettings with no faviconUrl key at all (favicon uploads
+   * apply immediately, they're not part of the color-preview draft) - a
+   * plain undefined check couldn't tell that apart from "clear the
+   * favicon", and would wipe out the tenant's real uploaded favicon on
+   * every single color tweak made while previewing.
+   */
+  private applyFavicon(settings: ThemeSettings): void {
+    if (!('faviconUrl' in settings)) {
+      return;
+    }
+    const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    if (link) {
+      link.href = settings.faviconUrl ?? DEFAULT_FAVICON_URL;
+    }
   }
 
   private applyThemeMode(mode: ThemeMode | undefined): void {

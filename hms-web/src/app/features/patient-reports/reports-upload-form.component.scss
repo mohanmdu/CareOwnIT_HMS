@@ -17,7 +17,7 @@
   display: flex;
   align-items: center;
   gap: var(--hms-space-3);
-  background: #e65100;
+  background: var(--hms-status-warning-text);
   padding: var(--hms-space-2) var(--hms-space-3);
   border-radius: var(--hms-radius-sm, 2px);
 }

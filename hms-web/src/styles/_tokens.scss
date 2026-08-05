@@ -61,6 +61,27 @@
   --hms-chart-series-3: #e87ba4;
   --hms-chart-series-4: #eda100;
   --hms-chart-series-5: #1baf7a;
+
+  // ---- Status badges/rows (lab, insurance, discharge, patient-reports) --
+  // Exact values these modules already used as bare hex before this block
+  // existed - defined here unchanged (zero visual difference in light mode)
+  // so they read from the token system instead of being repeated as raw
+  // hex in ~25 component stylesheets, and so dark mode (below) can give
+  // them a correct value at all, which a bare hex literal never could.
+  // Deliberately NOT reused for tenant branding - these are fixed
+  // semantic meanings (pending/expired/approved/info), never influenced by
+  // ClinicSettings' theme colors, matching how --hms-color-warning/-danger/
+  // -success above already work.
+  --hms-status-warning-bg: #fff3e0;
+  --hms-status-warning-text: #e65100;
+  --hms-status-danger-bg: #fdecea;
+  --hms-status-danger-border: #f5c2c0;
+  --hms-status-danger-text: #c62828;
+  --hms-status-success-bg: #e8f5e9;
+  --hms-status-success-border: #bfe3c1;
+  --hms-status-success-text: #2e7d32;
+  --hms-status-info-bg: #e3f2fd;
+  --hms-status-info-text: #1565c0;
 }
 
 // AUTO mode (ClinicSettings.themeMode, no explicit data-theme set): follow
@@ -113,6 +134,20 @@
     --hms-chart-series-3: #d55181;
     --hms-chart-series-4: #c98500;
     --hms-chart-series-5: #199e70;
+
+    // Same values as --hms-color-warning/-danger/-success-container/-on-*
+    // above, rather than the light-mode literals a few lines up - see
+    // this block's own status-token doc comment.
+    --hms-status-warning-bg: #402e0f;
+    --hms-status-warning-text: #f5d9ac;
+    --hms-status-danger-bg: #401615;
+    --hms-status-danger-border: #e5726f;
+    --hms-status-danger-text: #f6c6c4;
+    --hms-status-success-bg: #123821;
+    --hms-status-success-border: #6cc98a;
+    --hms-status-success-text: #bfe8cd;
+    --hms-status-info-bg: #123a5c;
+    --hms-status-info-text: #6fa8dc;
   }
 }
 
@@ -163,6 +198,17 @@
   --hms-chart-series-3: #d55181;
   --hms-chart-series-4: #c98500;
   --hms-chart-series-5: #199e70;
+
+  --hms-status-warning-bg: #402e0f;
+  --hms-status-warning-text: #f5d9ac;
+  --hms-status-danger-bg: #401615;
+  --hms-status-danger-border: #e5726f;
+  --hms-status-danger-text: #f6c6c4;
+  --hms-status-success-bg: #123821;
+  --hms-status-success-border: #6cc98a;
+  --hms-status-success-text: #bfe8cd;
+  --hms-status-info-bg: #123a5c;
+  --hms-status-info-text: #6fa8dc;
 }
 
 :root[data-theme='light'] {
@@ -210,6 +256,17 @@
   --hms-chart-series-3: #e87ba4;
   --hms-chart-series-4: #eda100;
   --hms-chart-series-5: #1baf7a;
+
+  --hms-status-warning-bg: #fff3e0;
+  --hms-status-warning-text: #e65100;
+  --hms-status-danger-bg: #fdecea;
+  --hms-status-danger-border: #f5c2c0;
+  --hms-status-danger-text: #c62828;
+  --hms-status-success-bg: #e8f5e9;
+  --hms-status-success-border: #bfe3c1;
+  --hms-status-success-text: #2e7d32;
+  --hms-status-info-bg: #e3f2fd;
+  --hms-status-info-text: #1565c0;
 }
 
 :root {

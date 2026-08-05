@@ -16,7 +16,7 @@
 .lrf-title {
   margin: 0;
   padding: var(--hms-space-2) var(--hms-space-3);
-  background: #e65100;
+  background: var(--hms-status-warning-text);
   color: #fff;
   text-align: center;
   border-radius: var(--hms-radius-sm, 2px);
@@ -63,7 +63,7 @@
   justify-content: center;
   gap: var(--hms-space-3);
   padding: var(--hms-space-3);
-  background: #fff3e0;
+  background: var(--hms-status-warning-bg);
   border-radius: var(--hms-radius-md, 4px);
 }
 
@@ -74,7 +74,7 @@
 .lrf-total-value {
   font-size: var(--hms-font-size-lg);
   font-weight: 700;
-  color: #e65100;
+  color: var(--hms-status-warning-text);
 }
 
 .lrf-submit-btn {

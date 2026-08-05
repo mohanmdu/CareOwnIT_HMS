@@ -98,13 +98,13 @@
 }
 
 .icd-type-op {
-  background: #e3f2fd;
-  color: #1565c0;
+  background: var(--hms-status-info-bg);
+  color: var(--hms-status-info-text);
 }
 
 .icd-type-ip {
-  background: #fff3e0;
-  color: #e65100;
+  background: var(--hms-status-warning-bg);
+  color: var(--hms-status-warning-text);
 }
 
 @media (max-width: 900px) {

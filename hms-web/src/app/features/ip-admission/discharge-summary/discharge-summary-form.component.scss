@@ -15,7 +15,7 @@
   justify-content: space-between;
   gap: var(--hms-space-3);
   padding: var(--hms-space-3) var(--hms-space-4);
-  background: #e65100;
+  background: var(--hms-status-warning-text);
   color: #fff;
   border-radius: var(--hms-radius-md, 4px);
 
@@ -48,7 +48,7 @@
 }
 
 .dsf-advise-title {
-  color: #e65100;
+  color: var(--hms-status-warning-text);
 }
 
 .dsf-subsection-title {

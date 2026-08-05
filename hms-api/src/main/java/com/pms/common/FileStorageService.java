@@ -134,6 +134,7 @@ public class FileStorageService {
         if (!ALLOWED_IMAGE_CONTENT_TYPES.contains(file.getContentType())) {
             throw new IllegalArgumentException("Only JPEG, PNG or WEBP images are allowed");
         }
+        requireMatchingSignature(file);
         return switch (file.getContentType()) {
             case "image/png" -> ".png";
             case "image/webp" -> ".webp";
@@ -145,11 +146,60 @@ public class FileStorageService {
         if (!ALLOWED_DOCUMENT_CONTENT_TYPES.contains(file.getContentType())) {
             throw new IllegalArgumentException("Only JPEG, PNG or PDF files are allowed");
         }
+        requireMatchingSignature(file);
         return switch (file.getContentType()) {
             case "image/png" -> ".png";
             case "application/pdf" -> ".pdf";
             default -> ".jpg";
         };
+    }
+
+    /**
+     * Defense-in-depth beyond the Content-Type header above, which is
+     * client-supplied and trivially spoofable (e.g. a renamed/relabeled
+     * file that isn't actually a JPEG) - checks the file's own leading
+     * bytes against the format its declared Content-Type claims. Doesn't
+     * replace the allowlist check (still the thing that keeps SVG and
+     * everything else out - see this class's own doc comment); this only
+     * catches a file that lies about which allowed type it is.
+     */
+    private void requireMatchingSignature(MultipartFile file) {
+        byte[] header;
+        try {
+            header = file.getBytes();
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to read uploaded file", e);
+        }
+        if (!matchesSignature(header, file.getContentType())) {
+            throw new IllegalArgumentException("File content does not match its declared type");
+        }
+    }
+
+    private static boolean matchesSignature(byte[] bytes, String contentType) {
+        return switch (contentType) {
+            case "image/jpeg" -> startsWith(bytes, 0xFF, 0xD8, 0xFF);
+            case "image/png" -> startsWith(bytes, 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A);
+            // RIFF....WEBP - bytes 4-7 are a little-endian chunk size, not part of the signature.
+            case "image/webp" -> startsWith(bytes, 0x52, 0x49, 0x46, 0x46) && matchesAt(bytes, 8, 0x57, 0x45, 0x42, 0x50);
+            case "application/pdf" -> startsWith(bytes, 0x25, 0x50, 0x44, 0x46);
+            default -> false;
+        };
+    }
+
+    private static boolean startsWith(byte[] bytes, int... signature) {
+        return matchesAt(bytes, 0, signature);
+    }
+
+    private static boolean matchesAt(byte[] bytes, int offset, int... signature) {
+        if (bytes.length < offset + signature.length) {
+            return false;
+        }
+        for (int i = 0; i < signature.length; i++) {
+            if ((bytes[offset + i] & 0xFF) != signature[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void requirePrivateCategory(String category) {

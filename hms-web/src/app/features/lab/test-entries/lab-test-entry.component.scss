@@ -13,7 +13,7 @@
 .lte-title {
   margin: 0;
   padding: var(--hms-space-2) var(--hms-space-3);
-  background: #e65100;
+  background: var(--hms-status-warning-text);
   color: #fff;
   text-align: center;
   border-radius: var(--hms-radius-sm, 2px);
@@ -101,7 +101,7 @@
 }
 
 .lte-result-input.lte-abnormal {
-  border-color: #c62828;
+  border-color: var(--hms-status-danger-text);
   border-width: 2px;
 }
 
@@ -113,7 +113,7 @@
 
 .lte-note {
   text-align: center;
-  color: #c62828;
+  color: var(--hms-status-danger-text);
   font-weight: 600;
   font-size: var(--hms-font-size-sm);
 }

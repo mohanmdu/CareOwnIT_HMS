@@ -51,7 +51,7 @@
 }
 
 .lps-investigations-btn {
-  background: #e65100;
+  background: var(--hms-status-warning-text);
   color: #fff;
 }
 
@@ -65,7 +65,7 @@
 .lps-results-title {
   margin: 0;
   padding: var(--hms-space-2) var(--hms-space-3);
-  background: #e65100;
+  background: var(--hms-status-warning-text);
   color: #fff;
   font-size: var(--hms-font-size-md);
   text-align: center;

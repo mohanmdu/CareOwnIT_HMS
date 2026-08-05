@@ -17,7 +17,7 @@
 .lrfd-title {
   margin: 0;
   padding: var(--hms-space-2) var(--hms-space-3);
-  background: #e65100;
+  background: var(--hms-status-warning-text);
   color: #fff;
   text-align: center;
   border-radius: var(--hms-radius-sm, 2px);
@@ -58,15 +58,15 @@
 .lrfd-already-refunded {
   margin: 0;
   padding: var(--hms-space-3);
-  background: #e8f5e9;
+  background: var(--hms-status-success-bg);
   border-radius: var(--hms-radius-sm, 2px);
-  color: #2e7d32;
+  color: var(--hms-status-success-text);
   font-weight: 600;
 }
 
 .lrfd-refund-panel {
   padding: var(--hms-space-4);
-  background: #e3f2fd;
+  background: var(--hms-status-info-bg);
   border-radius: var(--hms-radius-md, 4px);
   display: flex;
   flex-direction: column;

@@ -354,6 +354,9 @@ export class ClinicSettingsListComponent {
         this.faviconUrl.set(settings.faviconUrl);
         this.uploadingFavicon.set(false);
         this.notification.success('Favicon updated.');
+        // Swaps the actual browser-tab icon immediately - see ThemeService.applyFavicon(). Without this, the new favicon was
+        // only stored/uploaded but stayed invisible until the next full Save or page reload happened to re-apply the theme.
+        this.themeService.applyTheme(settings);
       },
       error: () => {
         this.uploadingFavicon.set(false);

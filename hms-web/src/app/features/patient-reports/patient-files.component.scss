@@ -13,7 +13,7 @@
 .pf-details-title {
   margin: 0;
   padding: var(--hms-space-2) var(--hms-space-3);
-  background: #e65100;
+  background: var(--hms-status-warning-text);
   color: #fff;
   font-size: var(--hms-font-size-lg);
 }
@@ -137,7 +137,7 @@
 
 .pf-whatsapp-link {
   display: block;
-  color: #2e7d32;
+  color: var(--hms-status-success-text);
   font-size: var(--hms-font-size-sm);
   min-width: 0;
   padding: 0;

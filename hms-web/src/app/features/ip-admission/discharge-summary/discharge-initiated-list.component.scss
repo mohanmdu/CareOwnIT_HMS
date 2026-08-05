@@ -102,7 +102,7 @@
 .dil-discharged-tag {
   margin-top: var(--hms-space-2);
   font-weight: 700;
-  color: #c62828;
+  color: var(--hms-status-danger-text);
 }
 
 .dil-card-actions {
@@ -113,7 +113,7 @@
 }
 
 .dil-summary-btn {
-  background: #2e7d32;
+  background: var(--hms-status-success-text);
   color: #fff;
 }
 

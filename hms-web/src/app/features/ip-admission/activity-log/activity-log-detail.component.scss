@@ -84,20 +84,20 @@
 }
 
 .ald-diff-old {
-  background: #fdecea;
-  border: 1px solid #f5c2c0;
+  background: var(--hms-status-danger-bg);
+  border: 1px solid var(--hms-status-danger-border);
 
   .ald-diff-label {
-    color: #c62828;
+    color: var(--hms-status-danger-text);
   }
 }
 
 .ald-diff-new {
-  background: #e8f5e9;
-  border: 1px solid #bfe3c1;
+  background: var(--hms-status-success-bg);
+  border: 1px solid var(--hms-status-success-border);
 
   .ald-diff-label {
-    color: #2e7d32;
+    color: var(--hms-status-success-text);
   }
 }
 

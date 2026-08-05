@@ -49,7 +49,7 @@
 .par-banner {
   margin: 0;
   padding: var(--hms-space-3);
-  background: #e65100;
+  background: var(--hms-status-warning-text);
   color: #fff;
   text-align: center;
   font-size: var(--hms-font-size-lg);
@@ -62,7 +62,7 @@
   gap: var(--hms-space-4);
   margin: var(--hms-space-4) var(--hms-space-4) 0;
   padding: var(--hms-space-2) var(--hms-space-4);
-  background: #e65100;
+  background: var(--hms-status-warning-text);
   color: #fff;
   font-weight: 600;
 }
@@ -129,7 +129,7 @@
 }
 
 .par-waiting-text {
-  color: #e65100;
+  color: var(--hms-status-warning-text);
   font-weight: 600;
 }
 
