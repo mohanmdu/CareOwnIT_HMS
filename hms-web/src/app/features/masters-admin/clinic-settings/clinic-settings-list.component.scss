@@ -175,21 +175,21 @@
   border-radius: var(--hms-radius-md, 8px);
 }
 
+// Icon-only placeholder, same shape as .clinic-logo-fallback above - a
+// previous version packed a full explanatory sentence into this same
+// fixed 96x56 box, which overflowed and collided with the hint text
+// above it. That explanation now lives in the hint paragraph instead.
 .clinic-login-background-fallback {
   display: flex;
   align-items: center;
-  gap: var(--hms-space-2);
+  justify-content: center;
   width: 96px;
   height: 56px;
-  padding: var(--hms-space-2);
   border: 1px dashed var(--hms-color-border-strong);
   border-radius: var(--hms-radius-md, 8px);
-  color: var(--hms-color-text-muted);
-  font-size: var(--hms-font-size-xs);
-
-  mat-icon {
-    flex-shrink: 0;
-  }
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.3));
+  font-size: 28px;
+  flex-shrink: 0;
 }
 
 .theme-mode-row {
