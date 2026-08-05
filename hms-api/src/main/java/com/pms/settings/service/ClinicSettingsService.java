@@ -92,6 +92,8 @@ public class ClinicSettingsService {
         settings.setMenuChevronColor(dto.menuChevronColor());
         settings.setMenuHoverTextColor(dto.menuHoverTextColor());
         settings.setFontSizeScale(dto.fontSizeScale() != null ? dto.fontSizeScale() : FontSizeScale.COMFORTABLE);
+        settings.setBrandTextColor(dto.brandTextColor());
+        settings.setMenuHoverIconColor(dto.menuHoverIconColor());
         return toDto(repository.save(settings));
     }
 
@@ -152,6 +154,8 @@ public class ClinicSettingsService {
                 settings.getMenuIconColor(),
                 settings.getMenuChevronColor(),
                 settings.getMenuHoverTextColor(),
-                settings.getFontSizeScale());
+                settings.getFontSizeScale(),
+                settings.getBrandTextColor(),
+                settings.getMenuHoverIconColor());
     }
 }

@@ -1,0 +1,78 @@
+<div class="color-field" [class.color-field-invalid]="invalid()">
+  <label class="color-field-label" [for]="inputId">{{ label() }}</label>
+
+  <div class="color-field-row">
+    <button
+      type="button"
+      class="color-field-swatch"
+      [style.background]="swatchColor"
+      [class.color-field-swatch-empty]="!value()"
+      [matTooltip]="'Pick ' + label() + ' visually'"
+      [attr.aria-label]="'Open color picker for ' + label()"
+      (click)="openNativePicker()"
+    ></button>
+
+    <input
+      #nativeColorInput
+      type="color"
+      class="color-field-native-input"
+      tabindex="-1"
+      aria-hidden="true"
+      [value]="value() || '#000000'"
+      (input)="onNativeColorPicked($event)"
+    />
+
+    <input
+      [id]="inputId"
+      class="color-field-hex-input"
+      type="text"
+      spellcheck="false"
+      autocomplete="off"
+      placeholder="Not set"
+      [ngModel]="draftText()"
+      [ngModelOptions]="{ standalone: true }"
+      (ngModelChange)="onHexInput($event)"
+      (blur)="onCommitDraft()"
+      (keydown.enter)="onCommitDraft()"
+    />
+
+    <div class="color-field-actions">
+      <button
+        type="button"
+        class="color-field-action-btn"
+        [disabled]="!value()"
+        matTooltip="Copy hex code"
+        [attr.aria-label]="'Copy hex code for ' + label()"
+        (click)="copy()"
+      >
+        <mat-icon aria-hidden="true">content_copy</mat-icon>
+      </button>
+      <button
+        type="button"
+        class="color-field-action-btn"
+        matTooltip="Paste hex code"
+        [attr.aria-label]="'Paste hex code for ' + label()"
+        (click)="paste()"
+      >
+        <mat-icon aria-hidden="true">content_paste</mat-icon>
+      </button>
+      @if (value()) {
+        <button
+          type="button"
+          class="color-field-action-btn"
+          matTooltip="Clear - use the default"
+          [attr.aria-label]="'Clear ' + label()"
+          (click)="clear()"
+        >
+          <mat-icon aria-hidden="true">close</mat-icon>
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (invalid()) {
+    <p class="color-field-error">Not a valid hex color - use a format like #0B5FA6.</p>
+  } @else if (hint()) {
+    <p class="color-field-hint">{{ hint() }}</p>
+  }
+</div>

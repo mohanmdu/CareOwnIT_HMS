@@ -40,5 +40,7 @@ public record ClinicSettingsDto(
         String menuIconColor,
         String menuChevronColor,
         String menuHoverTextColor,
-        FontSizeScale fontSizeScale) {
+        FontSizeScale fontSizeScale,
+        String brandTextColor,
+        String menuHoverIconColor) {
 }

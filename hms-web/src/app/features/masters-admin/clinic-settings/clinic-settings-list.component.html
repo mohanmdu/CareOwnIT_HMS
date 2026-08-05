@@ -123,10 +123,25 @@
       </app-section-card>
 
       <app-section-card icon="palette" tone="warning" title="Appearance Settings">
-        <button sectionActions mat-stroked-button type="button" [disabled]="saving()" (click)="resetTheme()">
-          <mat-icon aria-hidden="true">restart_alt</mat-icon>
-          Reset Theme &amp; Appearance
-        </button>
+        <div sectionActions class="theme-toolbar-actions">
+          <button mat-stroked-button type="button" [disabled]="!canUndo" (click)="undo()">
+            <mat-icon aria-hidden="true">undo</mat-icon>
+            Undo
+          </button>
+          <button mat-stroked-button type="button" (click)="exportTheme()">
+            <mat-icon aria-hidden="true">file_download</mat-icon>
+            Export JSON
+          </button>
+          <button mat-stroked-button type="button" (click)="triggerImportFile(importFileInput)">
+            <mat-icon aria-hidden="true">file_upload</mat-icon>
+            Import JSON
+          </button>
+          <input #importFileInput type="file" accept="application/json,.json" hidden (change)="onImportFileSelected($event)" />
+          <button mat-stroked-button type="button" [disabled]="saving()" (click)="resetTheme()">
+            <mat-icon aria-hidden="true">restart_alt</mat-icon>
+            Reset Theme &amp; Appearance
+          </button>
+        </div>
 
         <div class="theme-mode-row">
           <mat-button-toggle-group [value]="form.themeMode" (change)="onThemeModeChange($event.value)">
@@ -167,25 +182,59 @@
           }
         </div>
 
-        <h4 class="theme-subheading">Or fine-tune your own colors</h4>
+        <button
+          type="button"
+          class="theme-advanced-toggle"
+          (click)="toggleJsonPanel()"
+          [attr.aria-expanded]="showJsonPanel()"
+          aria-controls="theme-json-panel"
+        >
+          <mat-icon aria-hidden="true">{{ showJsonPanel() ? 'expand_less' : 'expand_more' }}</mat-icon>
+          Have a theme JSON already? Paste it here
+        </button>
+
+        <div
+          id="theme-json-panel"
+          class="theme-advanced-panel"
+          [class.theme-advanced-panel-expanded]="showJsonPanel()"
+          [attr.inert]="showJsonPanel() ? null : ''"
+        >
+          <div class="theme-advanced-panel-inner theme-json-paste">
+            <div class="theme-json-hint-box">
+              <p class="theme-colors-hint">
+                <strong>Where does a theme JSON come from?</strong> Someone at another branch opens their own
+                Appearance Settings, clicks <strong>Export JSON</strong> (top of this section) to download a small
+                text file, then sends you that file or its contents (email, chat, USB drive - anything that carries
+                text). Open it, copy everything inside, and paste it into the box below.
+              </p>
+              <p class="theme-colors-hint">
+                Not sure what it should look like?
+                <button type="button" class="theme-json-sample-link" (click)="loadSampleJson()">Load a sample to see the format</button>
+              </p>
+            </div>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="theme-json-textarea">
+              <textarea
+                matInput
+                name="pasteJsonText"
+                rows="10"
+                spellcheck="false"
+                placeholder="Paste the full contents of a theme JSON file here"
+                [ngModel]="pasteJsonText()"
+                (ngModelChange)="pasteJsonText.set($event)"
+              ></textarea>
+            </mat-form-field>
+            @if (pasteJsonError()) {
+              <p class="theme-json-error">{{ pasteJsonError() }}</p>
+            }
+            <p class="theme-colors-hint">Nothing is saved yet - review how it looks above, then click Save Changes when you're happy with it.</p>
+            <button mat-flat-button color="primary" type="button" [disabled]="!pasteJsonText().trim()" (click)="applyPastedJson()">
+              Apply pasted theme
+            </button>
+          </div>
+        </div>
+
+        <h4 class="theme-subheading">Typography &amp; shape</h4>
         <div class="hms-form-grid">
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Primary color</mat-label>
-            <input matInput type="color" name="themePrimaryColor" [(ngModel)]="form.themePrimaryColor" (change)="previewTheme()" />
-            <mat-hint>Buttons, links, table headers, active menu item</mat-hint>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Secondary color</mat-label>
-            <input matInput type="color" name="themeSecondaryColor" [(ngModel)]="form.themeSecondaryColor" (change)="previewTheme()" />
-            <mat-hint>Used for secondary/accent-style buttons</mat-hint>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Tertiary color</mat-label>
-            <input matInput type="color" name="themeTertiaryColor" [(ngModel)]="form.themeTertiaryColor" (change)="previewTheme()" />
-          </mat-form-field>
-
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>Font family</mat-label>
             <mat-select name="fontFamily" [(ngModel)]="form.fontFamily" (selectionChange)="previewTheme()">
@@ -237,6 +286,33 @@
           />
         </div>
 
+        <h4 class="theme-subheading">Brand colors</h4>
+        <div class="theme-color-grid">
+          <app-color-field
+            label="Primary"
+            hint="Buttons, links, table headers, active menu item"
+            [value]="form.themePrimaryColor || null"
+            (valueChange)="form.themePrimaryColor = $event ?? ''; previewTheme()"
+          />
+          <app-color-field
+            label="Secondary"
+            hint="Secondary/accent-style buttons"
+            [value]="form.themeSecondaryColor || null"
+            (valueChange)="form.themeSecondaryColor = $event ?? ''; previewTheme()"
+          />
+          <app-color-field
+            label="Tertiary"
+            [value]="form.themeTertiaryColor || null"
+            (valueChange)="form.themeTertiaryColor = $event ?? ''; previewTheme()"
+          />
+          <app-color-field
+            label="Company name text"
+            hint="The hospital name shown top-left in the side menu"
+            [value]="form.brandTextColor || null"
+            (valueChange)="form.brandTextColor = $event ?? ''; previewTheme()"
+          />
+        </div>
+
         <button
           type="button"
           class="theme-advanced-toggle"
@@ -245,7 +321,7 @@
           aria-controls="theme-advanced-panel"
         >
           <mat-icon aria-hidden="true">{{ showAdvanced() ? 'expand_less' : 'expand_more' }}</mat-icon>
-          Advanced - fine-tune individual elements
+          Advanced - fine-tune header, footer &amp; menu colors
         </button>
 
         <div
@@ -254,68 +330,78 @@
           [class.theme-advanced-panel-expanded]="showAdvanced()"
           [attr.inert]="showAdvanced() ? null : ''"
         >
-          <div class="theme-advanced-panel-inner hms-form-grid">
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Header background color</mat-label>
-              <input matInput type="color" name="headerBackgroundColor" [(ngModel)]="form.headerBackgroundColor" (change)="previewTheme()" />
-            </mat-form-field>
+          <div class="theme-advanced-panel-inner">
+            <p class="theme-colors-hint">
+              Grouped by where each color actually shows up. Every field shows its hex code - copy it to share with
+              your design team, or paste one in from a brand guide.
+            </p>
+            <mat-tab-group class="theme-color-tabs" animationDuration="150ms">
+              <mat-tab label="Header &amp; Footer">
+                <div class="theme-color-grid">
+                  <app-color-field
+                    label="Header background"
+                    [value]="form.headerBackgroundColor || null"
+                    (valueChange)="form.headerBackgroundColor = $event ?? ''; previewTheme()"
+                  />
+                  <app-color-field
+                    label="Footer background"
+                    [value]="form.footerBackgroundColor || null"
+                    (valueChange)="form.footerBackgroundColor = $event ?? ''; previewTheme()"
+                  />
+                </div>
+              </mat-tab>
 
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Footer background color</mat-label>
-              <input matInput type="color" name="footerBackgroundColor" [(ngModel)]="form.footerBackgroundColor" (change)="previewTheme()" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Menu background color</mat-label>
-              <input matInput type="color" name="menuBackgroundColor" [(ngModel)]="form.menuBackgroundColor" (change)="previewTheme()" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Menu text color</mat-label>
-              <input matInput type="color" name="menuTextColor" [(ngModel)]="form.menuTextColor" (change)="previewTheme()" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Menu active background color</mat-label>
-              <input
-                matInput
-                type="color"
-                name="menuActiveBackgroundColor"
-                [(ngModel)]="form.menuActiveBackgroundColor"
-                (change)="previewTheme()"
-              />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Menu active text color</mat-label>
-              <input matInput type="color" name="menuActiveTextColor" [(ngModel)]="form.menuActiveTextColor" (change)="previewTheme()" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Menu hover background color</mat-label>
-              <input
-                matInput
-                type="color"
-                name="menuHoverBackgroundColor"
-                [(ngModel)]="form.menuHoverBackgroundColor"
-                (change)="previewTheme()"
-              />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Menu hover text color</mat-label>
-              <input matInput type="color" name="menuHoverTextColor" [(ngModel)]="form.menuHoverTextColor" (change)="previewTheme()" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Menu icon color</mat-label>
-              <input matInput type="color" name="menuIconColor" [(ngModel)]="form.menuIconColor" (change)="previewTheme()" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Expand/collapse icon color</mat-label>
-              <input matInput type="color" name="menuChevronColor" [(ngModel)]="form.menuChevronColor" (change)="previewTheme()" />
-            </mat-form-field>
+              <mat-tab label="Side Menu">
+                <div class="theme-color-grid">
+                  <app-color-field
+                    label="Menu background"
+                    [value]="form.menuBackgroundColor || null"
+                    (valueChange)="form.menuBackgroundColor = $event ?? ''; previewTheme()"
+                  />
+                  <app-color-field
+                    label="Menu text"
+                    [value]="form.menuTextColor || null"
+                    (valueChange)="form.menuTextColor = $event ?? ''; previewTheme()"
+                  />
+                  <app-color-field
+                    label="Active background"
+                    [value]="form.menuActiveBackgroundColor || null"
+                    (valueChange)="form.menuActiveBackgroundColor = $event ?? ''; previewTheme()"
+                  />
+                  <app-color-field
+                    label="Active text"
+                    [value]="form.menuActiveTextColor || null"
+                    (valueChange)="form.menuActiveTextColor = $event ?? ''; previewTheme()"
+                  />
+                  <app-color-field
+                    label="Hover background"
+                    [value]="form.menuHoverBackgroundColor || null"
+                    (valueChange)="form.menuHoverBackgroundColor = $event ?? ''; previewTheme()"
+                  />
+                  <app-color-field
+                    label="Hover text"
+                    [value]="form.menuHoverTextColor || null"
+                    (valueChange)="form.menuHoverTextColor = $event ?? ''; previewTheme()"
+                  />
+                  <app-color-field
+                    label="Icon color"
+                    [value]="form.menuIconColor || null"
+                    (valueChange)="form.menuIconColor = $event ?? ''; previewTheme()"
+                  />
+                  <app-color-field
+                    label="Icon color on hover"
+                    hint="What a nav item's icon becomes on hover - separate from its normal icon color above"
+                    [value]="form.menuHoverIconColor || null"
+                    (valueChange)="form.menuHoverIconColor = $event ?? ''; previewTheme()"
+                  />
+                  <app-color-field
+                    label="Expand/collapse icon"
+                    [value]="form.menuChevronColor || null"
+                    (valueChange)="form.menuChevronColor = $event ?? ''; previewTheme()"
+                  />
+                </div>
+              </mat-tab>
+            </mat-tab-group>
           </div>
         </div>
       </app-section-card>

@@ -17,7 +17,11 @@
   padding: var(--hms-space-4) var(--hms-space-4) var(--hms-space-3);
   font-weight: var(--hms-font-weight-semibold);
   font-size: var(--hms-font-size-lg);
-  color: var(--hms-color-primary);
+  // Independently settable (ClinicSettings.brandTextColor via ThemeService)
+  // rather than always tied to the theme's primary color - a clinic whose
+  // brand color reads poorly as small text can fix just this without
+  // recoloring every other primary-colored element in the app.
+  color: var(--hms-brand-text, var(--hms-color-primary));
 }
 
 .shell-nav-list {
@@ -65,6 +69,16 @@
 .shell-nav-list a.mat-mdc-list-item {
   --mdc-list-list-item-label-text-color: var(--hms-menu-text, var(--hms-color-text));
   --mdc-list-list-item-leading-icon-color: var(--hms-menu-icon, var(--hms-color-text-muted));
+  // Material's OWN compiled CSS has a completely separate hover-specific
+  // selector/token for this - `.mdc-list-item--with-leading-icon:hover
+  // .mdc-list-item__start { color: var(--mdc-list-list-item-hover-leading-icon-color) }`
+  // (confirmed via CDP's getMatchedStylesForNode, not documented anywhere
+  // obvious) - redeclaring --mdc-list-list-item-leading-icon-color inside a
+  // :hover block here is a no-op, since that rule doesn't consume it at
+  // all during hover. This is the actual token Material reads, so it's set
+  // unconditionally here rather than nested under &:hover - Material's own
+  // selector already gates it to the hover state.
+  --mdc-list-list-item-hover-leading-icon-color: var(--hms-menu-hover-icon, var(--hms-menu-icon, var(--hms-color-text-muted)));
   width: calc(100% - var(--hms-space-4));
   margin: 0 var(--hms-space-2);
   border-radius: var(--hms-radius-full);

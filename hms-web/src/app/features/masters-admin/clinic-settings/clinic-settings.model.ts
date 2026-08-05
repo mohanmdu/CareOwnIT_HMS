@@ -60,6 +60,8 @@ export const DEFAULT_THEME_SETTINGS: Pick<
   | 'menuChevronColor'
   | 'menuHoverTextColor'
   | 'fontSizeScale'
+  | 'brandTextColor'
+  | 'menuHoverIconColor'
 > = {
   themeMode: 'LIGHT',
   themePrimaryColor: null,
@@ -78,7 +80,9 @@ export const DEFAULT_THEME_SETTINGS: Pick<
   menuIconColor: null,
   menuChevronColor: null,
   menuHoverTextColor: null,
-  fontSizeScale: 'COMFORTABLE'
+  fontSizeScale: 'COMFORTABLE',
+  brandTextColor: null,
+  menuHoverIconColor: null
 };
 
 export interface ClinicSettings {
@@ -117,4 +121,8 @@ export interface ClinicSettings {
   menuChevronColor: string | null;
   menuHoverTextColor: string | null;
   fontSizeScale: FontSizeScale;
+  /** Independent from themePrimaryColor - the hospital name shown top-left in the side menu (see app-shell.component.scss's .shell-brand). */
+  brandTextColor: string | null;
+  /** Independent from menuIconColor - what a leaf nav item's icon becomes on hover. */
+  menuHoverIconColor: string | null;
 }

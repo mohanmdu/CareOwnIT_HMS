@@ -1,0 +1,128 @@
+.color-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-1, 4px);
+}
+
+.color-field-label {
+  font-size: var(--hms-font-size-xs, 12px);
+  color: var(--hms-color-text-muted);
+  font-weight: var(--hms-font-weight-medium, 500);
+}
+
+.color-field-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2, 8px);
+  padding: 6px 8px;
+  border: 1px solid var(--hms-color-border);
+  border-radius: var(--hms-radius-sm, 6px);
+  background: var(--hms-color-surface, #fff);
+  transition: border-color var(--hms-transition-fast, 0.12s);
+
+  &:focus-within {
+    border-color: var(--hms-color-primary);
+  }
+}
+
+.color-field-invalid .color-field-row {
+  border-color: var(--hms-color-danger, #b3261e);
+}
+
+// Checkerboard pattern when unset, so "empty" reads as a real state, not a rendering glitch.
+.color-field-swatch {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  border: 1px solid var(--hms-color-border-strong);
+  cursor: pointer;
+  padding: 0;
+
+  &.color-field-swatch-empty {
+    background-image: conic-gradient(var(--hms-color-border) 90deg, transparent 90deg 180deg, var(--hms-color-border) 180deg 270deg, transparent 270deg);
+    background-size: 8px 8px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--hms-color-primary);
+    outline-offset: 2px;
+  }
+}
+
+.color-field-native-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.color-field-hex-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--hms-font-family-mono, 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace);
+  font-size: var(--hms-font-size-sm, 13px);
+  color: var(--hms-color-text);
+
+  &::placeholder {
+    color: var(--hms-color-text-disabled);
+    font-family: var(--hms-font-family, inherit);
+  }
+}
+
+.color-field-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.color-field-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: var(--hms-radius-sm, 6px);
+  background: transparent;
+  color: var(--hms-color-text-muted);
+  cursor: pointer;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover:not(:disabled) {
+    background: var(--hms-color-surface-alt);
+    color: var(--hms-color-text);
+  }
+
+  &:disabled {
+    color: var(--hms-color-text-disabled);
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--hms-color-primary);
+    outline-offset: -2px;
+  }
+}
+
+.color-field-error {
+  margin: 0;
+  font-size: var(--hms-font-size-xs, 12px);
+  color: var(--hms-color-danger, #b3261e);
+}
+
+.color-field-hint {
+  margin: 0;
+  font-size: var(--hms-font-size-xs, 12px);
+  color: var(--hms-color-text-muted);
+}

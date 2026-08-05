@@ -109,6 +109,13 @@
   </mat-sidenav-content>
 </mat-sidenav-container>
 
+<!--
+  Both icons below use the filled "material-icons" font set, not the
+  outlined variant Angular's own default styling elsewhere in this app
+  favors - outlined icons' thin strokes read as faint/hard-to-see at this
+  small colorful-badge size (each icon sits in a ~32px tone-container
+  square), where a bolder filled glyph is much more legible.
+-->
 <ng-template #navGroupTemplate let-group="group">
   @if (group.items.length === 1) {
     <a
@@ -121,7 +128,7 @@
     >
       <mat-icon
         matListItemIcon
-        fontSet="material-icons-outlined"
+        fontSet="material-icons"
         aria-hidden="true"
         [class]="'shell-nav-icon-badge tone-' + iconToneFor(group)"
         >{{ group.icon }}</mat-icon
@@ -139,7 +146,7 @@
     >
       <mat-icon
         [class]="'shell-nav-group-icon shell-nav-icon-badge tone-' + iconToneFor(group)"
-        fontSet="material-icons-outlined"
+        fontSet="material-icons"
         aria-hidden="true"
         >{{ group.icon }}</mat-icon
       >

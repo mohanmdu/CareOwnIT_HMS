@@ -134,4 +134,12 @@ public class ClinicSettings {
     @Enumerated(EnumType.STRING)
     @Column(name = "font_size_scale", nullable = false, length = 16)
     private FontSizeScale fontSizeScale = FontSizeScale.COMFORTABLE;
+
+    /** Independent from themePrimaryColor - see V92's own doc comment. */
+    @Column(name = "brand_text_color", length = 9)
+    private String brandTextColor;
+
+    /** Independent from menuIconColor - what a leaf nav item's icon becomes on hover (see V93's own doc comment). */
+    @Column(name = "menu_hover_icon_color", length = 9)
+    private String menuHoverIconColor;
 }

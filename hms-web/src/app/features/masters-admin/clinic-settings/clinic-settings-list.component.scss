@@ -11,6 +11,16 @@
   display: flex;
   align-items: center;
   gap: var(--hms-space-3);
+
+  // The "Change logo" button sits in a minmax(220px, 1fr) grid cell
+  // alongside the 64px logo preview - narrow enough that the button's text
+  // was wrapping to two lines. Keeps it on one line; the row overflows the
+  // cell slightly on very narrow columns instead, which reads far better
+  // than a button whose label breaks mid-phrase.
+  button {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 }
 
 .clinic-logo-fallback {
@@ -43,6 +53,12 @@
   display: flex;
   align-items: center;
   gap: var(--hms-space-3);
+
+  // Same "Change logo" wrapping fix - see .clinic-logo-row's own comment.
+  button {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 }
 
 .clinic-favicon-preview {
@@ -58,6 +74,83 @@
   font-size: var(--hms-font-size-sm);
   font-weight: var(--hms-font-weight-semibold);
   color: var(--hms-color-text-muted);
+}
+
+.theme-toolbar-actions {
+  display: flex;
+  gap: var(--hms-space-2);
+  flex-wrap: wrap;
+}
+
+.theme-colors-hint {
+  margin: 0 0 var(--hms-space-3);
+  font-size: var(--hms-font-size-xs);
+  color: var(--hms-color-text-muted);
+}
+
+.theme-color-tabs {
+  border: 1px solid var(--hms-color-border);
+  border-radius: var(--hms-radius-lg);
+  overflow: hidden;
+}
+
+.theme-color-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-4);
+}
+
+.theme-json-paste {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+  align-items: flex-start;
+}
+
+.theme-json-hint-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+  padding: var(--hms-space-3);
+  background: var(--hms-color-surface-alt);
+  border-radius: var(--hms-radius-md);
+  width: 100%;
+
+  .theme-colors-hint {
+    margin: 0;
+  }
+}
+
+.theme-json-sample-link {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: var(--hms-font-weight-semibold);
+  color: var(--hms-color-primary);
+  cursor: pointer;
+  text-decoration: underline;
+
+  &:focus-visible {
+    outline: 2px solid var(--hms-color-primary);
+    outline-offset: 2px;
+  }
+}
+
+.theme-json-textarea {
+  width: 100%;
+
+  textarea {
+    font-family: var(--hms-font-family-mono, 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace);
+    font-size: var(--hms-font-size-xs);
+  }
+}
+
+.theme-json-error {
+  margin: 0;
+  font-size: var(--hms-font-size-xs);
+  color: var(--hms-color-danger, #b3261e);
 }
 
 .theme-mode-row {
@@ -84,10 +177,20 @@
   cursor: pointer;
   text-align: left;
   font: inherit;
-  transition: border-color var(--hms-transition-fast), box-shadow var(--hms-transition-fast);
+  // Resting elevation (not just a border) so the card reads as a physical,
+  // liftable object rather than a flat outlined box - lifts further on
+  // hover as a tactile "about to be picked up" cue, matching how a
+  // considered card grid (not a plain bordered list) should feel.
+  box-shadow: var(--hms-shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.06));
+  transition:
+    border-color var(--hms-transition-fast),
+    box-shadow var(--hms-transition-fast),
+    transform var(--hms-transition-fast);
 
   &:hover {
     border-color: var(--hms-color-border-strong);
+    box-shadow: var(--hms-shadow-md, 0 6px 16px rgba(0, 0, 0, 0.1));
+    transform: translateY(-2px);
   }
 
   &:focus-visible {

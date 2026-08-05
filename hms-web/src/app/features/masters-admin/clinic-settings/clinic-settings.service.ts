@@ -39,6 +39,8 @@ export type ClinicSettingsInput = Pick<
   | 'menuChevronColor'
   | 'menuHoverTextColor'
   | 'fontSizeScale'
+  | 'brandTextColor'
+  | 'menuHoverIconColor'
 >;
 
 /**

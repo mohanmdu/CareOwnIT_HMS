@@ -21,6 +21,8 @@ export interface ThemeSettings {
   menuChevronColor?: string | null;
   menuHoverTextColor?: string | null;
   fontSizeScale?: FontSizeScale;
+  brandTextColor?: string | null;
+  menuHoverIconColor?: string | null;
 }
 
 /**
@@ -203,6 +205,16 @@ export class ThemeService {
       root.setProperty('--hms-menu-hover-text', settings.menuHoverTextColor);
     } else {
       root.removeProperty('--hms-menu-hover-text');
+    }
+    if (settings.brandTextColor) {
+      root.setProperty('--hms-brand-text', settings.brandTextColor);
+    } else {
+      root.removeProperty('--hms-brand-text');
+    }
+    if (settings.menuHoverIconColor) {
+      root.setProperty('--hms-menu-hover-icon', settings.menuHoverIconColor);
+    } else {
+      root.removeProperty('--hms-menu-hover-icon');
     }
 
     const radii = CORNER_RADIUS_MAP[settings.cornerRadiusStyle ?? 'ROUNDED'];
