@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; background: #f4f6f8; margin: 0; padding: 24px; color: #1f2937; }
+  .card { max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb; }
+  .header { background: #0f766e; color: #ffffff; padding: 20px 24px; font-size: 18px; font-weight: bold; }
+  .body { padding: 24px; }
+  .row { margin-bottom: 14px; }
+  .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #6b7280; margin-bottom: 2px; }
+  .value { font-size: 15px; color: #111827; }
+  .message-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px 14px; white-space: pre-wrap; font-size: 14px; }
+  .meta { margin-top: 20px; padding-top: 16px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #9ca3af; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">New Demo Request</div>
+    <div class="body">
+      <div class="row">
+        <div class="label">Name</div>
+        <div class="value">{{name}}</div>
+      </div>
+      <div class="row">
+        <div class="label">Email</div>
+        <div class="value"><a href="mailto:{{email}}">{{email}}</a></div>
+      </div>
+      <div class="row">
+        <div class="label">Hospital / Clinic</div>
+        <div class="value">{{hospitalName}}</div>
+      </div>
+      <div class="row">
+        <div class="label">Message</div>
+        <div class="message-box">{{message}}</div>
+      </div>
+      <div class="meta">
+        Submitted {{submittedAt}}<br />
+        IP: {{ipAddress}}<br />
+        User-Agent: {{userAgent}}
+      </div>
+    </div>
+  </div>
+</body>
+</html>

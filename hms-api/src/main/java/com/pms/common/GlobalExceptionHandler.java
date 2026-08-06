@@ -1,5 +1,6 @@
 package com.pms.common;
 
+import com.pms.contact.RateLimitExceededException;
 import com.pms.security.InvalidCredentialsException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
@@ -53,6 +54,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiError> handleBadRequest(IllegalArgumentException ex, HttpServletRequest request) {
         return build(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+    }
+
+    // Thrown by ContactRateLimiter (see com.pms.contact) for a spammy IP -
+    // a distinct status from 400 so a well-behaved client can tell "your
+    // input was wrong" apart from "slow down and retry later".
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ApiError> handleRateLimitExceeded(RateLimitExceededException ex, HttpServletRequest request) {
+        return build(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage(), request);
     }
 
     // Fires when two concurrent requests modify the same @Version'd row (e.g.
