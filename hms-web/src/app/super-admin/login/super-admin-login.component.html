@@ -9,12 +9,12 @@
     </div>
 
     <form (ngSubmit)="login()">
-      <mat-form-field appearance="outline" class="sa-login-field">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sa-login-field">
         <mat-label>Username</mat-label>
         <input matInput name="username" [(ngModel)]="username" required autocomplete="username" />
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="sa-login-field">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sa-login-field">
         <mat-label>Password</mat-label>
         <input
           matInput

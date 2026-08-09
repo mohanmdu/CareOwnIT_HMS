@@ -26,6 +26,12 @@
   background: var(--hms-color-surface-alt, #f7f7f7);
 }
 
+@media (max-width: 900px) {
+  .pf-details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .pf-details-field {
   display: flex;
   flex-direction: column;

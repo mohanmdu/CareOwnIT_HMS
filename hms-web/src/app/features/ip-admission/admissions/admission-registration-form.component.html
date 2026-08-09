@@ -106,11 +106,7 @@
                 #relationMobileNoModel="ngModel"
               />
               @if (relationMobileNoModel.invalid && (relationMobileNoModel.touched || admissionForm.submitted)) {
-                @if (relationMobileNoModel.hasError('required')) {
-                  <mat-error>Relation mobile number is required</mat-error>
-                } @else {
-                  <mat-error>Must be exactly 10 digits</mat-error>
-                }
+                <mat-error>{{ relationMobileNoModel.hasError('required') ? 'Relation mobile number is required' : 'Must be exactly 10 digits' }}</mat-error>
               } @else {
                 <mat-hint>10-digit mobile number</mat-hint>
               }

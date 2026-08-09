@@ -58,6 +58,16 @@
   grid-column: span 2;
 }
 
+@media (max-width: 599px) {
+  .ruf-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ruf-comments-field {
+    grid-column: span 1;
+  }
+}
+
 .ruf-warning {
   margin: 0;
   color: var(--hms-color-error, #c62828);

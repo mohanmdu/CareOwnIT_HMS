@@ -38,3 +38,15 @@
 .sa-content {
   padding: var(--hms-space-6);
 }
+
+@media (max-width: 599px) {
+  .sa-content {
+    padding: var(--hms-space-4);
+  }
+
+  .sa-topbar {
+    padding: var(--hms-space-3) var(--hms-space-4);
+    flex-wrap: wrap;
+    gap: var(--hms-space-2);
+  }
+}

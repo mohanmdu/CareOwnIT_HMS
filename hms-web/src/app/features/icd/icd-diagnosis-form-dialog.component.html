@@ -1,6 +1,6 @@
 <h2 mat-dialog-title>{{ readonlyMode ? 'View ICD Diagnosis' : isEdit ? 'Edit ICD Diagnosis' : 'Assign ICD Code' }}</h2>
 <mat-dialog-content class="icd-diagnosis-form">
-  <mat-form-field appearance="outline">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>ICD Version</mat-label>
     <mat-select [ngModel]="version()" (ngModelChange)="onVersionChange($event)" [disabled]="readonlyMode || isEdit">
       @for (v of icdVersions; track v) {
@@ -9,7 +9,7 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" class="icd-full-width">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="icd-full-width">
     <mat-label>ICD Code</mat-label>
     <input
       matInput
@@ -28,22 +28,22 @@
     </mat-autocomplete>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" class="icd-full-width">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="icd-full-width">
     <mat-label>Disease Name</mat-label>
     <input matInput [value]="diseaseName()" disabled />
   </mat-form-field>
 
-  <mat-form-field appearance="outline">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Chapter</mat-label>
     <input matInput [value]="chapter()" disabled />
   </mat-form-field>
 
-  <mat-form-field appearance="outline">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Category</mat-label>
     <input matInput [value]="category()" disabled />
   </mat-form-field>
 
-  <mat-form-field appearance="outline">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Diagnosis Type</mat-label>
     <mat-select [(ngModel)]="form.diagnosisType" [disabled]="readonlyMode">
       @for (t of diagnosisTypes; track t) {
@@ -52,7 +52,7 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field appearance="outline">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Department</mat-label>
     <mat-select [(ngModel)]="form.departmentId" [disabled]="readonlyMode">
       <mat-option [value]="null">—</mat-option>
@@ -62,7 +62,7 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field appearance="outline">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Consultant</mat-label>
     <mat-select [(ngModel)]="form.consultantId" [disabled]="readonlyMode">
       <mat-option [value]="null">—</mat-option>
@@ -72,12 +72,12 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field appearance="outline">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Diagnosis Date</mat-label>
     <input matInput type="date" [(ngModel)]="form.diagnosisDate" [disabled]="readonlyMode" />
   </mat-form-field>
 
-  <mat-form-field appearance="outline">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Diagnosis Status</mat-label>
     <mat-select [(ngModel)]="form.status" [disabled]="readonlyMode">
       @for (s of diagnosisStatuses; track s) {
@@ -86,7 +86,7 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field appearance="outline">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Severity</mat-label>
     <mat-select [(ngModel)]="form.severity" [disabled]="readonlyMode">
       <mat-option [value]="null">—</mat-option>
@@ -96,12 +96,12 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" class="icd-full-width">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="icd-full-width">
     <mat-label>Comments</mat-label>
     <textarea matInput rows="2" [(ngModel)]="form.comments" [disabled]="readonlyMode"></textarea>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" class="icd-full-width">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="icd-full-width">
     <mat-label>Clinical Notes</mat-label>
     <textarea matInput rows="3" [(ngModel)]="form.clinicalNotes" [disabled]="readonlyMode"></textarea>
   </mat-form-field>

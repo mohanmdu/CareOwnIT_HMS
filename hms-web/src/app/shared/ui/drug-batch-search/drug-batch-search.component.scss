@@ -17,3 +17,9 @@
   width: 100%;
   font-size: 0.85rem;
 }
+
+@media (max-width: 599px) {
+  .drug-batch-option-row {
+    grid-template-columns: 1fr;
+  }
+}

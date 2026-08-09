@@ -40,6 +40,12 @@
   font-size: 0.85rem;
 }
 
+@media (max-width: 599px) {
+  .lps-option-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .lps-option-uhid {
   font-weight: 600;
   color: var(--hms-color-primary, #1565c0);

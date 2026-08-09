@@ -70,3 +70,9 @@
   display: flex;
   justify-content: center;
 }
+
+@media (max-width: 900px) {
+  .iaq-panel {
+    grid-template-columns: 1fr;
+  }
+}
