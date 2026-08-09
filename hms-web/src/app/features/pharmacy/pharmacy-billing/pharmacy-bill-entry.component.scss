@@ -4,7 +4,14 @@
   gap: var(--hms-space-4);
 }
 
+// display:block + overflow-x:auto makes a lone <table> horizontally
+// scrollable on narrow viewports without a wrapping div - the same
+// narrow-viewport fallback every other data table in the app gets via a
+// dedicated *-table-wrap div (see role-list/client-list/etc.), applied
+// directly here since these two tables don't have such a wrapper.
 .bill-entry-patient-table {
+  display: block;
+  overflow-x: auto;
   width: 100%;
   border-collapse: collapse;
 
@@ -23,7 +30,12 @@
   gap: var(--hms-space-3);
 }
 
+// Only overflow-x, not display:block - this table carries the mat-table
+// directive, which already sets its own display (table); adding overflow-x
+// alone (a property Material doesn't set) avoids a specificity fight with
+// Material's compiled CSS while still giving it a horizontal-scroll fallback.
 .bill-entry-table {
+  overflow-x: auto;
   width: 100%;
 }
 

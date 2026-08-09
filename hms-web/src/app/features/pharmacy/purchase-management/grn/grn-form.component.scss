@@ -2,23 +2,59 @@
   display: flex;
   flex-direction: column;
   gap: var(--hms-space-4);
-  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+  padding: var(--hms-space-2);
 }
 
-.grn-items-table {
-  width: 100%;
+.grn-card-title {
+  margin: 0 0 var(--hms-space-3);
+  font-size: var(--hms-font-size-lg);
+  font-weight: var(--hms-font-weight-semibold);
 }
 
-.grn-totals-row {
-  margin: 0;
-  font-weight: var(--hms-font-weight-semibold, 600);
-  text-align: right;
+.grn-header-card,
+.grn-items-card {
+  padding: var(--hms-space-5);
 }
 
-.grn-hint {
-  margin: 0;
-  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
-  font-size: 0.875rem;
+// ---- Add Item: a distinct, highlighted "action zone" -----------------------
+.grn-add-item-card {
+  padding: var(--hms-space-5);
+  background: var(--hms-color-primary-container);
+  border: 1px solid var(--hms-color-primary);
+  border-radius: var(--hms-radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+}
+
+.grn-add-item-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+
+  .grn-card-title {
+    margin: 0;
+    color: var(--hms-color-on-primary-container);
+  }
+}
+
+.grn-add-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--hms-radius-md);
+  background: var(--hms-color-surface);
+  color: var(--hms-color-primary);
+  flex-shrink: 0;
+}
+
+.grn-add-item-subtitle {
+  margin: var(--hms-space-1) 0 0;
+  font-size: var(--hms-font-size-sm);
+  color: var(--hms-color-on-primary-container);
+  opacity: 0.85;
 }
 
 .grn-add-row {
@@ -26,6 +62,11 @@
   flex-wrap: wrap;
   align-items: flex-start;
   gap: var(--hms-space-3);
+
+  mat-form-field {
+    background: var(--hms-color-surface);
+    border-radius: var(--hms-radius-sm);
+  }
 }
 
 .grn-product-field {
@@ -42,8 +83,96 @@
   width: 160px;
 }
 
+.grn-add-btn {
+  align-self: flex-start;
+  margin-top: var(--hms-space-1);
+
+  mat-icon {
+    margin-right: var(--hms-space-1);
+  }
+}
+
+// ---- Line items table -------------------------------------------------------
+.grn-table-wrap {
+  overflow-x: auto;
+}
+
+.grn-items-table {
+  width: 100%;
+
+  tbody tr:hover {
+    background: var(--hms-color-surface-alt);
+  }
+}
+
+.grn-expiry-badge {
+  display: inline-block;
+}
+
+.grn-expiry-soon {
+  color: var(--hms-status-warning-text);
+  font-weight: var(--hms-font-weight-semibold);
+}
+
+.grn-expiry-expired {
+  color: var(--hms-status-danger-text);
+  font-weight: var(--hms-font-weight-semibold);
+}
+
+// ---- Summary: Net Payable prominently highlighted ---------------------------
+.grn-summary-card {
+  align-self: flex-end;
+  width: 100%;
+  max-width: 380px;
+  padding: var(--hms-space-4) var(--hms-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+}
+
+.grn-summary-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-1);
+}
+
+.grn-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--hms-font-size-sm);
+  color: var(--hms-color-text-muted);
+}
+
+.grn-summary-net {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--hms-space-2);
+  padding-top: var(--hms-space-3);
+  border-top: 1px solid var(--hms-color-border);
+  font-weight: var(--hms-font-weight-semibold);
+}
+
+.grn-summary-net-value {
+  font-size: var(--hms-font-size-2xl);
+  font-weight: var(--hms-font-weight-bold);
+  color: var(--hms-color-primary);
+}
+
+.grn-hint {
+  margin: 0;
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
+  font-size: 0.875rem;
+}
+
 .grn-actions-row {
   display: flex;
   justify-content: flex-end;
   gap: var(--hms-space-2);
+}
+
+@media (max-width: 599px) {
+  .grn-summary-card {
+    max-width: none;
+  }
 }

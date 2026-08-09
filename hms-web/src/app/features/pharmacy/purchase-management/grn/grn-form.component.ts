@@ -1,8 +1,9 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, computed, effect, inject, input, output, signal, viewChild } from '@angular/core';
+import { FormControl, FormGroupDirective, FormsModule, NgForm } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -47,6 +48,34 @@ function toIsoDate(date: Date | null): string | null {
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
+}
+
+type ExpiryStatus = 'expired' | 'expiring-soon' | 'fresh';
+
+/** How far out "expiring soon" reaches - a common near-expiry alert window for pharmacy stock. */
+const EXPIRING_SOON_DAYS = 90;
+
+/**
+ * Shows a field as invalid (red outline + <mat-error>) once the user has
+ * either touched it directly or attempted to submit the section it belongs
+ * to (add-item row vs. header) - mirrors NgForm's own default matcher
+ * (invalid && (touched || form.submitted)), but this form has no native
+ * <form>/(ngSubmit) to drive `submitted` since Save as Draft/Approve are two
+ * independent buttons sharing one dataset. `extraInvalid` layers in
+ * business-rule checks (e.g. MRP >= Purchase Rate, drug must resolve to a
+ * real product) that plain HTML validators (required/min) can't express, so
+ * they still drive Material's real error UI instead of a hand-rolled one.
+ */
+class AttemptedErrorStateMatcher implements ErrorStateMatcher {
+  constructor(
+    private readonly attempted: () => boolean,
+    private readonly extraInvalid: () => boolean = () => false
+  ) {}
+
+  isErrorState(control: FormControl | null, _form: FormGroupDirective | NgForm | null): boolean {
+    const invalid = (!!control && control.invalid) || this.extraInvalid();
+    return invalid && !!(control?.touched || this.attempted());
+  }
 }
 
 /**
@@ -112,8 +141,29 @@ export class GrnFormComponent {
   suppliers = signal<Supplier[]>([]);
   products = signal<Product[]>([]);
   items = signal<GrnWorkingItem[]>([]);
-  saving = signal(false);
+  /** Which action is in flight, if any - lets each button show its own "Saving…"/"Approving…" label instead of a shared generic one. */
+  savingStatus = signal<'DRAFT' | 'APPROVED' | null>(null);
   loading = signal(false);
+
+  /** Set true on the first Save as Draft/Approve click - drives header field error visibility (see AttemptedErrorStateMatcher). */
+  headerAttempted = signal(false);
+  /** Set true on each Add Item click; cleared again once an item is successfully added. */
+  addItemAttempted = signal(false);
+
+  /** For resetForm() only - clears touched/dirty state after a successful add/save so the next entry doesn't show stale red borders on fields that are only empty because they were just reset. */
+  private readonly headerForm = viewChild<NgForm>('headerForm');
+  private readonly addItemForm = viewChild<NgForm>('addItemForm');
+
+  readonly headerMatcher = new AttemptedErrorStateMatcher(() => this.headerAttempted());
+  readonly addItemMatcher = new AttemptedErrorStateMatcher(() => this.addItemAttempted());
+  readonly drugMatcher = new AttemptedErrorStateMatcher(
+    () => this.addItemAttempted(),
+    () => !this.selectedProduct
+  );
+  readonly mrpMatcher = new AttemptedErrorStateMatcher(
+    () => this.addItemAttempted(),
+    () => this.isMrpBelowRate
+  );
 
   supplierId = signal<number | null>(null);
   purchaseType: PurchaseType = 'CREDIT';
@@ -233,6 +283,45 @@ export class GrnFormComponent {
     return product && product.name === this.newItem.productSearch ? product : null;
   }
 
+  get isMrpBelowRate(): boolean {
+    const { mrp, purchaseRate } = this.newItem;
+    return mrp !== null && mrp > 0 && purchaseRate > 0 && mrp < purchaseRate;
+  }
+
+  /** Full "+ Add Item" validation - every check from the spec's line-item list, plus the backend's own positive-integer constraints on packing/qty/totalQty so a bad row never reaches the server at all. */
+  private get hasAddItemErrors(): boolean {
+    const item = this.newItem;
+    const mrpValid = item.mrp !== null && item.mrp > 0;
+    return (
+      !this.selectedProduct ||
+      !item.batch.trim() ||
+      !item.expiryDate ||
+      !(item.packing > 0) ||
+      !(item.qty > 0) ||
+      !(item.totalQty > 0) ||
+      item.freeQty < 0 ||
+      !(item.purchaseRate > 0) ||
+      !mrpValid ||
+      this.isMrpBelowRate ||
+      !item.hsnSac.trim() ||
+      item.sgstPercent < 0 ||
+      item.sgstPercent > 100 ||
+      item.cgstPercent < 0 ||
+      item.cgstPercent > 100
+    );
+  }
+
+  expiryStatus(expiryDate: string | null): ExpiryStatus | null {
+    if (!expiryDate) {
+      return null;
+    }
+    const days = (new Date(expiryDate).getTime() - Date.now()) / 86_400_000;
+    if (days < 0) {
+      return 'expired';
+    }
+    return days <= EXPIRING_SOON_DAYS ? 'expiring-soon' : 'fresh';
+  }
+
   private computeNetValue(
     purchaseRate: number,
     totalQty: number,
@@ -249,10 +338,12 @@ export class GrnFormComponent {
   }
 
   addItem(): void {
-    const product = this.selectedProduct;
-    if (!product || this.newItem.qty <= 0 || this.newItem.purchaseRate <= 0) {
+    this.addItemAttempted.set(true);
+    if (this.hasAddItemErrors) {
+      this.notification.error('Please fix the highlighted fields before adding this item.');
       return;
     }
+    const product = this.selectedProduct!;
     const computedValues = this.computeNetValue(
       this.newItem.purchaseRate,
       this.newItem.totalQty,
@@ -286,18 +377,59 @@ export class GrnFormComponent {
       }
     ]);
     this.newItem = emptyNewItem();
+    // resetForm(value) - not the no-arg form - clears each control's
+    // touched/dirty state AND its displayed value in one atomic operation.
+    // resetForm() alone left stale values on screen: NgForm resets each
+    // control straight through its ControlValueAccessor, bypassing the
+    // template's own [ngModel]="newItem.x" change-detection cache, so a
+    // *separate* `newItem = emptyNewItem()` write right after it was not
+    // reliably picked back up as a "changed" binding on the next tick.
+    this.addItemForm()?.resetForm(this.newItemFormValue(this.newItem));
+    this.addItemAttempted.set(false);
+    this.notification.success(`${product.name} added to the GRN.`);
+  }
+
+  /** Flat {controlName: value} map matching the add-item <form>'s name="…" attributes, for NgForm.resetForm(value). */
+  private newItemFormValue(item: ReturnType<typeof emptyNewItem>) {
+    return {
+      productSearch: item.productSearch,
+      productTypeDisplay: item.productTypeName,
+      packing: item.packing,
+      qty: item.qty,
+      totalQty: item.totalQty,
+      freeQty: item.freeQty,
+      batch: item.batch,
+      expiryDate: item.expiryDate,
+      manufactureDate: item.manufactureDate,
+      mrp: item.mrp,
+      purchaseRate: item.purchaseRate,
+      discountPercent: item.discountPercent,
+      hsnSac: item.hsnSac,
+      sgstPercent: item.sgstPercent,
+      cgstPercent: item.cgstPercent
+    };
   }
 
   removeItem(index: number): void {
     this.items.set(this.items().filter((_, i) => i !== index));
   }
 
+  private isHeaderValid(): boolean {
+    return !!this.supplierId() && !!this.purchaseType && !!this.invoiceNo.trim() && !!this.invoiceDate && !!this.grnDate;
+  }
+
   private submit(status: 'DRAFT' | 'APPROVED'): void {
-    const supplierId = this.supplierId();
-    if (!supplierId || this.items().length === 0 || !this.invoiceNo.trim() || !this.invoiceDate || !this.grnDate) {
+    this.headerAttempted.set(true);
+    if (this.items().length === 0) {
+      this.notification.error('Add at least one line item before saving the GRN.');
       return;
     }
-    this.saving.set(true);
+    if (!this.isHeaderValid()) {
+      this.notification.error('Please fix the highlighted header fields before saving.');
+      return;
+    }
+    const supplierId = this.supplierId()!;
+    this.savingStatus.set(status);
     const request = {
       supplierId,
       purchaseType: this.purchaseType,
@@ -333,13 +465,13 @@ export class GrnFormComponent {
     const request$ = existingId ? this.service.update(existingId, request) : this.service.create(request);
     request$.subscribe({
       next: () => {
-        this.saving.set(false);
+        this.savingStatus.set(null);
         this.notification.success(status === 'APPROVED' ? 'GRN approved.' : 'GRN saved as draft.');
         this.reset();
         this.saved.emit();
       },
       error: (err) => {
-        this.saving.set(false);
+        this.savingStatus.set(null);
         this.notification.error(err.error?.message ?? 'Failed to save GRN.');
       }
     });
@@ -366,5 +498,24 @@ export class GrnFormComponent {
     this.creditNote = '';
     this.debitNote = '';
     this.returnAmount = 0;
+    this.headerAttempted.set(false);
+    this.addItemAttempted.set(false);
+    // resetForm(value) - see addItem()'s identical note on why the no-arg
+    // form isn't reliable here.
+    this.headerForm()?.resetForm({
+      supplierId: null,
+      purchaseType: this.purchaseType,
+      invoiceNo: this.invoiceNo,
+      invoiceDate: this.invoiceDate,
+      poNumber: this.poNumber,
+      grnDate: this.grnDate,
+      invoiceAmountDisplay: 0,
+      grnAmountDisplay: 0,
+      discountAmount: this.discountAmount,
+      creditNote: this.creditNote,
+      debitNote: this.debitNote,
+      returnAmount: this.returnAmount
+    });
+    this.addItemForm()?.resetForm(this.newItemFormValue(this.newItem));
   }
 }

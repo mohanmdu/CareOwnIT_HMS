@@ -3,248 +3,439 @@
     <mat-progress-bar mode="indeterminate" />
   }
 
-  <div class="hms-form-grid">
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Supplier Name</mat-label>
-      <mat-select [ngModel]="supplierId()" (ngModelChange)="supplierId.set($event)" [disabled]="readonly()">
-        @for (supplier of suppliers(); track supplier.id) {
-          <mat-option [value]="supplier.id">{{ supplier.name }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Purchase Type</mat-label>
-      <mat-select [(ngModel)]="purchaseType" [disabled]="readonly()">
-        @for (type of purchaseTypes; track type) {
-          <mat-option [value]="type">{{ purchaseTypeLabels[type] }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Invoice No</mat-label>
-      <input matInput [(ngModel)]="invoiceNo" [disabled]="readonly()" required />
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Invoice Date</mat-label>
-      <input matInput [matDatepicker]="invoiceDatePicker" [(ngModel)]="invoiceDate" [disabled]="readonly()" required />
-      <mat-datepicker-toggle matIconSuffix [for]="invoiceDatePicker" />
-      <mat-datepicker #invoiceDatePicker />
-    </mat-form-field>
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>PO Number</mat-label>
-      <input matInput [(ngModel)]="poNumber" [disabled]="readonly()" />
-    </mat-form-field>
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>GRN Date</mat-label>
-      <input matInput [matDatepicker]="grnDatePicker" [(ngModel)]="grnDate" [disabled]="readonly()" required />
-      <mat-datepicker-toggle matIconSuffix [for]="grnDatePicker" />
-      <mat-datepicker #grnDatePicker />
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Invoice Amount</mat-label>
-      <input matInput [ngModel]="invoiceAmount()" disabled />
-    </mat-form-field>
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>GRN Amount</mat-label>
-      <input matInput [ngModel]="invoiceAmount()" disabled />
-    </mat-form-field>
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Discount Amount</mat-label>
-      <input matInput type="number" [(ngModel)]="discountAmount" [disabled]="readonly()" />
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Credit Note</mat-label>
-      <input matInput [(ngModel)]="creditNote" [disabled]="readonly()" />
-    </mat-form-field>
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Debit Note</mat-label>
-      <input matInput [(ngModel)]="debitNote" [disabled]="readonly()" />
-    </mat-form-field>
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Return Amount</mat-label>
-      <input matInput type="number" [(ngModel)]="returnAmount" [disabled]="readonly()" />
-    </mat-form-field>
-  </div>
-
-  @if (items().length > 0) {
-    <table mat-table [dataSource]="items()" class="grn-items-table">
-      <ng-container matColumnDef="productName">
-        <th mat-header-cell *matHeaderCellDef>P.Name</th>
-        <td mat-cell *matCellDef="let item">{{ item.productName }}</td>
-      </ng-container>
-      <ng-container matColumnDef="productTypeName">
-        <th mat-header-cell *matHeaderCellDef>Type</th>
-        <td mat-cell *matCellDef="let item">{{ item.productTypeName }}</td>
-      </ng-container>
-      <ng-container matColumnDef="packing">
-        <th mat-header-cell *matHeaderCellDef>Packing</th>
-        <td mat-cell *matCellDef="let item">{{ item.packing }}</td>
-      </ng-container>
-      <ng-container matColumnDef="qty">
-        <th mat-header-cell *matHeaderCellDef>Qty</th>
-        <td mat-cell *matCellDef="let item">{{ item.qty }}</td>
-      </ng-container>
-      <ng-container matColumnDef="totalQty">
-        <th mat-header-cell *matHeaderCellDef>Total Qty</th>
-        <td mat-cell *matCellDef="let item">{{ item.totalQty }}</td>
-      </ng-container>
-      <ng-container matColumnDef="freeQty">
-        <th mat-header-cell *matHeaderCellDef>Free Qty</th>
-        <td mat-cell *matCellDef="let item">{{ item.freeQty }}</td>
-      </ng-container>
-      <ng-container matColumnDef="batch">
-        <th mat-header-cell *matHeaderCellDef>Batch</th>
-        <td mat-cell *matCellDef="let item">{{ item.batch }}</td>
-      </ng-container>
-      <ng-container matColumnDef="expiryDate">
-        <th mat-header-cell *matHeaderCellDef>Expiry Date</th>
-        <td mat-cell *matCellDef="let item">{{ item.expiryDate }}</td>
-      </ng-container>
-      <ng-container matColumnDef="mrp">
-        <th mat-header-cell *matHeaderCellDef>MRP</th>
-        <td mat-cell *matCellDef="let item">{{ item.mrp }}</td>
-      </ng-container>
-      <ng-container matColumnDef="purchaseRate">
-        <th mat-header-cell *matHeaderCellDef>Pur.Rate</th>
-        <td mat-cell *matCellDef="let item">{{ item.purchaseRate }}</td>
-      </ng-container>
-      <ng-container matColumnDef="discountPercent">
-        <th mat-header-cell *matHeaderCellDef>Discount(%)</th>
-        <td mat-cell *matCellDef="let item">{{ item.discountPercent }}</td>
-      </ng-container>
-      <ng-container matColumnDef="hsnSac">
-        <th mat-header-cell *matHeaderCellDef>HSN/SAC</th>
-        <td mat-cell *matCellDef="let item">{{ item.hsnSac }}</td>
-      </ng-container>
-      <ng-container matColumnDef="sgstPercent">
-        <th mat-header-cell *matHeaderCellDef>SGST(%)</th>
-        <td mat-cell *matCellDef="let item">{{ item.sgstPercent }}</td>
-      </ng-container>
-      <ng-container matColumnDef="cgstPercent">
-        <th mat-header-cell *matHeaderCellDef>CGST(%)</th>
-        <td mat-cell *matCellDef="let item">{{ item.cgstPercent }}</td>
-      </ng-container>
-      <ng-container matColumnDef="netValue">
-        <th mat-header-cell *matHeaderCellDef>Net Value</th>
-        <td mat-cell *matCellDef="let item">{{ item.netValue | number: '1.2-2' }}</td>
-      </ng-container>
-      <ng-container matColumnDef="remove">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let item; let i = index">
-          @if (!readonly()) {
-            <button mat-icon-button type="button" color="warn" (click)="removeItem(i)" aria-label="Remove item">
-              <mat-icon aria-hidden="true">delete</mat-icon>
-            </button>
+  <section class="hms-card-surface grn-header-card">
+    <h3 class="grn-card-title">GRN Details</h3>
+    <form #headerForm="ngForm" class="hms-form-grid">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Supplier Name</mat-label>
+        <mat-select
+          name="supplierId"
+          required
+          [ngModel]="supplierId()"
+          (ngModelChange)="supplierId.set($event)"
+          [disabled]="readonly()"
+          [errorStateMatcher]="headerMatcher"
+        >
+          @for (supplier of suppliers(); track supplier.id) {
+            <mat-option [value]="supplier.id">{{ supplier.name }}</mat-option>
           }
-        </td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="itemColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: itemColumns"></tr>
-    </table>
-    <p class="grn-totals-row">
-      Total Discount: {{ totalDiscount() | number: '1.2-2' }} | Total SGST: {{ totalSgst() | number: '1.2-2' }} |
-      Total CGST: {{ totalCgst() | number: '1.2-2' }} | Net Amount: {{ invoiceAmount() | number: '1.2-2' }}
-    </p>
+        </mat-select>
+        <mat-error>Supplier is required</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Purchase Type</mat-label>
+        <mat-select
+          name="purchaseType"
+          required
+          [(ngModel)]="purchaseType"
+          [disabled]="readonly()"
+          [errorStateMatcher]="headerMatcher"
+        >
+          @for (type of purchaseTypes; track type) {
+            <mat-option [value]="type">{{ purchaseTypeLabels[type] }}</mat-option>
+          }
+        </mat-select>
+        <mat-error>Purchase type is required</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Invoice No</mat-label>
+        <input
+          matInput
+          name="invoiceNo"
+          required
+          [(ngModel)]="invoiceNo"
+          [disabled]="readonly()"
+          [errorStateMatcher]="headerMatcher"
+        />
+        <mat-error>Invoice No is required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Invoice Date</mat-label>
+        <input
+          matInput
+          name="invoiceDate"
+          required
+          [matDatepicker]="invoiceDatePicker"
+          [(ngModel)]="invoiceDate"
+          [disabled]="readonly()"
+          [errorStateMatcher]="headerMatcher"
+        />
+        <mat-datepicker-toggle matIconSuffix [for]="invoiceDatePicker" />
+        <mat-datepicker #invoiceDatePicker />
+        <mat-error>Invoice date is required</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>PO Number</mat-label>
+        <input matInput name="poNumber" [(ngModel)]="poNumber" [disabled]="readonly()" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>GRN Date</mat-label>
+        <input
+          matInput
+          name="grnDate"
+          required
+          [matDatepicker]="grnDatePicker"
+          [(ngModel)]="grnDate"
+          [disabled]="readonly()"
+          [errorStateMatcher]="headerMatcher"
+        />
+        <mat-datepicker-toggle matIconSuffix [for]="grnDatePicker" />
+        <mat-datepicker #grnDatePicker />
+        <mat-error>GRN date is required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Invoice Amount</mat-label>
+        <input matInput name="invoiceAmountDisplay" [ngModel]="invoiceAmount()" disabled />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>GRN Amount</mat-label>
+        <input matInput name="grnAmountDisplay" [ngModel]="invoiceAmount()" disabled />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Discount Amount</mat-label>
+        <input matInput name="discountAmount" type="number" min="0" [(ngModel)]="discountAmount" [disabled]="readonly()" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Credit Note</mat-label>
+        <input matInput name="creditNote" [(ngModel)]="creditNote" [disabled]="readonly()" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Debit Note</mat-label>
+        <input matInput name="debitNote" [(ngModel)]="debitNote" [disabled]="readonly()" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Return Amount</mat-label>
+        <input matInput name="returnAmount" type="number" min="0" [(ngModel)]="returnAmount" [disabled]="readonly()" />
+      </mat-form-field>
+    </form>
+  </section>
+
+  @if (!readonly()) {
+    <section class="grn-add-item-card">
+      <div class="grn-add-item-header">
+        <span class="grn-add-item-icon"><mat-icon aria-hidden="true">add_box</mat-icon></span>
+        <div>
+          <h3 class="grn-card-title">Add Line Item</h3>
+          <p class="grn-add-item-subtitle">Enter drug, batch and pricing details, then add it to the GRN below.</p>
+        </div>
+      </div>
+
+      <form #addItemForm="ngForm" class="grn-add-row">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-product-field">
+          <mat-label>Drug Name</mat-label>
+          <input
+            matInput
+            name="productSearch"
+            [(ngModel)]="newItem.productSearch"
+            [matAutocomplete]="productAuto"
+            [errorStateMatcher]="drugMatcher"
+          />
+          <mat-autocomplete #productAuto="matAutocomplete" (optionSelected)="onProductSelected($event.option.value)">
+            @for (product of filteredProducts(); track product.id) {
+              <mat-option [value]="product">{{ product.name }} - {{ product.productTypeName }}</mat-option>
+            } @empty {
+              <mat-option disabled>No matching products - pick one from the list to add it</mat-option>
+            }
+          </mat-autocomplete>
+          <mat-error>Select a valid drug from the list</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
+          <mat-label>Type</mat-label>
+          <input matInput name="productTypeDisplay" [ngModel]="newItem.productTypeName" disabled />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
+          <mat-label>Packing</mat-label>
+          <input
+            matInput
+            name="packing"
+            type="number"
+            min="1"
+            step="1"
+            required
+            [(ngModel)]="newItem.packing"
+            [errorStateMatcher]="addItemMatcher"
+          />
+          <mat-error>Required</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
+          <mat-label>Qty</mat-label>
+          <input
+            matInput
+            name="qty"
+            type="number"
+            min="1"
+            step="1"
+            required
+            [(ngModel)]="newItem.qty"
+            [errorStateMatcher]="addItemMatcher"
+          />
+          <mat-error>Must be &gt; 0</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
+          <mat-label>Total Qty</mat-label>
+          <input
+            matInput
+            name="totalQty"
+            type="number"
+            min="1"
+            step="1"
+            required
+            [(ngModel)]="newItem.totalQty"
+            [errorStateMatcher]="addItemMatcher"
+          />
+          <mat-error>Must be &gt; 0</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
+          <mat-label>Free Qty</mat-label>
+          <input
+            matInput
+            name="freeQty"
+            type="number"
+            min="0"
+            step="1"
+            [(ngModel)]="newItem.freeQty"
+            [errorStateMatcher]="addItemMatcher"
+          />
+          <mat-error>Cannot be negative</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
+          <mat-label>Batch</mat-label>
+          <input matInput name="batch" required [(ngModel)]="newItem.batch" [errorStateMatcher]="addItemMatcher" />
+          <mat-error>Required</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-date-field">
+          <mat-label>Expiry Date</mat-label>
+          <input
+            matInput
+            name="expiryDate"
+            required
+            [matDatepicker]="expiryPicker"
+            [(ngModel)]="newItem.expiryDate"
+            [errorStateMatcher]="addItemMatcher"
+          />
+          <mat-datepicker-toggle matIconSuffix [for]="expiryPicker" />
+          <mat-datepicker #expiryPicker />
+          <mat-error>Required</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-date-field">
+          <mat-label>Manufacture Date</mat-label>
+          <input matInput name="manufactureDate" [matDatepicker]="manufacturePicker" [(ngModel)]="newItem.manufactureDate" />
+          <mat-datepicker-toggle matIconSuffix [for]="manufacturePicker" />
+          <mat-datepicker #manufacturePicker />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
+          <mat-label>MRP</mat-label>
+          <input
+            matInput
+            name="mrp"
+            type="number"
+            min="0.01"
+            step="0.01"
+            required
+            [(ngModel)]="newItem.mrp"
+            [errorStateMatcher]="mrpMatcher"
+          />
+          @if (newItem.mrp === null || newItem.mrp <= 0) {
+            <mat-error>Must be &gt; 0</mat-error>
+          } @else {
+            <mat-error>MRP must be &ge; Pur. Rate</mat-error>
+          }
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
+          <mat-label>Pur.Rate</mat-label>
+          <input
+            matInput
+            name="purchaseRate"
+            type="number"
+            min="0.01"
+            step="0.01"
+            required
+            [(ngModel)]="newItem.purchaseRate"
+            [errorStateMatcher]="addItemMatcher"
+          />
+          <mat-error>Must be &gt; 0</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
+          <mat-label>Discount(%)</mat-label>
+          <input matInput name="discountPercent" type="number" min="0" max="100" step="0.01" [(ngModel)]="newItem.discountPercent" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
+          <mat-label>HSN/SAC</mat-label>
+          <input matInput name="hsnSac" required [(ngModel)]="newItem.hsnSac" [errorStateMatcher]="addItemMatcher" />
+          <mat-error>Required</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
+          <mat-label>SGST(%)</mat-label>
+          <input
+            matInput
+            name="sgstPercent"
+            type="number"
+            min="0"
+            max="100"
+            step="0.01"
+            required
+            [(ngModel)]="newItem.sgstPercent"
+            [errorStateMatcher]="addItemMatcher"
+          />
+          <mat-error>0-100 only</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
+          <mat-label>CGST(%)</mat-label>
+          <input
+            matInput
+            name="cgstPercent"
+            type="number"
+            min="0"
+            max="100"
+            step="0.01"
+            required
+            [(ngModel)]="newItem.cgstPercent"
+            [errorStateMatcher]="addItemMatcher"
+          />
+          <mat-error>0-100 only</mat-error>
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="button" class="grn-add-btn" (click)="addItem()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Add Item
+        </button>
+      </form>
+    </section>
+
+    @if (products().length === 0) {
+      <p class="grn-hint">
+        No products found in Product Master yet. Add products under Pharmacy &gt; Inventory Master &gt; Product Master
+        before raising a GRN.
+      </p>
+    }
   }
 
-  @if (!readonly() && products().length === 0) {
-    <p class="grn-hint">
-      No products found in Product Master yet. Add products under Pharmacy &gt; Inventory Master &gt; Product Master
-      before raising a GRN.
-    </p>
+  @if (items().length > 0) {
+    <section class="hms-card-surface grn-items-card">
+      <h3 class="grn-card-title">Line Items ({{ items().length }})</h3>
+      <div class="grn-table-wrap">
+        <table mat-table [dataSource]="items()" class="grn-items-table">
+          <ng-container matColumnDef="productName">
+            <th mat-header-cell *matHeaderCellDef>P.Name</th>
+            <td mat-cell *matCellDef="let item">{{ item.productName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="productTypeName">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let item">{{ item.productTypeName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="packing">
+            <th mat-header-cell *matHeaderCellDef>Packing</th>
+            <td mat-cell *matCellDef="let item">{{ item.packing }}</td>
+          </ng-container>
+          <ng-container matColumnDef="qty">
+            <th mat-header-cell *matHeaderCellDef>Qty</th>
+            <td mat-cell *matCellDef="let item">{{ item.qty }}</td>
+          </ng-container>
+          <ng-container matColumnDef="totalQty">
+            <th mat-header-cell *matHeaderCellDef>Total Qty</th>
+            <td mat-cell *matCellDef="let item">{{ item.totalQty }}</td>
+          </ng-container>
+          <ng-container matColumnDef="freeQty">
+            <th mat-header-cell *matHeaderCellDef>Free Qty</th>
+            <td mat-cell *matCellDef="let item">{{ item.freeQty }}</td>
+          </ng-container>
+          <ng-container matColumnDef="batch">
+            <th mat-header-cell *matHeaderCellDef>Batch</th>
+            <td mat-cell *matCellDef="let item">{{ item.batch }}</td>
+          </ng-container>
+          <ng-container matColumnDef="expiryDate">
+            <th mat-header-cell *matHeaderCellDef>Expiry Date</th>
+            <td mat-cell *matCellDef="let item">
+              <span
+                class="grn-expiry-badge"
+                [class.grn-expiry-expired]="expiryStatus(item.expiryDate) === 'expired'"
+                [class.grn-expiry-soon]="expiryStatus(item.expiryDate) === 'expiring-soon'"
+              >
+                {{ item.expiryDate }}
+              </span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="mrp">
+            <th mat-header-cell *matHeaderCellDef>MRP</th>
+            <td mat-cell *matCellDef="let item">{{ item.mrp }}</td>
+          </ng-container>
+          <ng-container matColumnDef="purchaseRate">
+            <th mat-header-cell *matHeaderCellDef>Pur.Rate</th>
+            <td mat-cell *matCellDef="let item">{{ item.purchaseRate }}</td>
+          </ng-container>
+          <ng-container matColumnDef="discountPercent">
+            <th mat-header-cell *matHeaderCellDef>Discount(%)</th>
+            <td mat-cell *matCellDef="let item">{{ item.discountPercent }}</td>
+          </ng-container>
+          <ng-container matColumnDef="hsnSac">
+            <th mat-header-cell *matHeaderCellDef>HSN/SAC</th>
+            <td mat-cell *matCellDef="let item">{{ item.hsnSac }}</td>
+          </ng-container>
+          <ng-container matColumnDef="sgstPercent">
+            <th mat-header-cell *matHeaderCellDef>SGST(%)</th>
+            <td mat-cell *matCellDef="let item">{{ item.sgstPercent }}</td>
+          </ng-container>
+          <ng-container matColumnDef="cgstPercent">
+            <th mat-header-cell *matHeaderCellDef>CGST(%)</th>
+            <td mat-cell *matCellDef="let item">{{ item.cgstPercent }}</td>
+          </ng-container>
+          <ng-container matColumnDef="netValue">
+            <th mat-header-cell *matHeaderCellDef>Net Value</th>
+            <td mat-cell *matCellDef="let item">{{ item.netValue | number: '1.2-2' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="remove">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let item; let i = index">
+              @if (!readonly()) {
+                <button mat-icon-button type="button" color="warn" (click)="removeItem(i)" aria-label="Remove item">
+                  <mat-icon aria-hidden="true">delete</mat-icon>
+                </button>
+              }
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="itemColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: itemColumns"></tr>
+        </table>
+      </div>
+    </section>
+
+    <section class="hms-card-surface grn-summary-card">
+      <div class="grn-summary-rows">
+        <div class="grn-summary-row">
+          <span>Total Discount</span>
+          <span>{{ totalDiscount() | number: '1.2-2' }}</span>
+        </div>
+        <div class="grn-summary-row">
+          <span>Total SGST</span>
+          <span>{{ totalSgst() | number: '1.2-2' }}</span>
+        </div>
+        <div class="grn-summary-row">
+          <span>Total CGST</span>
+          <span>{{ totalCgst() | number: '1.2-2' }}</span>
+        </div>
+      </div>
+      <div class="grn-summary-net">
+        <span>Net Payable Amount</span>
+        <span class="grn-summary-net-value">{{ invoiceAmount() | number: '1.2-2' }}</span>
+      </div>
+    </section>
+  } @else if (!readonly()) {
+    <p class="grn-hint">No items added yet - use the Add Line Item section above to build this GRN.</p>
   }
 
   @if (!readonly()) {
-    <div class="grn-add-row">
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-product-field">
-        <mat-label>Drug Name</mat-label>
-        <input matInput [(ngModel)]="newItem.productSearch" [matAutocomplete]="productAuto" />
-        <mat-autocomplete #productAuto="matAutocomplete" (optionSelected)="onProductSelected($event.option.value)">
-          @for (product of filteredProducts(); track product.id) {
-            <mat-option [value]="product">{{ product.name }} - {{ product.productTypeName }}</mat-option>
-          } @empty {
-            <mat-option disabled>No matching products - pick one from the list to add it</mat-option>
-          }
-        </mat-autocomplete>
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
-        <mat-label>Type</mat-label>
-        <input matInput [ngModel]="newItem.productTypeName" disabled />
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
-        <mat-label>Packing</mat-label>
-        <input matInput type="number" min="1" [(ngModel)]="newItem.packing" />
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
-        <mat-label>Qty</mat-label>
-        <input matInput type="number" min="1" [(ngModel)]="newItem.qty" />
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
-        <mat-label>Total Qty</mat-label>
-        <input matInput type="number" min="1" [(ngModel)]="newItem.totalQty" />
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
-        <mat-label>Free Qty</mat-label>
-        <input matInput type="number" min="0" [(ngModel)]="newItem.freeQty" />
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
-        <mat-label>Batch</mat-label>
-        <input matInput [(ngModel)]="newItem.batch" />
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-date-field">
-        <mat-label>Expiry Date</mat-label>
-        <input matInput [matDatepicker]="expiryPicker" [(ngModel)]="newItem.expiryDate" />
-        <mat-datepicker-toggle matIconSuffix [for]="expiryPicker" />
-        <mat-datepicker #expiryPicker />
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-date-field">
-        <mat-label>Manufacture Date</mat-label>
-        <input matInput [matDatepicker]="manufacturePicker" [(ngModel)]="newItem.manufactureDate" />
-        <mat-datepicker-toggle matIconSuffix [for]="manufacturePicker" />
-        <mat-datepicker #manufacturePicker />
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
-        <mat-label>MRP</mat-label>
-        <input matInput type="number" min="0" [(ngModel)]="newItem.mrp" />
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
-        <mat-label>Pur.Rate</mat-label>
-        <input matInput type="number" min="0" [(ngModel)]="newItem.purchaseRate" />
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
-        <mat-label>Discount(%)</mat-label>
-        <input matInput type="number" min="0" [(ngModel)]="newItem.discountPercent" />
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
-        <mat-label>HSN/SAC</mat-label>
-        <input matInput [(ngModel)]="newItem.hsnSac" />
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
-        <mat-label>SGST(%)</mat-label>
-        <input matInput type="number" min="0" [(ngModel)]="newItem.sgstPercent" />
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grn-narrow-field">
-        <mat-label>CGST(%)</mat-label>
-        <input matInput type="number" min="0" [(ngModel)]="newItem.cgstPercent" />
-      </mat-form-field>
-      <button mat-flat-button color="primary" type="button" [disabled]="!selectedProduct" (click)="addItem()">
-        Add
-      </button>
-    </div>
-
-    @if (saving()) {
+    @if (savingStatus()) {
       <mat-progress-bar mode="indeterminate" />
     }
 
     <div class="grn-actions-row">
-      <button mat-stroked-button type="button" [disabled]="items().length === 0 || saving()" (click)="saveAsDraft()">
-        Save as Draft
+      <button mat-stroked-button type="button" [disabled]="!!savingStatus()" (click)="saveAsDraft()">
+        {{ savingStatus() === 'DRAFT' ? 'Saving…' : 'Save as Draft' }}
       </button>
-      <button mat-flat-button color="primary" type="button" [disabled]="items().length === 0 || saving()" (click)="approve()">
-        Approve
+      <button mat-flat-button color="primary" type="button" [disabled]="!!savingStatus()" (click)="approve()">
+        {{ savingStatus() === 'APPROVED' ? 'Approving…' : 'Approve GRN' }}
       </button>
     </div>
   }
