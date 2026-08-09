@@ -124,7 +124,7 @@ public class OpDirectBillingService {
 
     private OpDirectBillingListEntryDto toListEntry(OpDirectBilling billing) {
         Patient patient = billing.getPatient();
-        Consultant consultant = billing.getConsultant();
+        Consultant consultant = billing.resolveConsultant();
         return new OpDirectBillingListEntryDto(
                 billing.getId(),
                 billing.getInvoiceNumber(),
@@ -141,7 +141,7 @@ public class OpDirectBillingService {
 
     private OpDirectBillingReceiptDto toReceipt(OpDirectBilling billing) {
         Patient patient = billing.getPatient();
-        Consultant consultant = billing.getConsultant();
+        Consultant consultant = billing.resolveConsultant();
         List<OpDirectBillingItemDto> items = billing.getItems().stream()
                 .map(item -> new OpDirectBillingItemDto(
                         item.getId(),

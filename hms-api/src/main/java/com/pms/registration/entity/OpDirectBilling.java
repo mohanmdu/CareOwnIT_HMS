@@ -18,6 +18,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -75,4 +76,20 @@ public class OpDirectBilling {
     @OneToMany(mappedBy = "billing", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("id ASC")
     private List<OpDirectBillingItem> items = new ArrayList<>();
+
+    /**
+     * Effective consultant for display/reporting - falls back to the first
+     * line item carrying one when the bill itself has none. The consultant
+     * picker moved from bill-level to per-item in the multi-item rebuild
+     * (OpDirectBillingItem.consultant), so `consultant` above is null on
+     * every bill saved since then; every read site (Collection Report,
+     * receipts, the Direct Billing tab, ...) should call this instead of
+     * `getConsultant()` directly so they don't silently go blank.
+     */
+    public Consultant resolveConsultant() {
+        if (consultant != null) {
+            return consultant;
+        }
+        return items.stream().map(OpDirectBillingItem::getConsultant).filter(Objects::nonNull).findFirst().orElse(null);
+    }
 }

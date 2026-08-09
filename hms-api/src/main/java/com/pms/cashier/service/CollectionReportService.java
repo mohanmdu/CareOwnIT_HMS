@@ -216,7 +216,7 @@ public class CollectionReportService {
 
     private CollectionReportRowDto toRow(OpDirectBilling billing, Map<String, String> userDisplayNames) {
         Patient patient = billing.getPatient();
-        Consultant consultant = billing.getConsultant();
+        Consultant consultant = billing.resolveConsultant();
         double total = billing.getTotalAmount() != null ? billing.getTotalAmount() : 0.0;
         double refund = billing.getRefundAmount() != null ? billing.getRefundAmount() : 0.0;
         return new CollectionReportRowDto(
@@ -229,10 +229,10 @@ public class CollectionReportService {
                 billing.getInvoiceNumber() != null ? String.valueOf(billing.getInvoiceNumber()) : null,
                 billing.getPaymentMode() != null ? billing.getPaymentMode().name() : null,
                 consultant != null ? consultant.getName() : null,
-                consultant != null ? consultant.getDepartment().getName() : null,
+                consultant != null && consultant.getDepartment() != null ? consultant.getDepartment().getName() : null,
                 billing.getBilledBy(),
                 userDisplayNames.get(billing.getBilledBy()),
-                consultant != null ? consultant.getDepartment().getId() : null,
+                consultant != null && consultant.getDepartment() != null ? consultant.getDepartment().getId() : null,
                 consultant != null ? consultant.getId() : null,
                 total,
                 0.0,

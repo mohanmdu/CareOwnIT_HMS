@@ -346,6 +346,7 @@ public class AppointmentService {
 
     private CollectionReportEntryDto toCollectionReportEntry(OpDirectBilling billing) {
         Patient patient = billing.getPatient();
+        Consultant resolvedConsultant = billing.resolveConsultant();
         return new CollectionReportEntryDto(
                 "DIRECT_BILLING",
                 null,
@@ -355,7 +356,7 @@ public class AppointmentService {
                 patient.getRegistrationNumber(),
                 billing.getBilledAt(),
                 billing.getPaymentMode(),
-                billing.getConsultant() != null ? billing.getConsultant().getName() : null,
+                resolvedConsultant != null ? resolvedConsultant.getName() : null,
                 billing.getBilledBy(),
                 billing.getTotalAmount(),
                 0.0,

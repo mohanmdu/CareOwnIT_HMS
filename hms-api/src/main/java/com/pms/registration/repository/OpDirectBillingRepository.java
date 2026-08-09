@@ -19,11 +19,17 @@ public interface OpDirectBillingRepository extends JpaRepository<OpDirectBilling
     @Query("SELECT MAX(b.invoiceNumber) FROM OpDirectBilling b")
     Long findMaxInvoiceNumber();
 
+    // :consultantId matches either the bill-level consultant (legacy, pre
+    // multi-item rebuild) or any line item's consultant (current) - the
+    // picker moved to per-item and bills saved since then never populate
+    // b.consultant, so a plain "b.consultant.id = :consultantId" silently
+    // dropped every new-style bill from a consultant-filtered search.
     @Query("""
             SELECT b FROM OpDirectBilling b
             WHERE (:fromInstant IS NULL OR b.billedAt >= :fromInstant)
               AND (:toInstant IS NULL OR b.billedAt < :toInstant)
-              AND (:consultantId IS NULL OR b.consultant.id = :consultantId)
+              AND (:consultantId IS NULL OR b.consultant.id = :consultantId
+                   OR EXISTS (SELECT 1 FROM OpDirectBillingItem i WHERE i.billing = b AND i.consultant.id = :consultantId))
               AND (:paymentMode IS NULL OR b.paymentMode = :paymentMode)
             ORDER BY b.billedAt DESC
             """)
@@ -35,12 +41,14 @@ public interface OpDirectBillingRepository extends JpaRepository<OpDirectBilling
 
     // Patient Prescription worklist - walk-in visits with a consultant
     // captured, listed alongside Appointment rows (see OpCaseSheetService).
-    // Same three-field free-text match as AppointmentRepository.prescriptionWorklist().
+    // Same three-field free-text match as AppointmentRepository.prescriptionWorklist(),
+    // and the same header-or-item consultant match as collectionReport() above.
     @Query("""
             SELECT b FROM OpDirectBilling b
             WHERE (:fromInstant IS NULL OR b.billedAt >= :fromInstant)
               AND (:toInstant IS NULL OR b.billedAt < :toInstant)
-              AND (:consultantId IS NULL OR b.consultant.id = :consultantId)
+              AND (:consultantId IS NULL OR b.consultant.id = :consultantId
+                   OR EXISTS (SELECT 1 FROM OpDirectBillingItem i WHERE i.billing = b AND i.consultant.id = :consultantId))
               AND (:search IS NULL OR :search = ''
                    OR LOWER(b.patient.firstName) LIKE LOWER(CONCAT('%', :search, '%'))
                    OR LOWER(b.patient.lastName) LIKE LOWER(CONCAT('%', :search, '%'))
