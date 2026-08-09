@@ -1,70 +1,213 @@
-.admission-form-section {
+.ward-form-section {
   padding: var(--hms-space-5);
 }
 
-.admission-patient-block {
-  padding-bottom: var(--hms-space-4);
-  margin-bottom: var(--hms-space-4);
-  border-bottom: 1px solid var(--hms-color-border, #e0e0e0);
+// ---- Patient header -------------------------------------------------------
+.ward-patient-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--hms-space-5);
+  padding: var(--hms-space-5);
 }
 
-.admission-readonly-field {
+.ward-patient-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hms-color-primary-container);
+  color: var(--hms-color-primary);
+  flex-shrink: 0;
+
+  mat-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 32px;
+  }
+}
+
+.ward-patient-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+}
+
+.ward-patient-info-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-3);
+  flex-wrap: wrap;
+}
+
+.ward-patient-name {
+  font-size: var(--hms-font-size-xl);
+  font-weight: var(--hms-font-weight-semibold);
+  color: var(--hms-color-text);
+}
+
+.ward-patient-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--hms-space-3) var(--hms-space-5);
+}
+
+.ward-patient-meta-item {
   display: flex;
   flex-direction: column;
   gap: var(--hms-space-1);
+  min-width: 0;
 }
 
-.admission-readonly-field-wide {
+.ward-patient-meta-item-wide {
   grid-column: span 2;
 }
 
-.admission-readonly-label {
-  font-size: var(--hms-font-size-sm);
+.ward-patient-meta-label {
+  font-size: var(--hms-font-size-xs);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   color: var(--hms-color-text-muted);
 }
 
-.admission-readonly-value {
-  font-weight: 500;
+.ward-patient-meta-value {
+  font-weight: var(--hms-font-weight-medium);
+  color: var(--hms-color-text);
+  overflow-wrap: anywhere;
 }
 
-.admission-remarks-field {
+// ---- Two-column layout: review sections + sticky ward/bed/advance panel --
+.ward-allocation-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: var(--hms-space-4);
+  align-items: start;
+}
+
+.ward-allocation-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ward-allocation-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-4);
+  position: sticky;
+  top: var(--hms-space-4);
+}
+
+.ward-sidebar-title {
+  font-size: var(--hms-font-size-lg);
+  margin: 0;
+}
+
+.ward-availability-btn {
+  width: 100%;
+
+  mat-icon {
+    margin-right: var(--hms-space-1);
+  }
+}
+
+.ward-admit-btn {
+  margin-top: var(--hms-space-2);
+  width: 100%;
+}
+
+@media (max-width: 960px) {
+  .ward-allocation-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ward-allocation-sidebar {
+    position: static;
+  }
+}
+
+// ---- Collapsible review sections ------------------------------------------
+.ward-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+
+  --mat-expansion-container-background-color: var(--hms-color-surface);
+  --mat-expansion-container-text-color: var(--hms-color-text);
+  --mat-expansion-container-shape: var(--hms-radius-lg);
+  --mat-expansion-header-text-color: var(--hms-color-text);
+  --mat-expansion-header-description-color: var(--hms-color-text-muted);
+  --mat-expansion-header-indicator-color: var(--hms-color-text-muted);
+  --mat-expansion-header-hover-state-layer-color: var(--hms-color-surface-alt);
+  --mat-expansion-header-text-size: var(--hms-font-size-lg);
+  --mat-expansion-header-text-weight: var(--hms-font-weight-semibold);
+}
+
+// See admission-registration-form.component.scss for the same convention -
+// Material's elevation directive needs ::ng-deep to override.
+::ng-deep .ward-panel.mat-expansion-panel {
+  border: 1px solid var(--hms-color-border);
+  box-shadow: var(--hms-shadow-sm) !important;
+  overflow: hidden;
+
+  &.mat-expanded {
+    box-shadow: var(--hms-shadow-md) !important;
+  }
+
+  .mat-expansion-panel-body {
+    padding: 0 var(--hms-space-5) var(--hms-space-5);
+  }
+}
+
+.ward-panel-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--hms-radius-md);
+  margin-right: var(--hms-space-3);
+  background: var(--hms-color-primary-container);
+  color: var(--hms-color-primary);
+  flex-shrink: 0;
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+}
+
+.ward-remarks-field {
   grid-column: span 2;
 }
 
-.admission-icu-field {
+.ward-icu-field {
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
   gap: var(--hms-space-4);
+  flex-wrap: wrap;
 }
 
-.admission-icu-label {
+.ward-icu-label {
   font-size: var(--hms-font-size-sm);
   color: var(--hms-color-text-muted);
 }
 
-.admission-ward-section {
-  grid-column: 1 / -1;
-  border-top: 1px solid var(--hms-color-border, #e0e0e0);
-  padding-top: var(--hms-space-4);
-  margin-top: var(--hms-space-2);
-}
+@media (max-width: 599px) {
+  .ward-patient-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
 
-.admission-ward-title {
-  font-size: var(--hms-font-size-lg);
-  margin: 0 0 var(--hms-space-3);
-}
-
-.admission-ward-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: var(--hms-space-3);
-  align-items: start;
-}
-
-.admission-submit-row {
-  grid-column: 1 / -1;
-  display: flex;
-  justify-content: center;
-  margin-top: var(--hms-space-2);
+  .ward-patient-meta-grid {
+    width: 100%;
+    text-align: left;
+  }
 }

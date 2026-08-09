@@ -1,0 +1,176 @@
+.ward-picker-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+  min-width: 360px;
+}
+
+.ward-picker-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hms-space-3);
+}
+
+.ward-picker-filter {
+  flex: 1 1 260px;
+  max-width: 340px;
+}
+
+.ward-picker-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hms-space-3);
+  font-size: var(--hms-font-size-xs);
+  color: var(--hms-color-text-muted);
+}
+
+.ward-picker-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hms-space-1);
+  white-space: nowrap;
+}
+
+.ward-picker-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.dot-available {
+  background: var(--hms-color-success);
+}
+
+.dot-allocated {
+  background: var(--hms-color-danger);
+}
+
+.dot-maintenance {
+  background: var(--hms-color-warning);
+}
+
+.dot-selected {
+  background: var(--hms-color-primary);
+}
+
+.ward-picker-empty {
+  color: var(--hms-color-text-muted);
+  text-align: center;
+  padding: var(--hms-space-3) 0;
+  margin: 0;
+}
+
+.ward-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--hms-space-3);
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 2px 2px 2px 0;
+}
+
+.ward-picker-room {
+  border: 1px solid var(--hms-color-border);
+  border-radius: var(--hms-radius-md);
+  padding: var(--hms-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+  background: var(--hms-color-surface-alt);
+}
+
+.ward-picker-room-number {
+  font-weight: var(--hms-font-weight-semibold);
+  font-size: var(--hms-font-size-sm);
+  color: var(--hms-color-text);
+}
+
+.ward-picker-beds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hms-space-2);
+}
+
+// Each bed is its own small status card (not a bare pill) so the
+// available/occupied/maintenance/selected states read as distinct at a
+// glance - color, border, and a status word, not color alone.
+.ward-picker-bed {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 88px;
+  border: 1.5px solid var(--hms-color-border);
+  border-radius: var(--hms-radius-md);
+  padding: var(--hms-space-2) var(--hms-space-3);
+  font: inherit;
+  background: var(--hms-color-surface);
+  cursor: pointer;
+  transition: background var(--hms-transition-fast), border-color var(--hms-transition-fast), box-shadow var(--hms-transition-fast);
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.ward-picker-bed-label {
+  font-weight: var(--hms-font-weight-semibold);
+  font-size: var(--hms-font-size-sm);
+}
+
+.ward-picker-bed-status {
+  font-size: var(--hms-font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  opacity: 0.85;
+}
+
+.ward-picker-bed-check {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  color: var(--hms-color-primary);
+  background: var(--hms-color-surface);
+  border-radius: 50%;
+}
+
+.bed-available {
+  border-color: var(--hms-color-success);
+  color: var(--hms-color-on-success-container);
+  background: var(--hms-color-success-container);
+
+  &:hover {
+    box-shadow: var(--hms-shadow-sm);
+  }
+}
+
+.bed-allocated {
+  border-color: var(--hms-color-danger);
+  color: var(--hms-color-on-danger-container);
+  background: var(--hms-color-danger-container);
+  opacity: 0.85;
+}
+
+.bed-maintenance {
+  border-color: var(--hms-color-warning);
+  color: var(--hms-color-on-warning-container);
+  background: var(--hms-color-warning-container);
+  opacity: 0.85;
+}
+
+// Declared after .bed-available so its border/background/color win for a
+// selected (always-available) bed while keeping the same card shape.
+.bed-selected {
+  border-color: var(--hms-color-primary);
+  background: var(--hms-color-primary-container);
+  color: var(--hms-color-on-primary-container);
+  box-shadow: 0 0 0 2px var(--hms-color-primary-container), var(--hms-shadow-sm);
+}

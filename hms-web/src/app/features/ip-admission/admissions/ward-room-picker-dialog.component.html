@@ -1,0 +1,65 @@
+<h2 mat-dialog-title>Check Room Availability</h2>
+
+<mat-dialog-content class="ward-picker-content">
+  <div class="ward-picker-toolbar">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ward-picker-filter">
+      <mat-label>Ward Type</mat-label>
+      <mat-select [value]="selectedRoomTypeId()" (selectionChange)="selectedRoomTypeId.set($event.value)">
+        <mat-option [value]="null">All Ward Types</mat-option>
+        @for (type of roomTypes; track type.id) {
+          <mat-option [value]="type.id">{{ type.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <div class="ward-picker-legend">
+      <span class="ward-picker-legend-item"><span class="ward-picker-dot dot-available"></span>Available</span>
+      <span class="ward-picker-legend-item"><span class="ward-picker-dot dot-allocated"></span>Occupied</span>
+      <span class="ward-picker-legend-item"><span class="ward-picker-dot dot-maintenance"></span>Maintenance</span>
+      <span class="ward-picker-legend-item"><span class="ward-picker-dot dot-selected"></span>Selected</span>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && roomGroups().length === 0) {
+    <p class="ward-picker-empty">No rooms found for this ward type.</p>
+  }
+
+  <div class="ward-picker-grid">
+    @for (group of roomGroups(); track group.roomNumber) {
+      <div class="ward-picker-room">
+        <span class="ward-picker-room-number">Room {{ group.roomNumber }}</span>
+        <div class="ward-picker-beds">
+          @for (bed of group.beds; track bed.id) {
+            <button
+              type="button"
+              class="ward-picker-bed"
+              [class.bed-available]="bed.status === 'AVAILABLE'"
+              [class.bed-allocated]="bed.status === 'ALLOCATED'"
+              [class.bed-maintenance]="bed.status === 'MAINTENANCE'"
+              [class.bed-selected]="selectedRoom()?.id === bed.id"
+              [disabled]="bed.status !== 'AVAILABLE'"
+              (click)="pick(bed)"
+            >
+              @if (selectedRoom()?.id === bed.id) {
+                <mat-icon class="ward-picker-bed-check">check_circle</mat-icon>
+              }
+              <span class="ward-picker-bed-label">{{ bed.bedNumber ? 'Bed ' + bed.bedNumber : group.roomNumber }}</span>
+              <span class="ward-picker-bed-status">{{ statusLabel(bed.status) }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()">Cancel</button>
+  <button mat-flat-button color="primary" type="button" [disabled]="!selectedRoom()" (click)="confirmSelection()">
+    Select This Bed
+  </button>
+</mat-dialog-actions>

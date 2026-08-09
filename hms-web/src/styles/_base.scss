@@ -120,6 +120,24 @@ button:focus-visible,
   padding-top: var(--hms-space-2);
 }
 
+// Same clearance problem as .hms-form-grid above, but for the more general
+// case: ANY MatDialogModule dialog whose first piece of content is a
+// floated-label mat-form-field, whether or not it happens to be wrapped in
+// .hms-form-grid (e.g. a single filter/select at the top of a picker
+// dialog, which has no reason to use the multi-column form grid). Fixed
+// once here, globally, for every dialog's content area, instead of
+// special-casing padding-top on each dialog's own top-level element.
+// !important needed - Angular Material's own compiled CSS ships
+// `.mat-mdc-dialog-container .mat-mdc-dialog-title + .mat-mdc-dialog-content
+// { padding-top: 0 }`, a 3-class/combinator selector that beats a plain
+// `.mat-mdc-dialog-content` rule on specificity regardless of source order
+// (confirmed via getComputedStyle - the plain override was silently losing);
+// same root cause/fix as .mat-accent and the floating-label pointer-events
+// rule above.
+.mat-mdc-dialog-content {
+  padding-top: var(--hms-space-4) !important;
+}
+
 .hms-inline-actions {
   display: flex;
   gap: var(--hms-space-2);

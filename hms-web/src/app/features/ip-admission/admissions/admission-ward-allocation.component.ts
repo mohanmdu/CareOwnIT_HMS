@@ -1,14 +1,18 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDialog } from '@angular/material/dialog';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
+import { StatusBadgeComponent } from '../../../shared/ui/status-badge/status-badge.component';
 import { Patient } from '../../registration/patients/patient.model';
 import { PatientService } from '../../registration/patients/patient.service';
 import { Room } from '../rooms/room.model';
@@ -17,6 +21,7 @@ import { RoomType } from '../rooms/room-type.model';
 import { RoomTypeService } from '../rooms/room-type.service';
 import { Admission, AdmissionAdmitInput, AdmissionPaymentType } from './admission.model';
 import { AdmissionService } from './admission.service';
+import { WardRoomPickerDialogComponent } from './ward-room-picker-dialog.component';
 
 const MARITAL_STATUS_OPTIONS = ['Single', 'Married', 'Divorced', 'Widowed'];
 const DESCRIPTION_OF_CASE_OPTIONS = ['Non-Surgery', 'Surgery'];
@@ -41,13 +46,16 @@ const PAYMENT_TYPE_OPTIONS: { value: AdmissionPaymentType; label: string }[] = [
   standalone: true,
   imports: [
     FormsModule,
+    MatButtonModule,
+    MatCheckboxModule,
+    MatExpansionModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatSelectModule,
-    MatCheckboxModule,
-    MatButtonModule,
     MatProgressBarModule,
-    PageHeaderComponent
+    PageHeaderComponent,
+    StatusBadgeComponent
   ],
   templateUrl: './admission-ward-allocation.component.html',
   styleUrl: './admission-ward-allocation.component.scss'
@@ -60,6 +68,7 @@ export class AdmissionWardAllocationComponent {
   private readonly roomService = inject(RoomService);
   private readonly admissionService = inject(AdmissionService);
   private readonly notification = inject(NotificationService);
+  private readonly dialog = inject(MatDialog);
 
   readonly maritalStatusOptions = MARITAL_STATUS_OPTIONS;
   readonly descriptionOfCaseOptions = DESCRIPTION_OF_CASE_OPTIONS;
@@ -72,9 +81,15 @@ export class AdmissionWardAllocationComponent {
   roomTypes = signal<RoomType[]>([]);
   availableRooms = signal<Room[]>([]);
   checkedAvailability = signal(false);
+  loadingRooms = signal(false);
   loading = signal(true);
   submitting = signal(false);
   notPending = signal(false);
+
+  /** Collapsible-card open state for the three review sections - all open by default so nothing required is hidden on first view. */
+  attenderPanelExpanded = signal(true);
+  clinicalPanelExpanded = signal(true);
+  insurancePanelExpanded = signal(true);
 
   /** Distinct room numbers among the available rooms - a room number can have several beds (see bedsForSelectedRoomNumber), so it must only appear once in this dropdown. */
   uniqueRoomNumbers = computed(() => {
@@ -136,7 +151,7 @@ export class AdmissionWardAllocationComponent {
           aadhaarNumber: admission.aadhaarNumber,
           ventilatorRequired: admission.ventilatorRequired,
           monitorRequired: admission.monitorRequired,
-          advanceAmount: admission.advanceAmount
+          advanceAmount: admission.advanceAmount ?? 0
         };
         this.patientService.get(admission.patientId).subscribe({
           next: (patient) => {
@@ -148,6 +163,11 @@ export class AdmissionWardAllocationComponent {
             this.notification.error('Failed to load patient details.');
           }
         });
+        // Ward type is already known from registration - load its rooms straight away instead
+        // of waiting for the user to re-select it.
+        if (admission.roomTypeId) {
+          this.fetchAvailableRooms(admission.roomTypeId);
+        }
       },
       error: () => {
         this.loading.set(false);
@@ -156,20 +176,17 @@ export class AdmissionWardAllocationComponent {
     });
   }
 
-  checkRoomAvailability(): void {
-    if (!this.selectedRoomTypeId) {
-      return;
-    }
+  /** Ward Type -> Room No cascade: fires automatically on selection, no separate "load" step needed. */
+  onWardTypeChange(): void {
     this.selectedRoomNumber = null;
     this.selectedRoomId = null;
     this.bedsForSelectedRoomNumber.set([]);
-    this.roomService.list().subscribe({
-      next: (rooms) => {
-        this.availableRooms.set(rooms.filter((r) => r.status === 'AVAILABLE' && r.roomTypeId === this.selectedRoomTypeId));
-        this.checkedAvailability.set(true);
-      },
-      error: () => this.notification.error('Failed to check room availability.')
-    });
+    this.availableRooms.set([]);
+    this.checkedAvailability.set(false);
+    if (!this.selectedRoomTypeId) {
+      return;
+    }
+    this.fetchAvailableRooms(this.selectedRoomTypeId);
   }
 
   /** A room number can span several beds - narrow to just this room number's beds, and auto-pick when there's only one. */
@@ -179,9 +196,50 @@ export class AdmissionWardAllocationComponent {
     this.selectedRoomId = beds.length === 1 ? beds[0].id : null;
   }
 
-  submit(): void {
+  /** Opens the bed-level availability picker (occupied/maintenance beds shown, not just available ones) so staff can see the full ward before choosing - separate from the automatic Ward Type -> Room No cascade above. */
+  openAvailabilityPicker(): void {
+    const dialogRef = this.dialog.open(WardRoomPickerDialogComponent, {
+      width: '760px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data: { roomTypeId: this.selectedRoomTypeId, roomTypes: this.roomTypes() }
+    });
+    dialogRef.afterClosed().subscribe((room?: Room) => {
+      if (!room || room.id === null) {
+        return;
+      }
+      this.selectedRoomTypeId = room.roomTypeId;
+      this.fetchAvailableRooms(room.roomTypeId, () => {
+        this.selectedRoomNumber = room.roomNumber;
+        this.onRoomNumberChange();
+        this.selectedRoomId = room.id;
+      });
+    });
+  }
+
+  private fetchAvailableRooms(roomTypeId: number, onLoaded?: () => void): void {
+    this.loadingRooms.set(true);
+    this.roomService.list().subscribe({
+      next: (rooms) => {
+        this.availableRooms.set(rooms.filter((r) => r.status === 'AVAILABLE' && r.roomTypeId === roomTypeId));
+        this.checkedAvailability.set(true);
+        this.loadingRooms.set(false);
+        onLoaded?.();
+      },
+      error: () => {
+        this.loadingRooms.set(false);
+        this.notification.error('Failed to check room availability.');
+      }
+    });
+  }
+
+  submit(formRef: NgForm): void {
     const admission = this.admission();
-    if (!admission || admission.id === null || !this.selectedRoomId) {
+    if (!admission || admission.id === null) {
+      return;
+    }
+    if (formRef.invalid || !this.selectedRoomTypeId || !this.selectedRoomNumber || !this.selectedRoomId) {
+      this.notification.error('Please select a Ward Type, Room No and Bed No before admitting the patient.');
       return;
     }
     this.submitting.set(true);
@@ -189,7 +247,7 @@ export class AdmissionWardAllocationComponent {
       next: (admitted) => {
         this.submitting.set(false);
         this.notification.success(
-          `The Patient ${admitted.patientName} (In-Patient ID: ${admitted.admissionNumber}) has been admitted as In-Patient in ${admitted.roomTypeName} - ${admitted.roomNumber}.`
+          `${admitted.patientName} (${admitted.admissionNumber}) has been admitted as an In-Patient in ${admitted.roomTypeName} - ${admitted.roomNumber}. Status updated to Admitted.`
         );
         this.router.navigate(['/ip/admissions']);
       },
