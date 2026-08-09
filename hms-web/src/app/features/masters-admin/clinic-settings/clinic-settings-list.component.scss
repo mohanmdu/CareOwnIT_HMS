@@ -63,6 +63,14 @@
   align-items: center;
   gap: var(--hms-space-3);
 
+  // Unlike .clinic-logo-row (which tolerates slight overflow into an empty
+  // margin), this row sits directly beside the SEO default title field -
+  // its own minmax(220px, 1fr) cell isn't wide enough for the preview +
+  // "Change favicon" button, so without its own full row it visibly
+  // overlapped that neighboring field instead of just spilling into blank
+  // space.
+  grid-column: 1 / -1;
+
   // Same "Change logo" wrapping fix - see .clinic-logo-row's own comment.
   button {
     white-space: nowrap;
