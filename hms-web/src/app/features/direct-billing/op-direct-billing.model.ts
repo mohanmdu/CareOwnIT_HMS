@@ -5,6 +5,7 @@ export interface OpDirectBillingItemRequest {
   quantity: number;
   amount: number;
   remarks: string | null;
+  consultantId: number | null;
 }
 
 export interface OpDirectBillingRequest {
@@ -22,6 +23,8 @@ export interface OpDirectBillingReceiptItem {
   quantity: number;
   amount: number;
   remarks: string | null;
+  consultantId: number | null;
+  consultantName: string | null;
 }
 
 export interface OpDirectBillingReceipt {

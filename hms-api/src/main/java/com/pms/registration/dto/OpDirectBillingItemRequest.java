@@ -7,5 +7,6 @@ public record OpDirectBillingItemRequest(
         @NotNull Long componentId,
         @NotNull @Positive Integer quantity,
         @NotNull @Positive Double amount,
-        String remarks) {
+        String remarks,
+        Long consultantId) {
 }

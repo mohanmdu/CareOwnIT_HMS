@@ -83,6 +83,11 @@ public class OpDirectBillingService {
             item.setQuantity(itemRequest.quantity());
             item.setAmount(itemRequest.amount());
             item.setRemarks(itemRequest.remarks());
+            if (itemRequest.consultantId() != null) {
+                Consultant itemConsultant = consultantRepository.findById(itemRequest.consultantId())
+                        .orElseThrow(() -> new EntityNotFoundException("Consultant not found: " + itemRequest.consultantId()));
+                item.setConsultant(itemConsultant);
+            }
             items.add(item);
             total += itemRequest.amount();
         }
@@ -139,7 +144,14 @@ public class OpDirectBillingService {
         Consultant consultant = billing.getConsultant();
         List<OpDirectBillingItemDto> items = billing.getItems().stream()
                 .map(item -> new OpDirectBillingItemDto(
-                        item.getId(), item.getCategoryName(), item.getComponentName(), item.getQuantity(), item.getAmount(), item.getRemarks()))
+                        item.getId(),
+                        item.getCategoryName(),
+                        item.getComponentName(),
+                        item.getQuantity(),
+                        item.getAmount(),
+                        item.getRemarks(),
+                        item.getConsultant() != null ? item.getConsultant().getId() : null,
+                        item.getConsultant() != null ? item.getConsultant().getName() : null))
                 .toList();
         return new OpDirectBillingReceiptDto(
                 billing.getId(),

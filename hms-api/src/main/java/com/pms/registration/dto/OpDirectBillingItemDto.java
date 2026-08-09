@@ -6,5 +6,7 @@ public record OpDirectBillingItemDto(
         String componentName,
         Integer quantity,
         Double amount,
-        String remarks) {
+        String remarks,
+        Long consultantId,
+        String consultantName) {
 }

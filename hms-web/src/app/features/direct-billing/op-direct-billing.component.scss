@@ -25,23 +25,78 @@
   margin: 0 0 var(--hms-space-3);
 }
 
+// One row for the whole item-entry form - Qty/Amount stay narrow and
+// fixed-width while Category/Component/Consultant/Remarks share the
+// remaining space, so all six fields fit alongside each other without
+// wrapping to a second line on typical desktop widths.
 .direct-billing-fields-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--hms-space-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hms-space-3);
   align-items: start;
 }
 
-// Qty and Amount share a single grid track so they read as a paired
-// quantity/price group rather than two full-width fields fighting the
-// wider Category/Component/Remarks columns for visual weight.
+.direct-billing-field-category {
+  flex: 1 1 150px;
+  min-width: 120px;
+}
+
+.direct-billing-field-component {
+  flex: 1.3 1 170px;
+  min-width: 140px;
+}
+
+.direct-billing-field-consultant {
+  flex: 1.2 1 160px;
+  min-width: 140px;
+}
+
+.direct-billing-field-remarks {
+  flex: 1.4 1 180px;
+  min-width: 150px;
+}
+
+// Qty and Amount share a single fixed-width group so they read as a paired
+// quantity/price group rather than two fields fighting the wider
+// Category/Component/Remarks columns for space.
 .direct-billing-qty-amount {
   display: flex;
   gap: var(--hms-space-2);
+  flex: 0 0 auto;
+}
 
-  mat-form-field {
-    flex: 1;
-    min-width: 0;
+.direct-billing-field-qty {
+  width: 72px;
+}
+
+.direct-billing-field-amount {
+  width: 96px;
+}
+
+.direct-billing-add-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--hms-space-3);
+}
+
+.direct-billing-items-table {
+  margin-top: var(--hms-space-4);
+  border: 1px solid var(--hms-color-border);
+  border-radius: var(--hms-radius-md);
+  overflow: hidden;
+
+  th:last-child,
+  td:last-child {
+    width: 1%;
+    white-space: nowrap;
+  }
+}
+
+.direct-billing-items-total-row {
+  font-weight: var(--hms-font-weight-semibold);
+
+  td {
+    border-top: 1px solid var(--hms-color-border);
   }
 }
 
@@ -56,14 +111,25 @@
   color: var(--hms-color-text-muted);
 }
 
-.direct-billing-full-field {
-  grid-column: 1 / -1;
+// Payment Mode, Bill Remarks and Submit read as one action row rather than
+// a form grid, since there are only two fields plus the final action.
+.direct-billing-payment-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hms-space-4);
 }
 
-.direct-billing-submit-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: var(--hms-space-5);
-  padding-top: var(--hms-space-4);
-  border-top: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+.direct-billing-payment-mode-field {
+  flex: 0 0 220px;
+}
+
+.direct-billing-remarks-field {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.direct-billing-payment-submit {
+  flex: 0 0 auto;
+  margin-left: auto;
 }

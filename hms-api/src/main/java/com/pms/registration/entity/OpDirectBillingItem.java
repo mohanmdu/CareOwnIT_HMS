@@ -1,5 +1,6 @@
 package com.pms.registration.entity;
 
+import com.pms.masters.entity.Consultant;
 import com.pms.masters.entity.OpBillingComponent;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,6 +38,11 @@ public class OpDirectBillingItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "component_id")
     private OpBillingComponent component;
+
+    /** Optional - separate from OpDirectBilling.consultant (one per whole bill); this is per line item. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "consultant_id")
+    private Consultant consultant;
 
     @Column(name = "category_name", nullable = false)
     private String categoryName;

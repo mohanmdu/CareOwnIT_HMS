@@ -34,6 +34,7 @@
           <th>Component</th>
           <th>Qty</th>
           <th>Amount</th>
+          <th>Consultant</th>
         </tr>
       </thead>
       <tbody>
@@ -44,6 +45,7 @@
             <td>{{ item.componentName }}</td>
             <td>{{ item.quantity }}</td>
             <td>{{ item.amount | number: '1.0-2' }}</td>
+            <td>{{ item.consultantName ?? '—' }}</td>
           </tr>
         }
         <tr class="receipt-total-row">
@@ -52,6 +54,7 @@
           <td></td>
           <td>Total ({{ paymentModeLabels[receipt.paymentMode] }})</td>
           <td>{{ receipt.totalAmount | number: '1.0-2' }}</td>
+          <td></td>
         </tr>
       </tbody>
     </table>

@@ -23,7 +23,7 @@
       <h3>Billing Items</h3>
 
       <div class="direct-billing-fields-grid">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="direct-billing-field-category">
           <mat-label>Category</mat-label>
           <mat-select
             [ngModel]="selectedCategoryId()"
@@ -34,7 +34,7 @@
             }
           </mat-select>
         </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="direct-billing-field-component">
           <mat-label>Component</mat-label>
           <mat-select [(ngModel)]="newItem.componentId" (ngModelChange)="onComponentChange()">
             @for (component of filteredComponents(); track component.id) {
@@ -43,25 +43,89 @@
           </mat-select>
         </mat-form-field>
         <div class="direct-billing-qty-amount">
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="direct-billing-field-qty">
             <mat-label>Qty</mat-label>
             <input matInput type="number" min="1" [(ngModel)]="newItem.quantity" (ngModelChange)="onQuantityChange()" />
           </mat-form-field>
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="direct-billing-field-amount">
             <mat-label>Amount</mat-label>
             <input matInput type="number" min="0" [(ngModel)]="newItem.amount" />
           </mat-form-field>
         </div>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="direct-billing-field-consultant">
+          <mat-label>Consultant</mat-label>
+          <mat-select [(ngModel)]="newItem.consultantId">
+            <mat-option [value]="null">No consultant</mat-option>
+            @for (consultant of consultants(); track consultant.id) {
+              <mat-option [value]="consultant.id">{{ consultant.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="direct-billing-field-remarks">
           <mat-label>Item Remarks</mat-label>
           <input matInput [(ngModel)]="newItem.remarks" />
         </mat-form-field>
       </div>
 
+      <div class="direct-billing-add-row">
+        <button
+          mat-stroked-button
+          color="primary"
+          type="button"
+          [disabled]="!newItem.componentId || newItem.quantity <= 0 || newItem.amount <= 0"
+          (click)="addItem()"
+        >
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Add
+        </button>
+      </div>
+
+      @if (items().length > 0) {
+        <table class="direct-billing-items-table hms-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Component</th>
+              <th>Qty</th>
+              <th>Amount</th>
+              <th>Consultant</th>
+              <th>Remarks</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of items(); track $index) {
+              <tr>
+                <td>{{ item.categoryName }}</td>
+                <td>{{ item.componentName }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.amount | number: '1.0-2' }}</td>
+                <td>{{ item.consultantName ?? '—' }}</td>
+                <td>{{ item.remarks ?? '—' }}</td>
+                <td>
+                  <button mat-icon-button type="button" [attr.aria-label]="'Remove ' + item.componentName" (click)="removeItem($index)">
+                    <mat-icon aria-hidden="true">close</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+            <tr class="direct-billing-items-total-row">
+              <td colspan="3">Total</td>
+              <td>{{ totalAmount() | number: '1.0-2' }}</td>
+              <td colspan="3"></td>
+            </tr>
+          </tbody>
+        </table>
+      }
+
       <h3 class="direct-billing-subsection-title">Payment Details</h3>
 
-      <div class="direct-billing-fields-grid">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      @if (saving()) {
+        <mat-progress-bar mode="indeterminate" />
+      }
+
+      <div class="direct-billing-payment-row">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="direct-billing-payment-mode-field">
           <mat-label>Payment Mode</mat-label>
           <mat-select [(ngModel)]="paymentMode">
             @for (mode of paymentModes; track mode) {
@@ -69,31 +133,16 @@
             }
           </mat-select>
         </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Consultant</mat-label>
-          <mat-select [(ngModel)]="selectedConsultantId">
-            <mat-option [value]="null">No consultant</mat-option>
-            @for (consultant of consultants(); track consultant.id) {
-              <mat-option [value]="consultant.id">{{ consultant.name }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="direct-billing-full-field">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="direct-billing-remarks-field">
           <mat-label>Bill Remarks</mat-label>
           <input matInput [(ngModel)]="remarks" />
         </mat-form-field>
-      </div>
-
-      @if (saving()) {
-        <mat-progress-bar mode="indeterminate" />
-      }
-
-      <div class="direct-billing-submit-row">
         <button
           mat-flat-button
           color="primary"
           type="button"
-          [disabled]="!newItem.componentId || newItem.quantity <= 0 || newItem.amount <= 0 || saving()"
+          class="direct-billing-payment-submit"
+          [disabled]="items().length === 0 || saving()"
           (click)="submit()"
         >
           Submit
