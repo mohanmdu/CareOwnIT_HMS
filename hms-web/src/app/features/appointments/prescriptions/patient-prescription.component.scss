@@ -43,6 +43,19 @@
   padding: var(--hms-space-2) 0;
 }
 
+// Fixed width, not auto - this button's label alternates between "View OP
+// Case Sheet" and the shorter "Edit Case Sheet" depending on hasCaseSheet,
+// so leaving it auto-sized shifted the whole row (and the "View Details"
+// button after it) left/right row to row instead of keeping every row's
+// buttons lined up in the same two columns.
+.prescription-case-sheet-btn {
+  width: 168px;
+}
+
+.prescription-view-details-btn {
+  width: 112px;
+}
+
 .prescription-actions-header {
   width: 0;
   white-space: nowrap;
