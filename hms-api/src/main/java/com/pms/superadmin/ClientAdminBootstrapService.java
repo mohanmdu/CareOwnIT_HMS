@@ -9,6 +9,8 @@ import com.pms.superadmin.dto.ClientAdminBootstrapRequest;
 import com.pms.superadmin.dto.ClientAdminBootstrapResponse;
 import com.pms.tenant.TenantContext;
 import com.pms.tenant.entity.Client;
+import com.pms.tenant.entity.ClientDatabaseStatus;
+import com.pms.tenant.repository.ClientDatabaseRepository;
 import com.pms.tenant.repository.ClientRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,7 @@ public class ClientAdminBootstrapService {
     private static final String DEFAULT_ADMIN_ROLE_NAME = "Administrator";
 
     private final ClientRepository clientRepository;
+    private final ClientDatabaseRepository clientDatabaseRepository;
     private final RoleRepository roleRepository;
     private final GeneralUserRepository generalUserRepository;
     private final PasswordEncoder passwordEncoder;
@@ -52,12 +55,14 @@ public class ClientAdminBootstrapService {
 
     public ClientAdminBootstrapService(
             ClientRepository clientRepository,
+            ClientDatabaseRepository clientDatabaseRepository,
             RoleRepository roleRepository,
             GeneralUserRepository generalUserRepository,
             PasswordEncoder passwordEncoder,
             DefaultAdminRoleStrategyResolver roleStrategyResolver,
             PlatformTransactionManager tenantTransactionManager) {
         this.clientRepository = clientRepository;
+        this.clientDatabaseRepository = clientDatabaseRepository;
         this.roleRepository = roleRepository;
         this.generalUserRepository = generalUserRepository;
         this.passwordEncoder = passwordEncoder;
@@ -70,6 +75,18 @@ public class ClientAdminBootstrapService {
     public ClientAdminBootstrapResponse bootstrap(Long clientId, ClientAdminBootstrapRequest request) {
         Client client = clientRepository.findById(clientId)
                 .orElseThrow(() -> new EntityNotFoundException("Client not found: " + clientId));
+
+        // Checked here, before TenantContext.runAs()/the tenant transaction opens
+        // a connection - TenantDataSourceRegistry throws this same exception type
+        // deep inside JPA transaction-begin if skipped, but Spring wraps it in a
+        // TransactionException there, which GlobalExceptionHandler's
+        // EntityNotFoundException handler can't unwrap, so it fell through to the
+        // generic 500 handler instead of a clean 404. Thrown from here, in the
+        // normal method body, it's caught correctly.
+        clientDatabaseRepository
+                .findByClientIdAndStatus(clientId, ClientDatabaseStatus.READY)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Client " + clientId + " has no ready database yet - provision it before adding an admin."));
 
         return TenantContext.runAs(client.getId(), () -> tenantTransaction.execute(status -> {
             if (generalUserRepository.existsByUsernameIgnoreCase(request.username())) {

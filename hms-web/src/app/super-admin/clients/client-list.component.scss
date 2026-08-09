@@ -112,11 +112,11 @@
 }
 
 .sa-actions-header {
-  // Wide enough for "Manage" + "Add Admin" + "Reactivate" (the longest of
-  // the toggle labels) side by side without wrapping - table-layout:fixed
-  // enforces this width strictly, so anything narrower gets visually
-  // clipped rather than wrapping to a second line.
-  width: 400px;
+  // Wide enough for "Manage" + "Provision Database" + "Add Admin" +
+  // "Reactivate" (the longest of the toggle labels) side by side without
+  // wrapping - table-layout:fixed enforces this width strictly, so anything
+  // narrower gets visually clipped rather than wrapping to a second line.
+  width: 580px;
   white-space: nowrap;
 }
 

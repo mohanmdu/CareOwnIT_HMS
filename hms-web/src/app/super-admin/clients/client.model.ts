@@ -26,3 +26,14 @@ export interface ClientAdminBootstrapResult {
   username: string;
   roleName: string;
 }
+
+export type ClientDatabaseStatus = 'PROVISIONING' | 'READY' | 'FAILED' | 'SUSPENDED';
+
+export interface ClientDatabaseRecord {
+  clientId: number;
+  host: string;
+  port: number;
+  schemaName: string;
+  status: ClientDatabaseStatus;
+  schemaVersion: string | null;
+}

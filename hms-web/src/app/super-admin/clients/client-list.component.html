@@ -156,6 +156,14 @@
             <td mat-cell *matCellDef="let client" class="sa-actions-cell">
               <div class="sa-actions-inner">
                 <button mat-stroked-button type="button" (click)="manageClient(client)">Manage</button>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  [disabled]="provisioningClientId() === client.id"
+                  (click)="provisionDatabase(client)"
+                >
+                  {{ provisioningClientId() === client.id ? 'Provisioning…' : 'Provision Database' }}
+                </button>
                 <button mat-stroked-button type="button" (click)="bootstrapAdmin(client)">Add Admin</button>
                 <button mat-stroked-button [color]="client.status === 'ACTIVE' ? 'warn' : 'primary'" type="button" (click)="toggleStatus(client)">
                   {{ client.status === 'ACTIVE' ? 'Suspend' : 'Reactivate' }}

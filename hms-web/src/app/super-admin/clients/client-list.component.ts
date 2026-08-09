@@ -97,6 +97,9 @@ export class ClientListComponent {
   savingBootstrap = signal(false);
   bootstrapForm = { ...BOOTSTRAP_FORM_DEFAULTS };
 
+  /** Which row's "Provision Database" button is mid-request - a slow, real migration run (see ClientService.provisionDatabase's own doc comment), not instant. */
+  provisioningClientId = signal<number | null>(null);
+
   searchTerm = signal('');
   filteredClients = computed(() => this.filterBySearch(this.clients()));
   pagination = new TablePagination(this.filteredClients);
@@ -316,6 +319,39 @@ export class ClientListComponent {
           this.savingBootstrap.set(false);
           this.notification.error(err.error?.message ?? 'Failed to create admin.');
         }
+      });
+  }
+
+  /**
+   * Creates this client's dedicated database (CREATE DATABASE/USER + the
+   * full tenant migration set) - a brand-new client has none until this
+   * runs, which is exactly why "Add Admin" fails until it has. Idempotent -
+   * safe to run again for a client stuck in FAILED, or to re-run on an
+   * already-READY one (a no-op beyond a fast schema_history check).
+   */
+  provisionDatabase(client: ClientRecord): void {
+    this.confirmDialog
+      .confirm({
+        title: `Provision database for ${client.name}?`,
+        message:
+          'Creates a dedicated database and runs the full migration set. This is a real, one-time setup step and can take a little while - do not navigate away while it runs.',
+        confirmLabel: 'Provision'
+      })
+      .subscribe((confirmed) => {
+        if (!confirmed) {
+          return;
+        }
+        this.provisioningClientId.set(client.id);
+        this.service.provisionDatabase(client.id).subscribe({
+          next: () => {
+            this.provisioningClientId.set(null);
+            this.notification.success(`Database ready for ${client.name}. You can add their first admin now.`);
+          },
+          error: (err) => {
+            this.provisioningClientId.set(null);
+            this.notification.error(err.error?.message ?? 'Failed to provision the database.');
+          }
+        });
       });
   }
 }
