@@ -9,232 +9,343 @@
   }
 
   @if (!loading() && patient(); as patient) {
-    <section class="hms-card-surface admission-form-section">
-      <div class="admission-patient-block">
-        <div class="hms-form-grid">
-          <div class="admission-readonly-field">
-            <span class="admission-readonly-label">Patient ID</span>
-            <span class="admission-readonly-value">{{ patient.registrationNumber }}</span>
-          </div>
-          <div class="admission-readonly-field">
-            <span class="admission-readonly-label">Patient Name</span>
-            <span class="admission-readonly-value">{{ patient.firstName }} {{ patient.lastName }}</span>
-          </div>
-          <div class="admission-readonly-field">
-            <span class="admission-readonly-label">Gender</span>
-            <span class="admission-readonly-value">{{ patient.gender ?? '-' }}</span>
-          </div>
-          <div class="admission-readonly-field">
-            <span class="admission-readonly-label">Age</span>
-            <span class="admission-readonly-value">{{ patient.age ?? '-' }}</span>
-          </div>
-          <div class="admission-readonly-field">
-            <span class="admission-readonly-label">Date of Birth</span>
-            <span class="admission-readonly-value">{{ patient.dateOfBirth ?? '-' }}</span>
-          </div>
-          <div class="admission-readonly-field">
-            <span class="admission-readonly-label">Mobile No</span>
-            <span class="admission-readonly-value">{{ patient.mobileNumber }}</span>
-          </div>
-          <div class="admission-readonly-field admission-readonly-field-wide">
-            <span class="admission-readonly-label">Address</span>
-            <span class="admission-readonly-value">{{ patient.address ?? '-' }}</span>
-          </div>
-        </div>
-        <div class="admission-photo-field">
+    <section class="hms-card-surface admission-patient-header">
+      <div class="admission-avatar-block">
+        <div class="admission-avatar">
           @if (photoPreviewUrl()) {
-            <img [src]="photoPreviewUrl()" alt="" class="admission-photo-preview" />
+            <img [src]="photoPreviewUrl()" alt="" />
           } @else {
-            <div class="admission-photo-placeholder">No photo</div>
+            <mat-icon>person</mat-icon>
           }
-          <button mat-stroked-button type="button" (click)="photoInput.click()">Upload Photo</button>
-          <input #photoInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onPhotoSelected($event)" />
         </div>
+        <button mat-stroked-button type="button" color="primary" (click)="photoInput.click()">
+          <mat-icon>photo_camera</mat-icon>
+          Upload Photo
+        </button>
+        <input #photoInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onPhotoSelected($event)" />
       </div>
 
-      <form class="hms-form-grid admission-editable-grid" (ngSubmit)="submit()">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Attender/Relation Name</mat-label>
-          <input matInput name="attenderName" [(ngModel)]="form.attenderName" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Relation Type</mat-label>
-          <input matInput name="relationType" [(ngModel)]="form.relationType" placeholder="Enter the Type" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Relation Mobile No</mat-label>
-          <input
-            matInput
-            name="relationMobileNo"
-            inputmode="numeric"
-            maxlength="10"
-            [ngModel]="form.relationMobileNo"
-            (input)="onRelationMobileInput($event)"
-          />
-          @if (form.relationMobileNo && form.relationMobileNo.length !== 10) {
-            <mat-hint>Must be exactly 10 digits</mat-hint>
-          }
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Father's/Spouse Name</mat-label>
-          <input matInput name="fatherSpouseName" [(ngModel)]="form.fatherSpouseName" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Occupation</mat-label>
-          <input matInput name="occupation" [(ngModel)]="form.occupation" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Marital Status</mat-label>
-          <mat-select name="maritalStatus" [(ngModel)]="form.maritalStatus">
-            @for (option of maritalStatusOptions; track option) {
-              <mat-option [value]="option">{{ option }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Period of Stay (Approx, days)</mat-label>
-          <input matInput type="number" min="0" name="periodOfStayDays" [(ngModel)]="form.periodOfStayDays" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Date</mat-label>
-          <input matInput type="datetime-local" name="admissionDate" [(ngModel)]="form.admissionDate" required />
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Description of Case</mat-label>
-          <mat-select name="descriptionOfCase" [(ngModel)]="form.descriptionOfCase">
-            @for (option of descriptionOfCaseOptions; track option) {
-              <mat-option [value]="option">{{ option }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Room Type</mat-label>
-          <mat-select name="roomTypeId" [(ngModel)]="form.roomTypeId">
-            @for (type of roomTypes(); track type.id) {
-              <mat-option [value]="type.id">{{ type.name }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Referral Doctor</mat-label>
-          <input matInput name="referralDoctor" [(ngModel)]="form.referralDoctor" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Primary Consultant/Surgeon</mat-label>
-          <input
-            matInput
-            name="primaryConsultant"
-            autocomplete="off"
-            [matAutocomplete]="primaryConsultantAuto"
-            [(ngModel)]="form.primaryConsultant"
-            (input)="filterPrimaryConsultants($event)"
-            placeholder="Enter the Name"
-          />
-          <mat-autocomplete #primaryConsultantAuto="matAutocomplete">
-            @for (consultant of filteredPrimaryConsultants(); track consultant.id) {
-              <mat-option [value]="consultant.name">{{ consultant.name }}</mat-option>
-            }
-          </mat-autocomplete>
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Secondary Consultant</mat-label>
-          <input
-            matInput
-            name="secondaryConsultant"
-            autocomplete="off"
-            [matAutocomplete]="secondaryConsultantAuto"
-            [(ngModel)]="form.secondaryConsultant"
-            (input)="filterSecondaryConsultants($event)"
-            placeholder="Enter the Name"
-          />
-          <mat-autocomplete #secondaryConsultantAuto="matAutocomplete">
-            @for (consultant of filteredSecondaryConsultants(); track consultant.id) {
-              <mat-option [value]="consultant.name">{{ consultant.name }}</mat-option>
-            }
-          </mat-autocomplete>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Payment Type</mat-label>
-          <mat-select name="paymentType" [(ngModel)]="form.paymentType">
-            @for (option of paymentTypeOptions; track option.value) {
-              <mat-option [value]="option.value">{{ option.label }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Height (in Cms)</mat-label>
-          <input matInput type="number" min="0" name="heightCm" [(ngModel)]="form.heightCm" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Weight (in Kgs)</mat-label>
-          <input matInput type="number" min="0" name="weightKg" [(ngModel)]="form.weightKg" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>MLC</mat-label>
-          <mat-select name="mlc" [(ngModel)]="form.mlc">
-            <mat-option [value]="false">No</mat-option>
-            <mat-option [value]="true">Yes</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Insurance Type</mat-label>
-          <mat-select name="insuranceType" [(ngModel)]="form.insuranceType">
-            @for (option of insuranceTypeOptions; track option) {
-              <mat-option [value]="option">{{ option }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        @if (showInsuranceCompany) {
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Insurance Company</mat-label>
-            <mat-select name="insuranceCompany" [(ngModel)]="form.insuranceCompany">
-              @for (option of insuranceCompanyOptions; track option) {
-                <mat-option [value]="option">{{ option }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        }
-        @if (showInsuranceFields) {
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>TPA Name</mat-label>
-            <input matInput name="tpaName" [(ngModel)]="form.tpaName" placeholder="Enter the Name" />
-          </mat-form-field>
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Corporate Name</mat-label>
-            <input matInput name="corporateName" [(ngModel)]="form.corporateName" placeholder="Enter the Name" />
-          </mat-form-field>
-        }
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Patient Type</mat-label>
-          <mat-select name="patientType" [(ngModel)]="form.patientType">
-            @for (option of patientTypeOptions; track option) {
-              <mat-option [value]="option">{{ option }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Aadhaar Card Number</mat-label>
-          <input matInput name="aadhaarNumber" [(ngModel)]="form.aadhaarNumber" placeholder="Enter the Aadhar" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="admission-remarks-field">
-          <mat-label>Remarks</mat-label>
-          <input matInput name="remarks" [(ngModel)]="form.remarks" placeholder="Leave Empty if No" />
-        </mat-form-field>
-
-        <div class="admission-icu-field">
-          <span class="admission-icu-label">For ICU Admission</span>
-          <mat-checkbox name="ventilatorRequired" [(ngModel)]="form.ventilatorRequired">Ventilator Required</mat-checkbox>
-          <mat-checkbox name="monitorRequired" [(ngModel)]="form.monitorRequired">Monitor Required</mat-checkbox>
+      <div class="admission-identity-grid">
+        <div class="admission-identity-item">
+          <span class="admission-identity-label">Patient ID</span>
+          <span class="admission-identity-value">{{ patient.registrationNumber }}</span>
         </div>
-
-        <div class="admission-submit-row">
-          <button mat-flat-button color="primary" type="submit" [disabled]="submitting() || !isRelationMobileValid">
-            {{ isEditMode ? 'Save' : 'Create' }}
-          </button>
+        <div class="admission-identity-item admission-identity-item-name">
+          <span class="admission-identity-label">Patient Name</span>
+          <span class="admission-identity-value">{{ patient.firstName }} {{ patient.lastName }}</span>
         </div>
-      </form>
+        <div class="admission-identity-item">
+          <span class="admission-identity-label">Gender</span>
+          <span class="admission-identity-value">{{ patient.gender ?? '-' }}</span>
+        </div>
+        <div class="admission-identity-item">
+          <span class="admission-identity-label">Age</span>
+          <span class="admission-identity-value">{{ patient.age ?? '-' }}</span>
+        </div>
+        <div class="admission-identity-item">
+          <span class="admission-identity-label">Date of Birth</span>
+          <span class="admission-identity-value">{{ patient.dateOfBirth ?? '-' }}</span>
+        </div>
+        <div class="admission-identity-item">
+          <span class="admission-identity-label">Mobile No</span>
+          <span class="admission-identity-value">{{ patient.mobileNumber }}</span>
+        </div>
+        <div class="admission-identity-item admission-identity-item-wide">
+          <span class="admission-identity-label">Address</span>
+          <span class="admission-identity-value">{{ patient.address ?? '-' }}</span>
+        </div>
+      </div>
     </section>
+
+    <form #admissionForm="ngForm" (ngSubmit)="submit(admissionForm)" class="admission-form">
+      @if (admissionForm.invalid && admissionForm.submitted) {
+        <div class="admission-error-banner" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          <span>Please fix highlighted errors before submitting.</span>
+        </div>
+      }
+
+      <mat-accordion multi="true" class="admission-accordion">
+        <mat-expansion-panel
+          class="admission-panel"
+          [expanded]="attenderPanelExpanded()"
+          (opened)="attenderPanelExpanded.set(true)"
+          (closed)="attenderPanelExpanded.set(false)"
+        >
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <span class="admission-panel-icon"><mat-icon>groups</mat-icon></span>
+              Attender & Guardian Info
+            </mat-panel-title>
+            <mat-panel-description>Who to contact during the stay</mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="hms-form-grid">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Attender/Relation Name</mat-label>
+              <input matInput name="attenderName" required [(ngModel)]="form.attenderName" #attenderNameModel="ngModel" />
+              @if (attenderNameModel.invalid && (attenderNameModel.touched || admissionForm.submitted)) {
+                <mat-error>Attender name is required</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Relation Type</mat-label>
+              <input matInput name="relationType" [(ngModel)]="form.relationType" placeholder="Enter the Type" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Relation Mobile No</mat-label>
+              <input
+                matInput
+                name="relationMobileNo"
+                inputmode="numeric"
+                maxlength="10"
+                required
+                pattern="\d{10}"
+                [ngModel]="form.relationMobileNo"
+                (input)="onRelationMobileInput($event)"
+                #relationMobileNoModel="ngModel"
+              />
+              @if (relationMobileNoModel.invalid && (relationMobileNoModel.touched || admissionForm.submitted)) {
+                @if (relationMobileNoModel.hasError('required')) {
+                  <mat-error>Relation mobile number is required</mat-error>
+                } @else {
+                  <mat-error>Must be exactly 10 digits</mat-error>
+                }
+              } @else {
+                <mat-hint>10-digit mobile number</mat-hint>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Father's/Spouse Name</mat-label>
+              <input matInput name="fatherSpouseName" [(ngModel)]="form.fatherSpouseName" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Occupation</mat-label>
+              <input matInput name="occupation" [(ngModel)]="form.occupation" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Marital Status</mat-label>
+              <mat-select name="maritalStatus" [(ngModel)]="form.maritalStatus">
+                @for (option of maritalStatusOptions; track option) {
+                  <mat-option [value]="option">{{ option }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </mat-expansion-panel>
+
+        <mat-expansion-panel
+          class="admission-panel"
+          [expanded]="clinicalPanelExpanded()"
+          (opened)="clinicalPanelExpanded.set(true)"
+          (closed)="clinicalPanelExpanded.set(false)"
+        >
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <span class="admission-panel-icon"><mat-icon>medical_information</mat-icon></span>
+              Clinical & Admission Info
+            </mat-panel-title>
+            <mat-panel-description>Case, consultants and admission schedule</mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="hms-form-grid">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Period of Stay (Approx, days)</mat-label>
+              <input matInput type="number" min="0" name="periodOfStayDays" [(ngModel)]="form.periodOfStayDays" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Date</mat-label>
+              <input matInput type="datetime-local" name="admissionDate" required [(ngModel)]="form.admissionDate" #admissionDateModel="ngModel" />
+              @if (admissionDateModel.invalid && (admissionDateModel.touched || admissionForm.submitted)) {
+                <mat-error>Admission date/time is required</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Description of Case</mat-label>
+              <mat-select name="descriptionOfCase" [(ngModel)]="form.descriptionOfCase">
+                @for (option of descriptionOfCaseOptions; track option) {
+                  <mat-option [value]="option">{{ option }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Referral Doctor</mat-label>
+              <input matInput name="referralDoctor" [(ngModel)]="form.referralDoctor" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Primary Consultant/Surgeon</mat-label>
+              <input
+                matInput
+                name="primaryConsultant"
+                required
+                autocomplete="off"
+                [matAutocomplete]="primaryConsultantAuto"
+                [(ngModel)]="form.primaryConsultant"
+                (input)="filterPrimaryConsultants($event)"
+                placeholder="Enter the Name"
+                #primaryConsultantModel="ngModel"
+              />
+              <mat-autocomplete #primaryConsultantAuto="matAutocomplete">
+                @for (consultant of filteredPrimaryConsultants(); track consultant.id) {
+                  <mat-option [value]="consultant.name">{{ consultant.name }}</mat-option>
+                }
+              </mat-autocomplete>
+              @if (primaryConsultantModel.invalid && (primaryConsultantModel.touched || admissionForm.submitted)) {
+                <mat-error>Primary consultant is required</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Secondary Consultant</mat-label>
+              <input
+                matInput
+                name="secondaryConsultant"
+                autocomplete="off"
+                [matAutocomplete]="secondaryConsultantAuto"
+                [(ngModel)]="form.secondaryConsultant"
+                (input)="filterSecondaryConsultants($event)"
+                placeholder="Enter the Name"
+              />
+              <mat-autocomplete #secondaryConsultantAuto="matAutocomplete">
+                @for (consultant of filteredSecondaryConsultants(); track consultant.id) {
+                  <mat-option [value]="consultant.name">{{ consultant.name }}</mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>MLC</mat-label>
+              <mat-select name="mlc" [(ngModel)]="form.mlc">
+                <mat-option [value]="false">No</mat-option>
+                <mat-option [value]="true">Yes</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Patient Type</mat-label>
+              <mat-select name="patientType" [(ngModel)]="form.patientType">
+                @for (option of patientTypeOptions; track option) {
+                  <mat-option [value]="option">{{ option }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </mat-expansion-panel>
+
+        <mat-expansion-panel
+          class="admission-panel"
+          [expanded]="roomPanelExpanded()"
+          (opened)="roomPanelExpanded.set(true)"
+          (closed)="roomPanelExpanded.set(false)"
+        >
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <span class="admission-panel-icon"><mat-icon>bed</mat-icon></span>
+              Room, Vitals & Billing
+            </mat-panel-title>
+            <mat-panel-description>Room, measurements, insurance and payment</mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="hms-form-grid">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Room Type</mat-label>
+              <mat-select name="roomTypeId" required [(ngModel)]="form.roomTypeId" #roomTypeIdModel="ngModel">
+                @for (type of roomTypes(); track type.id) {
+                  <mat-option [value]="type.id">{{ type.name }}</mat-option>
+                }
+              </mat-select>
+              @if (roomTypeIdModel.invalid && (roomTypeIdModel.touched || admissionForm.submitted)) {
+                <mat-error>Room type is required</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Payment Type</mat-label>
+              <mat-select name="paymentType" required [(ngModel)]="form.paymentType" #paymentTypeModel="ngModel">
+                @for (option of paymentTypeOptions; track option.value) {
+                  <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                }
+              </mat-select>
+              @if (paymentTypeModel.invalid && (paymentTypeModel.touched || admissionForm.submitted)) {
+                <mat-error>Payment type is required</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Height (in Cms)</mat-label>
+              <input matInput type="number" min="0.01" step="0.1" name="heightCm" [(ngModel)]="form.heightCm" #heightCmModel="ngModel" />
+              @if (heightCmModel.invalid && (heightCmModel.touched || admissionForm.submitted)) {
+                <mat-error>Must be a positive number</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Weight (in Kgs)</mat-label>
+              <input matInput type="number" min="0.01" step="0.1" name="weightKg" [(ngModel)]="form.weightKg" #weightKgModel="ngModel" />
+              @if (weightKgModel.invalid && (weightKgModel.touched || admissionForm.submitted)) {
+                <mat-error>Must be a positive number</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Insurance Type</mat-label>
+              <mat-select name="insuranceType" [(ngModel)]="form.insuranceType">
+                @for (option of insuranceTypeOptions; track option) {
+                  <mat-option [value]="option">{{ option }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            @if (showInsuranceCompany) {
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Insurance Company</mat-label>
+                <mat-select name="insuranceCompany" [(ngModel)]="form.insuranceCompany">
+                  @for (option of insuranceCompanyOptions; track option) {
+                    <mat-option [value]="option">{{ option }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            }
+            @if (showInsuranceFields) {
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>TPA Name</mat-label>
+                <input matInput name="tpaName" [(ngModel)]="form.tpaName" placeholder="Enter the Name" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Corporate Name</mat-label>
+                <input matInput name="corporateName" [(ngModel)]="form.corporateName" placeholder="Enter the Name" />
+              </mat-form-field>
+            }
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Aadhaar Card Number</mat-label>
+              <input
+                matInput
+                name="aadhaarNumber"
+                inputmode="numeric"
+                maxlength="12"
+                pattern="\d{12}"
+                [ngModel]="form.aadhaarNumber"
+                (input)="onAadhaarInput($event)"
+                placeholder="Enter the Aadhaar"
+                #aadhaarNumberModel="ngModel"
+              />
+              @if (aadhaarNumberModel.invalid && (aadhaarNumberModel.touched || admissionForm.submitted)) {
+                <mat-error>Must be exactly 12 digits</mat-error>
+              } @else {
+                <mat-hint>Optional, 12 digits</mat-hint>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="admission-remarks-field">
+              <mat-label>Remarks</mat-label>
+              <input matInput name="remarks" [(ngModel)]="form.remarks" placeholder="Leave Empty if No" />
+            </mat-form-field>
+
+            <div class="admission-icu-field">
+              <span class="admission-icu-label">For ICU Admission</span>
+              <mat-checkbox name="ventilatorRequired" [(ngModel)]="form.ventilatorRequired">Ventilator Required</mat-checkbox>
+              <mat-checkbox name="monitorRequired" [(ngModel)]="form.monitorRequired">Monitor Required</mat-checkbox>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+
+      <div class="admission-submit-row">
+        <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">
+          {{ submitting() ? (isEditMode ? 'Saving…' : 'Creating…') : (isEditMode ? 'Save' : 'Create') }}
+        </button>
+      </div>
+    </form>
   }
 </div>

@@ -1,9 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, ElementRef, inject, signal } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
@@ -113,7 +115,9 @@ const EMPTY_FORM: Omit<AdmissionRegistrationInput, 'patientId'> = {
   imports: [
     FormsModule,
     MatAutocompleteModule,
+    MatExpansionModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatSelectModule,
     MatCheckboxModule,
@@ -132,6 +136,7 @@ export class AdmissionRegistrationFormComponent {
   private readonly consultantService = inject(ConsultantService);
   private readonly admissionService = inject(AdmissionService);
   private readonly notification = inject(NotificationService);
+  private readonly elementRef: ElementRef<HTMLElement> = inject(ElementRef);
 
   readonly maritalStatusOptions = MARITAL_STATUS_OPTIONS;
   readonly descriptionOfCaseOptions = DESCRIPTION_OF_CASE_OPTIONS;
@@ -150,6 +155,11 @@ export class AdmissionRegistrationFormComponent {
 
   photoPreviewUrl = signal<string | null>(null);
   private photoFile: File | null = null;
+
+  /** Collapsible-card open state - forced back open (and scrolled to) when a section holds an invalid field on submit. */
+  attenderPanelExpanded = signal(true);
+  clinicalPanelExpanded = signal(true);
+  roomPanelExpanded = signal(true);
 
   form: Omit<AdmissionRegistrationInput, 'patientId'> = { ...EMPTY_FORM, admissionDate: nowAsDatetimeLocal() };
 
@@ -216,7 +226,12 @@ export class AdmissionRegistrationFormComponent {
   }
 
   get isRelationMobileValid(): boolean {
-    return !this.form.relationMobileNo || /^\d{10}$/.test(this.form.relationMobileNo);
+    return !!this.form.relationMobileNo && /^\d{10}$/.test(this.form.relationMobileNo);
+  }
+
+  onAadhaarInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.form.aadhaarNumber = input.value.replace(/\D/g, '').slice(0, 12);
   }
 
   filterPrimaryConsultants(event: Event): void {
@@ -243,9 +258,17 @@ export class AdmissionRegistrationFormComponent {
     reader.readAsDataURL(file);
   }
 
-  submit(): void {
+  submit(formRef: NgForm): void {
+    if (formRef.invalid || !this.isRelationMobileValid) {
+      this.attenderPanelExpanded.set(true);
+      this.clinicalPanelExpanded.set(true);
+      this.roomPanelExpanded.set(true);
+      this.notification.error('Please fix highlighted errors before submitting.');
+      setTimeout(() => this.scrollToFirstError(), 150);
+      return;
+    }
     const patient = this.patient();
-    if (!patient || patient.id === null || !this.isRelationMobileValid) {
+    if (!patient || patient.id === null) {
       return;
     }
     this.submitting.set(true);
@@ -290,5 +313,12 @@ export class AdmissionRegistrationFormComponent {
         this.notification.error(err.error?.message ?? 'Failed to register the admission.');
       }
     });
+  }
+
+  /** Scrolls/focuses the first invalid control (Angular stamps .ng-invalid on it directly) after an expansion panel forced back open has had a moment to lay out. */
+  private scrollToFirstError(): void {
+    const invalidField = this.elementRef.nativeElement.querySelector<HTMLElement>('.ng-invalid[name]');
+    invalidField?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    invalidField?.focus({ preventScroll: true });
   }
 }

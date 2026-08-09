@@ -1,40 +1,12 @@
-.admission-form-section {
+// ---- Patient profile header --------------------------------------------
+.admission-patient-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--hms-space-6);
   padding: var(--hms-space-5);
 }
 
-.admission-patient-block {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--hms-space-5);
-  padding-bottom: var(--hms-space-4);
-  margin-bottom: var(--hms-space-4);
-  border-bottom: 1px solid var(--hms-color-border, #e0e0e0);
-
-  .hms-form-grid {
-    flex: 1;
-  }
-}
-
-.admission-readonly-field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--hms-space-1);
-}
-
-.admission-readonly-field-wide {
-  grid-column: span 2;
-}
-
-.admission-readonly-label {
-  font-size: var(--hms-font-size-sm);
-  color: var(--hms-color-text-muted);
-}
-
-.admission-readonly-value {
-  font-weight: 500;
-}
-
-.admission-photo-field {
+.admission-avatar-block {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -42,25 +14,146 @@
   flex-shrink: 0;
 }
 
-.admission-photo-preview {
-  width: 96px;
-  height: 96px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 1px solid var(--hms-color-border, #e0e0e0);
-}
-
-.admission-photo-placeholder {
+.admission-avatar {
   width: 96px;
   height: 96px;
   border-radius: 50%;
-  border: 1px dashed var(--hms-color-border, #e0e0e0);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--hms-font-size-sm);
+  overflow: hidden;
+  background: var(--hms-color-primary-container);
+  border: 1px solid var(--hms-color-border);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  mat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+    color: var(--hms-color-primary);
+  }
+}
+
+.admission-identity-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--hms-space-4) var(--hms-space-5);
+}
+
+.admission-identity-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-1);
+  min-width: 0;
+}
+
+.admission-identity-item-name .admission-identity-value {
+  font-size: var(--hms-font-size-lg);
+  font-weight: var(--hms-font-weight-semibold);
+}
+
+.admission-identity-item-wide {
+  grid-column: span 2;
+}
+
+.admission-identity-label {
+  font-size: var(--hms-font-size-xs);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   color: var(--hms-color-text-muted);
-  text-align: center;
+}
+
+.admission-identity-value {
+  font-weight: var(--hms-font-weight-medium);
+  color: var(--hms-color-text);
+  overflow-wrap: anywhere;
+}
+
+// ---- Validation banner ---------------------------------------------------
+.admission-error-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  padding: var(--hms-space-3) var(--hms-space-4);
+  border-radius: var(--hms-radius-md);
+  background: var(--hms-color-danger-container);
+  color: var(--hms-color-on-danger-container);
+  font-weight: var(--hms-font-weight-medium);
+
+  mat-icon {
+    color: var(--hms-color-danger);
+    flex-shrink: 0;
+  }
+}
+
+// ---- Collapsible sections -------------------------------------------------
+.admission-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+}
+
+.admission-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+
+  // Rethemes Material's own expansion-panel tokens (defined globally by
+  // mat.all-component-themes in _theme.scss) to the hms design tokens,
+  // rather than fighting Material's internal DOM with !important overrides.
+  --mat-expansion-container-background-color: var(--hms-color-surface);
+  --mat-expansion-container-text-color: var(--hms-color-text);
+  --mat-expansion-container-shape: var(--hms-radius-lg);
+  --mat-expansion-header-text-color: var(--hms-color-text);
+  --mat-expansion-header-description-color: var(--hms-color-text-muted);
+  --mat-expansion-header-indicator-color: var(--hms-color-text-muted);
+  --mat-expansion-header-hover-state-layer-color: var(--hms-color-surface-alt);
+  --mat-expansion-header-text-size: var(--hms-font-size-lg);
+  --mat-expansion-header-text-weight: var(--hms-font-weight-semibold);
+}
+
+// Material ships mat-expansion-panel with its own elevation directive
+// (higher specificity than a plain box-shadow rule) - overridden here so
+// each section reads as the same soft "card" as the patient header above,
+// per the app's existing ::ng-deep-for-Material-internals convention (see
+// booking-wizard.component.scss).
+::ng-deep .admission-panel.mat-expansion-panel {
+  border: 1px solid var(--hms-color-border);
+  box-shadow: var(--hms-shadow-sm) !important;
+  overflow: hidden;
+
+  &.mat-expanded {
+    box-shadow: var(--hms-shadow-md) !important;
+  }
+
+  .mat-expansion-panel-body {
+    padding: 0 var(--hms-space-5) var(--hms-space-5);
+  }
+}
+
+.admission-panel-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--hms-radius-md);
+  margin-right: var(--hms-space-3);
+  background: var(--hms-color-primary-container);
+  color: var(--hms-color-primary);
+  flex-shrink: 0;
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
 }
 
 .admission-remarks-field {
@@ -72,6 +165,7 @@
   display: flex;
   align-items: center;
   gap: var(--hms-space-4);
+  flex-wrap: wrap;
 }
 
 .admission-icu-label {
@@ -80,8 +174,19 @@
 }
 
 .admission-submit-row {
-  grid-column: 1 / -1;
   display: flex;
   justify-content: center;
-  margin-top: var(--hms-space-2);
+}
+
+@media (max-width: 599px) {
+  .admission-patient-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .admission-identity-grid {
+    width: 100%;
+    text-align: left;
+  }
 }
