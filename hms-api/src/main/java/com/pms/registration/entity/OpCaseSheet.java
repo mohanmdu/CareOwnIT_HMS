@@ -21,12 +21,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * A doctor's OP case sheet for one appointment (migration doc's "Patient
- * Prescription" screens): vitals, assessment, diagnosis, and a repeating
- * drug-prescription grid. One case sheet per appointment
- * (uq_op_case_sheet_appointment) - since an appointment already pairs one
- * patient with one consultant, a patient seeing several consultants over
- * time naturally ends up with several case sheets, each correctly scoped.
+ * A doctor's OP case sheet for one appointment OR one OP Direct Billing
+ * walk-in visit (migration doc's "Patient Prescription" screens): vitals,
+ * assessment, diagnosis, and a repeating drug-prescription grid. Exactly one
+ * of appointment/opDirectBilling is set (enforced by chk_op_case_sheet_source
+ * - same dual-parent shape as Refund), each individually unique
+ * (uq_op_case_sheet_appointment / uq_op_case_sheet_op_direct_billing) - one
+ * case sheet per visit, since an appointment/walk-in already pairs one
+ * patient with (at most) one consultant for that visit.
  */
 @Entity
 @Table(name = "op_case_sheet")
@@ -40,8 +42,12 @@ public class OpCaseSheet extends Auditable {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "appointment_id", nullable = false, unique = true)
+    @JoinColumn(name = "appointment_id")
     private Appointment appointment;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "op_direct_billing_id")
+    private OpDirectBilling opDirectBilling;
 
     @Column(name = "food_drug_allergy", length = 500)
     private String foodDrugAllergy;

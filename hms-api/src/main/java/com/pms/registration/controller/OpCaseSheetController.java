@@ -44,6 +44,17 @@ public class OpCaseSheetController {
         return service.save(appointmentId, request);
     }
 
+    @GetMapping("/by-direct-billing/{directBillingId}")
+    public OpCaseSheetDto getByDirectBilling(@PathVariable Long directBillingId) {
+        return service.getOrCreateShellForDirectBilling(directBillingId);
+    }
+
+    @PutMapping("/by-direct-billing/{directBillingId}")
+    public OpCaseSheetDto saveForDirectBilling(
+            @PathVariable Long directBillingId, @Valid @RequestBody OpCaseSheetSaveRequest request) {
+        return service.saveForDirectBilling(directBillingId, request);
+    }
+
     @GetMapping("/review-date-report")
     public List<ReviewDateReportEntryDto> reviewDateReport(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,

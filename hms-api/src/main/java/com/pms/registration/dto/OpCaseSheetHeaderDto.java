@@ -5,6 +5,8 @@ import java.time.LocalTime;
 
 public record OpCaseSheetHeaderDto(
         Long appointmentId,
+        Long directBillingId,
+        String source,
         String patientRegistrationNumber,
         String patientName,
         String gender,

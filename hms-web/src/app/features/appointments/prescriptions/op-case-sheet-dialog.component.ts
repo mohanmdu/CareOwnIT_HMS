@@ -17,8 +17,10 @@ import { ProductService } from '../../pharmacy/inventory-master/products/product
 import { OpCaseSheet, OpCaseSheetHeader, OpCaseSheetSaveRequest, OpPrescriptionItem } from './op-case-sheet.model';
 import { OpCaseSheetService } from './op-case-sheet.service';
 
+/** Exactly one of appointmentId/directBillingId is set - matches PrescriptionWorklistEntry's own two-source shape. */
 export interface OpCaseSheetDialogData {
-  appointmentId: number;
+  appointmentId: number | null;
+  directBillingId: number | null;
 }
 
 const YES_NO_OPTIONS = ['Yes', 'No'];
@@ -93,7 +95,10 @@ export class OpCaseSheetDialogComponent implements OnInit {
       next: (products) => this.drugSuggestions.set(products),
       error: () => {}
     });
-    this.service.getByAppointment(this.data.appointmentId).subscribe({
+    const load = this.data.appointmentId !== null
+      ? this.service.getByAppointment(this.data.appointmentId)
+      : this.service.getByDirectBilling(this.data.directBillingId!);
+    load.subscribe({
       next: (caseSheet) => {
         this.header.set(caseSheet.header);
         this.form = this.toForm(caseSheet);
@@ -122,7 +127,10 @@ export class OpCaseSheetDialogComponent implements OnInit {
   save(): void {
     this.saving.set(true);
     const request: OpCaseSheetSaveRequest = { ...this.form, reviewDate: this.toIsoDate(this.reviewDateValue) };
-    this.service.save(this.data.appointmentId, request).subscribe({
+    const save$ = this.data.appointmentId !== null
+      ? this.service.save(this.data.appointmentId, request)
+      : this.service.saveDirectBilling(this.data.directBillingId!, request);
+    save$.subscribe({
       next: () => {
         this.saving.set(false);
         this.notification.success('Case sheet saved.');

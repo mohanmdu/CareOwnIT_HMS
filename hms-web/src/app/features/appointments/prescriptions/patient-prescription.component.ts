@@ -77,18 +77,12 @@ export class PatientPrescriptionComponent {
     return CATEGORY_LABELS[source];
   }
 
-  /** Case-sheet documentation status - separate from Category (what kind of visit) and Actions (what you can do about it). */
+  /** Case-sheet documentation status - separate from Category (what kind of visit) and Actions (what you can do about it). Same rule for both sources now that a walk-in can carry a case sheet too. */
   statusLabel(entry: PrescriptionWorklistEntry): string {
-    if (entry.source === 'DIRECT_BILLING') {
-      return 'Walk-in visit';
-    }
     return entry.hasCaseSheet ? 'Documented' : 'Pending';
   }
 
   statusTone(entry: PrescriptionWorklistEntry): StatusBadgeTone {
-    if (entry.source === 'DIRECT_BILLING') {
-      return 'neutral';
-    }
     return entry.hasCaseSheet ? 'success' : 'warning';
   }
 
@@ -139,14 +133,14 @@ export class PatientPrescriptionComponent {
   }
 
   openCaseSheet(entry: PrescriptionWorklistEntry): void {
-    if (entry.appointmentId === null) {
+    if (entry.appointmentId === null && entry.directBillingId === null) {
       return;
     }
     this.dialog
       .open(OpCaseSheetDialogComponent, {
         width: '820px',
         maxWidth: '95vw',
-        data: { appointmentId: entry.appointmentId }
+        data: { appointmentId: entry.appointmentId, directBillingId: entry.directBillingId }
       })
       .afterClosed()
       .subscribe((saved) => {
@@ -157,13 +151,13 @@ export class PatientPrescriptionComponent {
   }
 
   viewCaseSheet(entry: PrescriptionWorklistEntry): void {
-    if (entry.appointmentId === null) {
+    if (entry.appointmentId === null && entry.directBillingId === null) {
       return;
     }
     this.dialog.open(OpCaseSheetViewDialogComponent, {
       width: '760px',
       maxWidth: '95vw',
-      data: { appointmentId: entry.appointmentId }
+      data: { appointmentId: entry.appointmentId, directBillingId: entry.directBillingId }
     });
   }
 

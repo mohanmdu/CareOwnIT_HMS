@@ -12,8 +12,10 @@ import { OpCaseSheet } from './op-case-sheet.model';
 import { OP_CASE_SHEET_PRINT_STYLES } from './op-case-sheet-print-styles';
 import { OpCaseSheetService } from './op-case-sheet.service';
 
+/** Exactly one of appointmentId/directBillingId is set - matches PrescriptionWorklistEntry's own two-source shape. */
 export interface OpCaseSheetViewDialogData {
-  appointmentId: number;
+  appointmentId: number | null;
+  directBillingId: number | null;
 }
 
 /** Read-only, printable rendering of a saved OP Case Sheet - the "View Details" action in the Patient Prescription worklist. */
@@ -44,7 +46,10 @@ export class OpCaseSheetViewDialogComponent implements OnInit {
       next: (settings) => this.clinicSettings.set(settings),
       error: () => {}
     });
-    this.service.getByAppointment(this.data.appointmentId).subscribe({
+    const load = this.data.appointmentId !== null
+      ? this.service.getByAppointment(this.data.appointmentId)
+      : this.service.getByDirectBilling(this.data.directBillingId!);
+    load.subscribe({
       next: (caseSheet) => {
         this.caseSheet.set(caseSheet);
         this.loading.set(false);

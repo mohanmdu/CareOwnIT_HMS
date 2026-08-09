@@ -41,6 +41,14 @@ export class OpCaseSheetService {
     return this.http.put<OpCaseSheet>(`${this.baseUrl}/by-appointment/${appointmentId}`, request);
   }
 
+  getByDirectBilling(directBillingId: number): Observable<OpCaseSheet> {
+    return this.http.get<OpCaseSheet>(`${this.baseUrl}/by-direct-billing/${directBillingId}`);
+  }
+
+  saveDirectBilling(directBillingId: number, request: OpCaseSheetSaveRequest): Observable<OpCaseSheet> {
+    return this.http.put<OpCaseSheet>(`${this.baseUrl}/by-direct-billing/${directBillingId}`, request);
+  }
+
   reviewDateReport(filter: ReviewDateReportFilter): Observable<ReviewDateReportEntry[]> {
     const params: Record<string, string> = { upcoming: String(filter.upcoming) };
     if (filter.fromDate) {

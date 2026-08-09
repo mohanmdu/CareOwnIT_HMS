@@ -13,9 +13,20 @@ public interface OpCaseSheetRepository extends JpaRepository<OpCaseSheet, Long> 
 
     boolean existsByAppointmentId(Long appointmentId);
 
+    Optional<OpCaseSheet> findByOpDirectBillingId(Long opDirectBillingId);
+
+    boolean existsByOpDirectBillingId(Long opDirectBillingId);
+
+    // Scoped to appointment-linked case sheets only - the Review Date Report
+    // screen/DTO (ReviewDateReportEntryDto.appointmentId) has no concept of a
+    // Direct Billing walk-in source yet (unlike the Patient Prescription
+    // worklist's appointmentId/directBillingId/source triad), so a walk-in's
+    // case sheet is intentionally left out here for now rather than crashing
+    // OpCaseSheetService.toReviewDateEntry() or silently mislabeling it.
     @Query("""
             SELECT c FROM OpCaseSheet c
-            WHERE c.reviewDate IS NOT NULL
+            WHERE c.appointment IS NOT NULL
+              AND c.reviewDate IS NOT NULL
               AND (:fromDate IS NULL OR c.reviewDate >= :fromDate)
               AND (:toDate IS NULL OR c.reviewDate <= :toDate)
               AND (:upcoming = TRUE AND c.reviewDate >= CURRENT_DATE

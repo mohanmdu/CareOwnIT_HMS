@@ -1,5 +1,7 @@
 export interface OpCaseSheetHeader {
-  appointmentId: number;
+  appointmentId: number | null;
+  directBillingId: number | null;
+  source: PrescriptionWorklistSource;
   patientRegistrationNumber: string | null;
   patientName: string | null;
   gender: string | null;

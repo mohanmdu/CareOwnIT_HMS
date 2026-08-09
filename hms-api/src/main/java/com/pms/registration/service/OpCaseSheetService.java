@@ -30,9 +30,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Patient Prescription module (migration doc's OP Case Sheet screens): one
- * case sheet per appointment, upserted wholesale (including its prescription
- * items) on every save - matches the legacy "Save draft" button's semantics
- * of always overwriting with the latest full form state.
+ * case sheet per appointment OR per OP Direct Billing walk-in visit,
+ * upserted wholesale (including its prescription items) on every save -
+ * matches the legacy "Save draft" button's semantics of always overwriting
+ * with the latest full form state.
  */
 @Service
 @Transactional(readOnly = true)
@@ -51,12 +52,7 @@ public class OpCaseSheetService {
         this.opDirectBillingRepository = opDirectBillingRepository;
     }
 
-    /**
-     * Merges two visit sources: appointments (which may need a case sheet
-     * documented) and OP Direct Billing walk-ins (view-only here - a case
-     * sheet requires a real appointment, and there's nothing clinical to
-     * document for a walk-in charge; see the Patient Prescription plan).
-     */
+    /** Merges two visit sources that can each carry their own case sheet: appointments and OP Direct Billing walk-ins. */
     public List<PrescriptionWorklistEntryDto> worklist(LocalDate fromDate, LocalDate toDate, Long consultantId, String search) {
         Stream<PrescriptionWorklistEntryDto> appointmentEntries =
                 appointmentRepository.prescriptionWorklist(fromDate, toDate, consultantId, search).stream()
@@ -80,7 +76,15 @@ public class OpCaseSheetService {
         return caseSheetRepository
                 .findByAppointmentId(appointmentId)
                 .map(this::toDto)
-                .orElseGet(() -> emptyShell(appointment));
+                .orElseGet(() -> emptyShell(toHeader(appointment)));
+    }
+
+    public OpCaseSheetDto getOrCreateShellForDirectBilling(Long directBillingId) {
+        OpDirectBilling billing = getDirectBillingOrThrow(directBillingId);
+        return caseSheetRepository
+                .findByOpDirectBillingId(directBillingId)
+                .map(this::toDto)
+                .orElseGet(() -> emptyShell(toHeader(billing)));
     }
 
     @Transactional
@@ -88,26 +92,15 @@ public class OpCaseSheetService {
         Appointment appointment = getAppointmentOrThrow(appointmentId);
         OpCaseSheet caseSheet = caseSheetRepository.findByAppointmentId(appointmentId).orElseGet(OpCaseSheet::new);
         caseSheet.setAppointment(appointment);
-        applyFields(caseSheet, request);
+        return toDto(caseSheetRepository.save(applyFields(caseSheet, request)));
+    }
 
-        caseSheet.getPrescriptionItems().clear();
-        List<OpPrescriptionItemRequest> items = request.prescriptionItems() != null ? request.prescriptionItems() : List.of();
-        int sortOrder = 0;
-        for (OpPrescriptionItemRequest itemRequest : items) {
-            OpPrescriptionItem item = new OpPrescriptionItem();
-            item.setCaseSheet(caseSheet);
-            item.setDrugName(itemRequest.drugName());
-            item.setQty(itemRequest.qty());
-            item.setIntake(itemRequest.intake());
-            item.setMorningDose(itemRequest.morningDose());
-            item.setAfternoonDose(itemRequest.afternoonDose());
-            item.setEveningDose(itemRequest.eveningDose());
-            item.setNightDose(itemRequest.nightDose());
-            item.setSortOrder(sortOrder++);
-            caseSheet.getPrescriptionItems().add(item);
-        }
-
-        return toDto(caseSheetRepository.save(caseSheet));
+    @Transactional
+    public OpCaseSheetDto saveForDirectBilling(Long directBillingId, OpCaseSheetSaveRequest request) {
+        OpDirectBilling billing = getDirectBillingOrThrow(directBillingId);
+        OpCaseSheet caseSheet = caseSheetRepository.findByOpDirectBillingId(directBillingId).orElseGet(OpCaseSheet::new);
+        caseSheet.setOpDirectBilling(billing);
+        return toDto(caseSheetRepository.save(applyFields(caseSheet, request)));
     }
 
     public List<ReviewDateReportEntryDto> reviewDateReport(LocalDate fromDate, LocalDate toDate, boolean upcoming) {
@@ -116,7 +109,8 @@ public class OpCaseSheetService {
                 .toList();
     }
 
-    private void applyFields(OpCaseSheet caseSheet, OpCaseSheetSaveRequest request) {
+    /** Shared by both save paths - which parent (appointment vs. direct billing) is already set on caseSheet by the caller. */
+    private OpCaseSheet applyFields(OpCaseSheet caseSheet, OpCaseSheetSaveRequest request) {
         caseSheet.setFoodDrugAllergy(request.foodDrugAllergy());
         caseSheet.setHeightCm(request.heightCm());
         caseSheet.setWeightKg(request.weightKg());
@@ -146,6 +140,24 @@ public class OpCaseSheetService {
         caseSheet.setDiet(request.diet());
         caseSheet.setRemarks(request.remarks());
         caseSheet.setReviewDate(request.reviewDate());
+
+        caseSheet.getPrescriptionItems().clear();
+        List<OpPrescriptionItemRequest> items = request.prescriptionItems() != null ? request.prescriptionItems() : List.of();
+        int sortOrder = 0;
+        for (OpPrescriptionItemRequest itemRequest : items) {
+            OpPrescriptionItem item = new OpPrescriptionItem();
+            item.setCaseSheet(caseSheet);
+            item.setDrugName(itemRequest.drugName());
+            item.setQty(itemRequest.qty());
+            item.setIntake(itemRequest.intake());
+            item.setMorningDose(itemRequest.morningDose());
+            item.setAfternoonDose(itemRequest.afternoonDose());
+            item.setEveningDose(itemRequest.eveningDose());
+            item.setNightDose(itemRequest.nightDose());
+            item.setSortOrder(sortOrder++);
+            caseSheet.getPrescriptionItems().add(item);
+        }
+        return caseSheet;
     }
 
     private Appointment getAppointmentOrThrow(Long appointmentId) {
@@ -154,10 +166,16 @@ public class OpCaseSheetService {
                 .orElseThrow(() -> new EntityNotFoundException("Appointment not found: " + appointmentId));
     }
 
-    private OpCaseSheetDto emptyShell(Appointment appointment) {
+    private OpDirectBilling getDirectBillingOrThrow(Long directBillingId) {
+        return opDirectBillingRepository
+                .findById(directBillingId)
+                .orElseThrow(() -> new EntityNotFoundException("OP Direct Billing not found: " + directBillingId));
+    }
+
+    private OpCaseSheetDto emptyShell(OpCaseSheetHeaderDto header) {
         return new OpCaseSheetDto(
                 null, // id
-                toHeader(appointment),
+                header,
                 null, // foodDrugAllergy
                 null, null, null, null, null, // heightCm, weightKg, bmi, temperatureF, pulseBpm
                 null, null, null, null, null, // respirationBpm, bpSystolic, bpDiastolic, spo2, bodyFatPercent
@@ -174,6 +192,8 @@ public class OpCaseSheetService {
         Consultant consultant = appointment.getConsultant();
         return new OpCaseSheetHeaderDto(
                 appointment.getId(),
+                null,
+                "APPOINTMENT",
                 patient.getRegistrationNumber(),
                 displayName(patient),
                 patient.getGender(),
@@ -182,6 +202,24 @@ public class OpCaseSheetService {
                 appointment.getAppointmentDate(),
                 appointment.getSlotTime(),
                 consultant.getName());
+    }
+
+    private OpCaseSheetHeaderDto toHeader(OpDirectBilling billing) {
+        Patient patient = billing.getPatient();
+        Consultant consultant = billing.resolveConsultant();
+        ZonedDateTime billedAt = billing.getBilledAt().atZone(ZoneId.systemDefault());
+        return new OpCaseSheetHeaderDto(
+                null,
+                billing.getId(),
+                "DIRECT_BILLING",
+                patient.getRegistrationNumber(),
+                displayName(patient),
+                patient.getGender(),
+                patient.getAge(),
+                patient.getMobileNumber(),
+                billedAt.toLocalDate(),
+                billedAt.toLocalTime(),
+                consultant != null ? consultant.getName() : null);
     }
 
     private OpCaseSheetDto toDto(OpCaseSheet caseSheet) {
@@ -197,9 +235,12 @@ public class OpCaseSheetService {
                     item.getEveningDose(),
                     item.getNightDose()));
         }
+        OpCaseSheetHeaderDto header = caseSheet.getAppointment() != null
+                ? toHeader(caseSheet.getAppointment())
+                : toHeader(caseSheet.getOpDirectBilling());
         return new OpCaseSheetDto(
                 caseSheet.getId(),
-                toHeader(caseSheet.getAppointment()),
+                header,
                 caseSheet.getFoodDrugAllergy(),
                 caseSheet.getHeightCm(),
                 caseSheet.getWeightKg(),
@@ -267,6 +308,11 @@ public class OpCaseSheetService {
         // own header-level getConsultant() is null on every bill saved since.
         Consultant consultant = billing.resolveConsultant();
         ZonedDateTime billedAt = billing.getBilledAt().atZone(ZoneId.systemDefault());
+        boolean hasCaseSheet = caseSheetRepository.existsByOpDirectBillingId(billing.getId());
+        LocalDate reviewDate = caseSheetRepository
+                .findByOpDirectBillingId(billing.getId())
+                .map(OpCaseSheet::getReviewDate)
+                .orElse(null);
         return new PrescriptionWorklistEntryDto(
                 null,
                 billing.getId(),
@@ -281,8 +327,8 @@ public class OpCaseSheetService {
                 consultant != null ? consultant.getName() : null,
                 billedAt.toLocalDate(),
                 billedAt.toLocalTime(),
-                false,
-                null);
+                hasCaseSheet,
+                reviewDate);
     }
 
     private ReviewDateReportEntryDto toReviewDateEntry(OpCaseSheet caseSheet) {
