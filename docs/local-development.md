@@ -28,6 +28,7 @@ none of them and just uses the defaults below.
 | `JWT_EXPIRATION_MINUTES` | `600` | |
 | `UPLOAD_DIR` | `uploads` (relative to wherever you launch the JVM from) | Consultant photos, CMS images, patient reports |
 | `CORS_ALLOWED_ORIGINS` | `http://localhost:*` | Allows any localhost port, since the Angular/Vite dev servers for hms-web and hms-website land on unpredictable ports |
+| `DEPLOYMENT_MODE` | `multi-tenant` | 3-field client-code login, per-client license enforcement, domain-based public-site routing (see `DeploymentModeProperties`) - the deployment target this product is built for. `single-tenant` still exists as a code path but is no longer the default either locally or in production. |
 
 **To run locally**: have a local MySQL with a `Navjeevan` database (or point
 `DB_URL` elsewhere), then from `hms-api/`:

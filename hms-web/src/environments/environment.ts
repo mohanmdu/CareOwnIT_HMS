@@ -7,8 +7,9 @@ export const environment = {
   // once a user is signed in.
   activePackage: 'PREMIUM' as const,
   // Must match the backend's app.deployment.mode for this same deployment
-  // (see hms-api's DeploymentModeProperties) - 'single-tenant' (the default
-  // for every offline/on-prem build) hides the Client Code login field;
-  // only the shared multi-tenant VPS build sets this to 'multi-tenant'.
-  deploymentMode: 'single-tenant' as 'single-tenant' | 'multi-tenant'
+  // (see hms-api's DeploymentModeProperties) - multi-tenant is the
+  // deployment target this product is built for (3-field client-code
+  // login). 'single-tenant' still exists as a code path for a one-off
+  // offline/on-prem build, but is no longer the default.
+  deploymentMode: 'multi-tenant' as 'single-tenant' | 'multi-tenant'
 };
