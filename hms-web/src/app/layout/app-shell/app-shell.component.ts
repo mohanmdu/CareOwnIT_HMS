@@ -95,6 +95,16 @@ export class AppShellComponent {
   readonly clinicName = computed(() => this.clinicSettings()?.name ?? 'HMS');
   readonly footerText = computed(() => this.clinicSettings()?.footerText ?? null);
 
+  /** Same module gate as the Clinic Settings screen itself (Administration), and null whenever no website is configured - the toolbar icon simply doesn't render rather than linking to nothing. See clinic-settings-list.component.ts's identical websiteUrl getter. */
+  readonly websiteUrl = computed(() => {
+    const settings = this.clinicSettings();
+    const domain = settings?.domain?.trim();
+    if (!settings?.websiteEnabled || !domain || !this.auth.permittedModules().has('administration')) {
+      return null;
+    }
+    return /^https?:\/\//i.test(domain) ? domain : `https://${domain}`;
+  });
+
   readonly currentUsername = this.auth.currentUsername;
   readonly roleName = this.auth.roleName;
   readonly userInitials = computed(() => {

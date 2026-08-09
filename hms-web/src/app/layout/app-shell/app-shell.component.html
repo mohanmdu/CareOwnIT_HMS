@@ -70,6 +70,12 @@
 
       <span class="shell-spacer"></span>
 
+      @if (websiteUrl(); as url) {
+        <a mat-icon-button [href]="url" target="_blank" rel="noopener noreferrer" aria-label="View our website">
+          <mat-icon>language</mat-icon>
+        </a>
+      }
+
       <button
         mat-icon-button
         type="button"

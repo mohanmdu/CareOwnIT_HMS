@@ -177,6 +177,15 @@ export class ClinicSettingsListComponent {
     return this.form.name.trim().length > 0;
   }
 
+  /** Null hides the "view website" link entirely rather than showing a disabled/dead one - same "leave blank if this client doesn't have one yet" convention as the Super Admin domain field. */
+  get websiteUrl(): string | null {
+    const domain = this.form.domain.trim();
+    if (!this.form.websiteEnabled || !domain) {
+      return null;
+    }
+    return /^https?:\/\//i.test(domain) ? domain : `https://${domain}`;
+  }
+
   /** Whichever preset's fields all match the current form, or null - derived, never imperatively tracked, so manually tweaking a color after picking a preset naturally un-highlights it. */
   get selectedPresetId(): ThemePresetId | null {
     const match = this.themePresets.find(

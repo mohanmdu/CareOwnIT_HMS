@@ -62,6 +62,11 @@
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>Domain</mat-label>
             <input matInput name="domain" [(ngModel)]="form.domain" placeholder="www.example-hospital.com" />
+            @if (websiteUrl) {
+              <a mat-icon-button matSuffix [href]="websiteUrl" target="_blank" rel="noopener noreferrer" aria-label="View website in a new tab">
+                <mat-icon aria-hidden="true">open_in_new</mat-icon>
+              </a>
+            }
           </mat-form-field>
 
           <div class="clinic-favicon-row">
