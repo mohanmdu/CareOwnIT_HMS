@@ -1,27 +1,42 @@
-// Deliberately not a reskin of login.component.scss's hospital-facing
-// gradient - a dark/slate palette signals "platform console, not a tenant
-// screen" at a glance, consistent with this area being structurally (not
-// just visually) separate from the tenant app - see super-admin.guard.ts.
+// Light theme, on-token like every other screen in the app - a previous
+// dark/slate palette here was meant to signal "platform console, not a
+// tenant screen" at a glance, but read as dated/heavy rather than distinct.
+// Differentiation from the tenant login (login.component.scss's brand
+// gradient) now comes from the secondary (purple) token instead of a
+// different color scheme entirely - a colored accent bar + badge, same
+// light surface as everywhere else.
 .sa-login-shell {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at 20% 20%, #1e293b 0%, #0b1120 65%);
+  background: var(--hms-color-surface-alt);
   padding: var(--hms-space-4);
 }
 
 .sa-login-card {
   width: 100%;
-  max-width: 380px;
-  background: #121a2c;
-  border: 1px solid #2a3550;
+  max-width: 400px;
+  background: var(--hms-color-surface);
+  border: 1px solid var(--hms-color-border);
   border-radius: var(--hms-radius-lg);
   box-shadow: var(--hms-shadow-lg);
-  padding: var(--hms-space-8) var(--hms-space-6);
+  padding: var(--hms-space-8) var(--hms-space-6) var(--hms-space-6);
   display: flex;
   flex-direction: column;
   gap: var(--hms-space-6);
+  position: relative;
+  overflow: hidden;
+
+  // Thin top accent bar - the one deliberate "this isn't the tenant login"
+  // cue, instead of a whole dark theme.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--hms-color-secondary) 0%, var(--hms-color-primary) 100%);
+  }
 }
 
 .sa-login-brand {
@@ -30,9 +45,9 @@
   gap: var(--hms-space-3);
 
   h1 {
-    font-size: var(--hms-font-size-lg);
+    font-size: var(--hms-font-size-xl);
     margin: 2px 0 0;
-    color: #e7eaf3;
+    color: var(--hms-color-text);
   }
 }
 
@@ -41,7 +56,7 @@
   font-size: var(--hms-font-size-xs);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #818cf8;
+  color: var(--hms-color-secondary);
   font-weight: var(--hms-font-weight-bold);
 }
 
@@ -49,13 +64,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: var(--hms-radius-md);
-  background: #211e52;
-  color: #a5b4fc;
-  font-size: 1.25rem;
+  background: var(--hms-color-secondary-container);
+  color: var(--hms-color-secondary);
   flex-shrink: 0;
+
+  mat-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 26px;
+  }
 }
 
 form {
@@ -75,6 +95,9 @@ form {
 
 .sa-login-error {
   margin: 0;
-  color: #fb7185;
+  padding: var(--hms-space-2) var(--hms-space-3);
+  border-radius: var(--hms-radius-sm);
+  background: var(--hms-color-danger-container);
+  color: var(--hms-color-on-danger-container);
   font-size: var(--hms-font-size-sm);
 }
