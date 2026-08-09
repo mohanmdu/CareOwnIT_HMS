@@ -40,3 +40,8 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Local dev server run artifacts
+website-run.log
+website-run-err.log
+website-run.pid

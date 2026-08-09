@@ -45,3 +45,7 @@ Thumbs.db
 /test-results
 /playwright-report
 /playwright/.cache
+
+# Local dev server run artifacts
+ng-serve.log
+ng-serve.pid
