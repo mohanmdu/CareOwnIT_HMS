@@ -4,16 +4,16 @@ import java.time.LocalTime;
 
 /**
  * One of a consultant's four working sessions in a day (see ConsultantTiming),
- * each with a fixed allowed time-of-day window. NIGHT wraps past midnight
- * (22:00-05:59 the next day) - callers must use {@link #isValidRange} rather
- * than a plain start-before-end check, since a wrapping session's end time is
- * numerically earlier than its start time.
+ * each with a fixed allowed time-of-day window. Every session is a same-day
+ * range (Morning 06:00-11:45, Afternoon 12:00-17:45, Evening 18:00-23:45,
+ * Night 00:00-05:45) - none wraps past midnight, so every comparison below
+ * is a plain, non-wrapping start/end check.
  */
 public enum Session {
-    MORNING(LocalTime.of(6, 0), LocalTime.of(11, 59, 59)),
-    AFTERNOON(LocalTime.of(12, 0), LocalTime.of(16, 59, 59)),
-    EVENING(LocalTime.of(17, 0), LocalTime.of(21, 59, 59)),
-    NIGHT(LocalTime.of(22, 0), LocalTime.of(5, 59, 59));
+    MORNING(LocalTime.of(6, 0), LocalTime.of(11, 45)),
+    AFTERNOON(LocalTime.of(12, 0), LocalTime.of(17, 45)),
+    EVENING(LocalTime.of(18, 0), LocalTime.of(23, 45)),
+    NIGHT(LocalTime.of(0, 0), LocalTime.of(5, 45));
 
     private final LocalTime rangeStart;
     private final LocalTime rangeEnd;
@@ -31,29 +31,22 @@ public enum Session {
         return rangeEnd;
     }
 
+    /**
+     * Always false now that no session's range wraps past midnight. Kept as
+     * a method (not removed) so ConsultantTimingService's existing
+     * "(next day)" suffix on its validation error message keeps compiling -
+     * it now naturally never appends that suffix, which is correct.
+     */
     public boolean wrapsMidnight() {
-        return this == NIGHT;
+        return false;
     }
 
     public boolean contains(LocalTime time) {
-        if (wrapsMidnight()) {
-            return !time.isBefore(rangeStart) || !time.isAfter(rangeEnd);
-        }
         return !time.isBefore(rangeStart) && !time.isAfter(rangeEnd);
     }
 
-    /** True if both times fall in this session's window and start comes before end (wrap-aware for NIGHT). */
+    /** True if both times fall in this session's window and start comes strictly before end. */
     public boolean isValidRange(LocalTime start, LocalTime end) {
-        if (!contains(start) || !contains(end)) {
-            return false;
-        }
-        return normalizedMinutes(start) < normalizedMinutes(end);
-    }
-
-    /** Minutes elapsed since this session's rangeStart, wrapping past midnight - makes ordering comparisons monotonic. */
-    private long normalizedMinutes(LocalTime time) {
-        long minutesSinceMidnight = time.getHour() * 60L + time.getMinute();
-        long rangeStartMinutes = rangeStart.getHour() * 60L + rangeStart.getMinute();
-        return Math.floorMod(minutesSinceMidnight - rangeStartMinutes, 24 * 60L);
+        return contains(start) && contains(end) && start.isBefore(end);
     }
 }

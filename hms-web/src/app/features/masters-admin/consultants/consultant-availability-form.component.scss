@@ -6,72 +6,95 @@
 }
 
 .availability-slots-label {
-  font-weight: 600;
+  font-weight: var(--hms-font-weight-semibold);
 }
 
 .availability-slots-field {
   width: 80px;
 }
 
-.availability-table-wrap {
-  overflow-x: auto;
+.availability-tabs {
+  border: 1px solid var(--hms-color-border);
+  border-radius: var(--hms-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--hms-shadow-sm);
+
+  // Confirmed working without ::ng-deep elsewhere in this codebase (see
+  // time-select.component.scss) - these are plain inherited CSS custom
+  // properties Material exposes, not Shadow DOM-scoped.
+  --mat-tab-header-active-label-text-color: var(--hms-color-primary);
+  --mat-tab-header-active-ripple-color: var(--hms-color-primary);
+  --mat-tab-header-inactive-label-text-color: var(--hms-color-text);
+  --mat-tab-header-active-focus-indicator-color: var(--hms-color-primary);
+  --mat-tab-header-active-hover-indicator-color: var(--hms-color-primary);
+  --mat-tab-header-indicator-color: var(--hms-color-primary);
 }
 
-.availability-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 860px;
+.availability-tab-invalid-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: var(--hms-space-1);
+  border-radius: var(--hms-radius-full);
+  background: var(--hms-color-danger);
+  vertical-align: middle;
 }
 
-// Inherits the header <th>'s own on-primary text color (not a hardcoded
-// muted gray meant for a light background) so it stays legible against
-// whatever header/primary color a clinic picks - dimmed via opacity, not a
-// separate color, to still read as subordinate to the session label above it.
-.availability-session-range {
-  display: block;
-  font-weight: 400;
-  font-size: 0.7rem;
-  color: inherit;
-  opacity: 0.8;
+.availability-tab-range {
+  margin: var(--hms-space-4) var(--hms-space-4) 0;
+  color: var(--hms-color-text-muted);
+  font-size: var(--hms-font-size-sm);
 }
 
-.availability-table th,
-.availability-table td {
-  border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
-  padding: var(--hms-space-2);
-  text-align: center;
-  white-space: nowrap;
+.availability-day-list {
+  display: flex;
+  flex-direction: column;
+  padding: var(--hms-space-2) var(--hms-space-4) var(--hms-space-4);
 }
 
-.availability-table thead th {
-  background: var(--hms-color-primary);
-  color: var(--hms-color-on-primary);
-  font-weight: var(--hms-font-weight-bold);
+.availability-day-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-4);
+  padding: var(--hms-space-2) var(--hms-space-2);
+  border-radius: var(--hms-radius-md);
+
+  &:nth-child(even) {
+    background: var(--hms-color-surface-alt);
+  }
 }
 
-.availability-day-header,
-.availability-day-cell {
-  text-align: left;
-  font-weight: 600;
+.availability-day-row-invalid {
+  background: var(--hms-color-danger-container);
 }
 
-.availability-time-input {
-  padding: var(--hms-space-1, 4px) var(--hms-space-2);
-  border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.2));
-  border-radius: 4px;
+.availability-day-row-label {
+  width: 100px;
+  flex-shrink: 0;
+  font-weight: var(--hms-font-weight-semibold);
+}
+
+.availability-day-row-fields {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-3);
+  flex: 1;
+  max-width: 420px;
+}
+
+.availability-day-row-fields app-time-select {
+  flex: 1;
+  min-width: 0;
+}
+
+.availability-day-row-sep {
+  flex-shrink: 0;
+  color: var(--hms-color-text-muted);
+  font-size: var(--hms-font-size-sm);
 }
 
 .availability-error {
-  color: var(--hms-color-danger, #b3261e);
-  font-size: 0.85rem;
-  margin: var(--hms-space-2) 0 0;
-}
-
-.availability-cell-invalid {
-  background-color: var(--hms-color-danger-bg, rgba(179, 38, 30, 0.08));
-}
-
-.availability-cell-invalid .availability-time-input {
-  border-color: var(--hms-color-danger, #b3261e);
-  border-width: 2px;
+  color: var(--hms-color-danger);
+  font-size: var(--hms-font-size-sm);
+  margin: var(--hms-space-3) 0 0;
 }

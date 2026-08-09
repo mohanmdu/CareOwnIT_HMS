@@ -1,0 +1,27 @@
+:host {
+  display: block;
+}
+
+.time-select-field {
+  width: 100%;
+  min-width: 108px;
+
+  // Compact row height so a 7x4x2 grid of these doesn't inflate vertically
+  // compared to the native time inputs it replaces.
+  .mat-mdc-text-field-wrapper {
+    padding: 0 var(--hms-space-2);
+  }
+
+  .mat-mdc-form-field-infix {
+    min-height: 36px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+}
+
+.time-select-field-invalid {
+  --mdc-outlined-text-field-outline-color: var(--hms-color-danger);
+  --mdc-outlined-text-field-hover-outline-color: var(--hms-color-danger);
+  --mdc-outlined-text-field-focus-outline-color: var(--hms-color-danger);
+  --mdc-outlined-text-field-outline-width: 2px;
+}

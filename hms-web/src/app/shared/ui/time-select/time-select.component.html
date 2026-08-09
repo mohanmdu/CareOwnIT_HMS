@@ -1,0 +1,19 @@
+<mat-form-field
+  appearance="outline"
+  subscriptSizing="dynamic"
+  class="time-select-field"
+  [class.time-select-field-invalid]="invalid()"
+>
+  <mat-select
+    [value]="value() || ''"
+    [disabled]="disabled()"
+    [attr.aria-label]="ariaLabel()"
+    panelClass="time-select-panel"
+    (selectionChange)="onSelectionChange($event)"
+  >
+    <mat-option value="">{{ placeholder() }}</mat-option>
+    @for (option of options(); track option) {
+      <mat-option [value]="option">{{ option }}</mat-option>
+    }
+  </mat-select>
+</mat-form-field>

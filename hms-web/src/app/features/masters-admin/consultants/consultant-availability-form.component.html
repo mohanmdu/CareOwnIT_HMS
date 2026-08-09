@@ -9,58 +9,48 @@
   </mat-form-field>
 </div>
 
-<div class="availability-table-wrap">
-  <table class="availability-table">
-    <thead>
-      <tr>
-        <th rowspan="2" class="availability-day-header">Day</th>
-        @for (session of sessions; track session) {
-          <th colspan="2">
-            {{ sessionLabels[session] }}
-            <span class="availability-session-range">({{ sessionRanges[session].start }}–{{ sessionRanges[session].end }}{{ sessionRanges[session].wraps ? ' next day' : '' }})</span>
-          </th>
+<mat-tab-group class="availability-tabs" animationDuration="0ms">
+  @for (session of sessions; track session) {
+    <mat-tab>
+      <ng-template mat-tab-label>
+        {{ sessionLabels[session] }}
+        @if (sessionHasInvalid(session)) {
+          <span class="availability-tab-invalid-dot" title="One or more days need attention"></span>
         }
-      </tr>
-      <tr>
-        @for (session of sessions; track session) {
-          <th>From Time</th>
-          <th>To Time</th>
+      </ng-template>
+
+      <p class="availability-tab-range">Allowed window: {{ sessionRanges[session].start }}–{{ sessionRanges[session].end }}</p>
+
+      <div class="availability-day-list">
+        @for (day of days; track day) {
+          <div class="availability-day-row" [class.availability-day-row-invalid]="cellInvalid(day, session)">
+            <span class="availability-day-row-label">{{ dayLabels[day] }}</span>
+            <div class="availability-day-row-fields">
+              <app-time-select
+                [options]="timeOptionsFor(session)"
+                [value]="rows[day][session].startTime"
+                [invalid]="cellInvalid(day, session)"
+                [ariaLabel]="dayLabels[day] + ' ' + sessionLabels[session] + ' From Time'"
+                (valueChange)="rows[day][session].startTime = $event"
+              />
+              <span class="availability-day-row-sep">to</span>
+              <app-time-select
+                [options]="timeOptionsFor(session)"
+                [value]="rows[day][session].endTime"
+                [invalid]="cellInvalid(day, session)"
+                [ariaLabel]="dayLabels[day] + ' ' + sessionLabels[session] + ' To Time'"
+                (valueChange)="rows[day][session].endTime = $event"
+              />
+            </div>
+          </div>
         }
-      </tr>
-    </thead>
-    <tbody>
-      @for (day of days; track day) {
-        <tr>
-          <td class="availability-day-cell">{{ dayLabels[day] }}</td>
-          @for (session of sessions; track session) {
-            <td [class.availability-cell-invalid]="cellInvalid(day, session)">
-              <input
-                type="time"
-                class="availability-time-input"
-                [min]="sessionRanges[session].start"
-                [max]="sessionRanges[session].end"
-                [(ngModel)]="rows[day][session].startTime"
-              />
-            </td>
-            <td [class.availability-cell-invalid]="cellInvalid(day, session)">
-              <input
-                type="time"
-                class="availability-time-input"
-                [min]="sessionRanges[session].start"
-                [max]="sessionRanges[session].end"
-                [(ngModel)]="rows[day][session].endTime"
-              />
-            </td>
-          }
-        </tr>
-      }
-    </tbody>
-  </table>
-</div>
+      </div>
+    </mat-tab>
+  }
+</mat-tab-group>
 
 @if (!isValid) {
   <p class="availability-error">
-    Enter both a From and To time for each session, within that session's window, with From before To
-    (Night wraps past midnight).
+    Enter both a From and To time for each session, within that session's window, with To after From.
   </p>
 }

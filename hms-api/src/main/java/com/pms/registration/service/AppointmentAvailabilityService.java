@@ -30,8 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
  * this is a pure read-time projection, kept separate from AppointmentService
  * so slot math doesn't bloat the CRUD/status-transition service.
  *
- * NIGHT sessions wrap past midnight, so a slot generated for a queried date
- * can carry either that date or the next one - see AppointmentSlotDto.
+ * Every session is a same-day range (see Session) - a slot generated for a
+ * queried date always carries that same date.
  */
 @Service
 @Transactional(readOnly = true)
@@ -127,12 +127,11 @@ public class AppointmentAvailabilityService {
     private record TimeSlot(LocalDate date, LocalTime time) {
     }
 
-    /** Unified for same-day and wrapping sessions: a NIGHT session's end is on baseDate+1. */
+    /** Every session is a same-day range (see Session) - start and end both fall on baseDate. */
     private List<TimeSlot> generateSlots(LocalDate baseDate, ConsultantTiming timing, int slotsPerHour) {
         int minutesPerSlot = Math.max(1, 60 / slotsPerHour);
-        LocalDate endDate = timing.getSession().wrapsMidnight() ? baseDate.plusDays(1) : baseDate;
         LocalDateTime cursor = LocalDateTime.of(baseDate, timing.getStartTime());
-        LocalDateTime end = LocalDateTime.of(endDate, timing.getEndTime());
+        LocalDateTime end = LocalDateTime.of(baseDate, timing.getEndTime());
 
         List<TimeSlot> result = new ArrayList<>();
         while (cursor.isBefore(end)) {

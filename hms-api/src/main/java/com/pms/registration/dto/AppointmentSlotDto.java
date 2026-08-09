@@ -5,9 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 /**
- * `date` is the slot's true calendar date - for a wrapping NIGHT session
- * queried against day D, the portion after midnight carries date D+1, not D.
- * Callers must book using this date, not the date they queried slots for.
+ * `date` is the slot's calendar date - since every session is a same-day
+ * range (see Session), this always equals the date slots were queried for.
  */
 public record AppointmentSlotDto(
         LocalDate date,
