@@ -1,6 +1,7 @@
 package com.pms.registration.service;
 
 import com.pms.common.EntityNotFoundException;
+import com.pms.masters.entity.Consultant;
 import com.pms.registration.dto.RefundCandidateDto;
 import com.pms.registration.dto.RefundReceiptEntryDto;
 import com.pms.registration.dto.RefundRequest;
@@ -140,12 +141,13 @@ public class RefundService {
     private RefundCandidateDto toCandidate(OpDirectBilling billing) {
         Refund existing = refundRepository.findByOpDirectBillingId(billing.getId()).orElse(null);
         Patient patient = billing.getPatient();
+        Consultant consultant = billing.resolveConsultant();
         return new RefundCandidateDto(
                 billing.getId(),
                 RefundSource.DIRECT_BILLING,
                 displayName(patient),
                 patient.getRegistrationNumber(),
-                billing.getConsultant() != null ? billing.getConsultant().getName() : null,
+                consultant != null ? consultant.getName() : null,
                 billing.getInvoiceNumber(),
                 billing.getTotalAmount(),
                 billing.getTotalAmount(),
@@ -180,13 +182,14 @@ public class RefundService {
         }
         OpDirectBilling billing = refund.getOpDirectBilling();
         Patient patient = billing.getPatient();
+        Consultant billingConsultant = billing.resolveConsultant();
         return new RefundReceiptEntryDto(
                 billing.getId(),
                 RefundSource.DIRECT_BILLING,
                 refund.getRefundNumber(),
                 displayName(patient),
                 patient.getRegistrationNumber(),
-                billing.getConsultant() != null ? billing.getConsultant().getName() : null,
+                billingConsultant != null ? billingConsultant.getName() : null,
                 "Direct Billing",
                 billing.getInvoiceNumber(),
                 billing.getTotalAmount(),

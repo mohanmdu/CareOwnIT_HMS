@@ -262,7 +262,10 @@ public class OpCaseSheetService {
 
     private PrescriptionWorklistEntryDto toWorklistEntry(OpDirectBilling billing) {
         Patient patient = billing.getPatient();
-        Consultant consultant = billing.getConsultant();
+        // resolveConsultant() falls back to the first line item's consultant -
+        // the picker moved to per-item in the multi-item rebuild, so the bill's
+        // own header-level getConsultant() is null on every bill saved since.
+        Consultant consultant = billing.resolveConsultant();
         ZonedDateTime billedAt = billing.getBilledAt().atZone(ZoneId.systemDefault());
         return new PrescriptionWorklistEntryDto(
                 null,
@@ -274,7 +277,7 @@ public class OpCaseSheetService {
                 patient.getAge(),
                 patient.getGender(),
                 patient.getMobileNumber(),
-                consultant != null ? consultant.getDepartment().getName() : null,
+                consultant != null && consultant.getDepartment() != null ? consultant.getDepartment().getName() : null,
                 consultant != null ? consultant.getName() : null,
                 billedAt.toLocalDate(),
                 billedAt.toLocalTime(),
