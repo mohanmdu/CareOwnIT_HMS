@@ -41,6 +41,7 @@ export type ClinicSettingsInput = Pick<
   | 'fontSizeScale'
   | 'brandTextColor'
   | 'menuHoverIconColor'
+  | 'animationSpeed'
 >;
 
 /**

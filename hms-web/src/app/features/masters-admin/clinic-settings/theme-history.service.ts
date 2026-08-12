@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CornerRadiusStyle, FontSizeScale, ThemeMode } from './clinic-settings.model';
+import { AnimationSpeed, CornerRadiusStyle, FontSizeScale, ThemeMode } from './clinic-settings.model';
 
 /**
  * The theme-related subset of ClinicSettingsListComponent's `form` - the
@@ -28,6 +28,7 @@ export interface ThemeFormSnapshot {
   menuIconColor: string;
   menuHoverIconColor: string;
   menuChevronColor: string;
+  animationSpeed: AnimationSpeed;
 }
 
 const MAX_DEPTH = 20;

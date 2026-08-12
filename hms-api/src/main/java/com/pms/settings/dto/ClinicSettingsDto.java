@@ -1,5 +1,6 @@
 package com.pms.settings.dto;
 
+import com.pms.settings.entity.AnimationSpeed;
 import com.pms.settings.entity.CornerRadiusStyle;
 import com.pms.settings.entity.FontSizeScale;
 import com.pms.settings.entity.ThemeMode;
@@ -43,5 +44,6 @@ public record ClinicSettingsDto(
         FontSizeScale fontSizeScale,
         String brandTextColor,
         String menuHoverIconColor,
-        String loginBackgroundUrl) {
+        String loginBackgroundUrl,
+        AnimationSpeed animationSpeed) {
 }

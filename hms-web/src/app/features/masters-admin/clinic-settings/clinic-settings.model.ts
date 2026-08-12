@@ -1,6 +1,7 @@
 export type ThemeMode = 'LIGHT' | 'DARK' | 'CUSTOM' | 'AUTO';
 export type CornerRadiusStyle = 'SQUARE' | 'ROUNDED' | 'PILL';
 export type FontSizeScale = 'COMPACT' | 'COMFORTABLE' | 'SPACIOUS';
+export type AnimationSpeed = 'NONE' | 'SUBTLE' | 'STANDARD';
 
 export const THEME_MODE_OPTIONS: { value: ThemeMode; label: string }[] = [
   { value: 'LIGHT', label: 'Light' },
@@ -22,6 +23,13 @@ export const FONT_SIZE_SCALE_OPTIONS: { value: FontSizeScale; label: string }[] 
   { value: 'COMPACT', label: 'Compact' },
   { value: 'COMFORTABLE', label: 'Comfortable (default)' },
   { value: 'SPACIOUS', label: 'Spacious' }
+];
+
+/** Controls --hms-transition-fast/--hms-transition-base (see ThemeService) - hover/active states, sidenav expand, menu highlights. NONE disables every CSS transition that references those two tokens; it doesn't touch Angular Material's own component animations (menus, dialogs) or the JSON-imported color palette. */
+export const ANIMATION_SPEED_OPTIONS: { value: AnimationSpeed; label: string }[] = [
+  { value: 'NONE', label: 'None' },
+  { value: 'SUBTLE', label: 'Subtle' },
+  { value: 'STANDARD', label: 'Standard (default)' }
 ];
 
 /** Curated allowlist, not free text - see ThemeService for why. */
@@ -62,6 +70,7 @@ export const DEFAULT_THEME_SETTINGS: Pick<
   | 'fontSizeScale'
   | 'brandTextColor'
   | 'menuHoverIconColor'
+  | 'animationSpeed'
 > = {
   themeMode: 'LIGHT',
   themePrimaryColor: null,
@@ -82,7 +91,8 @@ export const DEFAULT_THEME_SETTINGS: Pick<
   menuHoverTextColor: null,
   fontSizeScale: 'COMFORTABLE',
   brandTextColor: null,
-  menuHoverIconColor: null
+  menuHoverIconColor: null,
+  animationSpeed: 'STANDARD'
 };
 
 export interface ClinicSettings {
@@ -127,4 +137,5 @@ export interface ClinicSettings {
   menuHoverIconColor: string | null;
   /** Shown pre-authentication on the multi-tenant login screen - see PublicBrandingService (hms-api) and core/services/public-branding.service.ts. */
   loginBackgroundUrl: string | null;
+  animationSpeed: AnimationSpeed;
 }

@@ -17,6 +17,8 @@ import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.
 import { SectionCardComponent } from '../../../shared/ui/section-card/section-card.component';
 import { ThemeService } from '../../../core/services/theme.service';
 import {
+  ANIMATION_SPEED_OPTIONS,
+  AnimationSpeed,
   CORNER_RADIUS_STYLE_OPTIONS,
   CornerRadiusStyle,
   DEFAULT_THEME_SETTINGS,
@@ -66,6 +68,7 @@ export class ClinicSettingsListComponent {
   readonly cornerRadiusStyleOptions = CORNER_RADIUS_STYLE_OPTIONS;
   readonly fontFamilyOptions = FONT_FAMILY_OPTIONS;
   readonly fontSizeScaleOptions = FONT_SIZE_SCALE_OPTIONS;
+  readonly animationSpeedOptions = ANIMATION_SPEED_OPTIONS;
   readonly themePresets = THEME_PRESETS;
 
   loading = signal(true);
@@ -117,7 +120,8 @@ export class ClinicSettingsListComponent {
     menuChevronColor: '',
     menuHoverTextColor: '',
     fontSizeScale: 'COMFORTABLE' as FontSizeScale,
-    brandTextColor: ''
+    brandTextColor: '',
+    animationSpeed: 'STANDARD' as AnimationSpeed
   };
 
   constructor() {
@@ -158,7 +162,8 @@ export class ClinicSettingsListComponent {
           menuChevronColor: settings.menuChevronColor ?? '',
           menuHoverTextColor: settings.menuHoverTextColor ?? '',
           fontSizeScale: settings.fontSizeScale,
-          brandTextColor: settings.brandTextColor ?? ''
+          brandTextColor: settings.brandTextColor ?? '',
+          animationSpeed: settings.animationSpeed
         };
         this.logoUrl.set(settings.logoUrl);
         this.faviconUrl.set(settings.faviconUrl);
@@ -454,7 +459,8 @@ export class ClinicSettingsListComponent {
       menuHoverTextColor: this.form.menuHoverTextColor,
       menuIconColor: this.form.menuIconColor,
       menuHoverIconColor: this.form.menuHoverIconColor,
-      menuChevronColor: this.form.menuChevronColor
+      menuChevronColor: this.form.menuChevronColor,
+      animationSpeed: this.form.animationSpeed
     };
   }
 
@@ -483,7 +489,8 @@ export class ClinicSettingsListComponent {
       menuChevronColor: snapshot.menuChevronColor || null,
       menuHoverTextColor: snapshot.menuHoverTextColor || null,
       fontSizeScale: snapshot.fontSizeScale,
-      brandTextColor: snapshot.brandTextColor || null
+      brandTextColor: snapshot.brandTextColor || null,
+      animationSpeed: snapshot.animationSpeed
     });
   }
 
@@ -521,6 +528,7 @@ export class ClinicSettingsListComponent {
         this.form.menuHoverTextColor = DEFAULT_THEME_SETTINGS.menuHoverTextColor ?? '';
         this.form.fontSizeScale = DEFAULT_THEME_SETTINGS.fontSizeScale;
         this.form.brandTextColor = DEFAULT_THEME_SETTINGS.brandTextColor ?? '';
+        this.form.animationSpeed = DEFAULT_THEME_SETTINGS.animationSpeed;
         this.previewTheme();
 
         this.saving.set(true);
@@ -574,7 +582,8 @@ export class ClinicSettingsListComponent {
       menuChevronColor: this.form.menuChevronColor.trim() || null,
       menuHoverTextColor: this.form.menuHoverTextColor.trim() || null,
       fontSizeScale: this.form.fontSizeScale,
-      brandTextColor: this.form.brandTextColor.trim() || null
+      brandTextColor: this.form.brandTextColor.trim() || null,
+      animationSpeed: this.form.animationSpeed
     };
   }
 }

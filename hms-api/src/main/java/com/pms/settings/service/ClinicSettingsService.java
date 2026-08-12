@@ -3,6 +3,7 @@ package com.pms.settings.service;
 import com.pms.common.EntityNotFoundException;
 import com.pms.common.FileStorageService;
 import com.pms.settings.dto.ClinicSettingsDto;
+import com.pms.settings.entity.AnimationSpeed;
 import com.pms.settings.entity.ClinicSettings;
 import com.pms.settings.entity.CornerRadiusStyle;
 import com.pms.settings.entity.FontSizeScale;
@@ -95,6 +96,7 @@ public class ClinicSettingsService {
         settings.setFontSizeScale(dto.fontSizeScale() != null ? dto.fontSizeScale() : FontSizeScale.COMFORTABLE);
         settings.setBrandTextColor(dto.brandTextColor());
         settings.setMenuHoverIconColor(dto.menuHoverIconColor());
+        settings.setAnimationSpeed(dto.animationSpeed() != null ? dto.animationSpeed() : AnimationSpeed.STANDARD);
         return toDto(repository.save(settings));
     }
 
@@ -176,6 +178,7 @@ public class ClinicSettingsService {
                 settings.getFontSizeScale(),
                 settings.getBrandTextColor(),
                 settings.getMenuHoverIconColor(),
-                settings.getLoginBackgroundPath());
+                settings.getLoginBackgroundPath(),
+                settings.getAnimationSpeed());
     }
 }

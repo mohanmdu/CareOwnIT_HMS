@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { catchError, of } from 'rxjs';
 import { ClinicSettingsService } from '../../features/masters-admin/clinic-settings/clinic-settings.service';
-import { CornerRadiusStyle, FontSizeScale, ThemeMode } from '../../features/masters-admin/clinic-settings/clinic-settings.model';
+import { AnimationSpeed, CornerRadiusStyle, FontSizeScale, ThemeMode } from '../../features/masters-admin/clinic-settings/clinic-settings.model';
 import { bumpChartThemeVersion } from './chart-theme.signal';
 
 const DEFAULT_FAVICON_URL = 'favicon.ico';
@@ -27,6 +27,7 @@ export interface ThemeSettings {
   brandTextColor?: string | null;
   menuHoverIconColor?: string | null;
   faviconUrl?: string | null;
+  animationSpeed?: AnimationSpeed;
 }
 
 /**
@@ -108,6 +109,24 @@ const FONT_SCALE_MAP: Record<FontSizeScale, string> = {
   COMPACT: '0.9',
   COMFORTABLE: '1',
   SPACIOUS: '1.1'
+};
+
+/**
+ * Overrides the same --hms-transition-fast/--hms-transition-base tokens
+ * _tokens.scss defines as global fallbacks - every existing `transition:
+ * ... var(--hms-transition-fast)` declaration app-wide (hover states,
+ * sidenav expand, menu highlights) picks this up automatically, no other
+ * code needed. NONE is 0ms rather than removing the properties, so those
+ * transitions resolve to instant rather than falling back to the (non-zero)
+ * compiled default. Doesn't touch Angular Material's own component
+ * animations (menu/dialog open, ripples) - those are a separate animation
+ * system entirely, swapped only via a full app reload, not a per-tenant
+ * runtime preference.
+ */
+const ANIMATION_SPEED_MAP: Record<AnimationSpeed, { fast: string; base: string }> = {
+  NONE: { fast: '0ms', base: '0ms' },
+  SUBTLE: { fast: '80ms ease', base: '140ms ease' },
+  STANDARD: { fast: '120ms ease', base: '200ms ease' }
 };
 
 @Injectable({ providedIn: 'root' })
@@ -227,6 +246,10 @@ export class ThemeService {
     root.setProperty('--hms-radius-lg', radii.lg);
 
     root.setProperty('--hms-font-scale', FONT_SCALE_MAP[settings.fontSizeScale ?? 'COMFORTABLE']);
+
+    const transitions = ANIMATION_SPEED_MAP[settings.animationSpeed ?? 'STANDARD'];
+    root.setProperty('--hms-transition-fast', transitions.fast);
+    root.setProperty('--hms-transition-base', transitions.base);
 
     this.applyThemeMode(settings.themeMode);
     this.applyFavicon(settings);

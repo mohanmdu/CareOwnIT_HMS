@@ -146,4 +146,9 @@ public class ClinicSettings {
     /** Shown pre-authentication on the multi-tenant login screen - see V94's own doc comment and PublicBrandingController. */
     @Column(name = "login_background_path", length = 255)
     private String loginBackgroundPath;
+
+    /** See AnimationSpeed's own doc comment. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "animation_speed", nullable = false, length = 16)
+    private AnimationSpeed animationSpeed = AnimationSpeed.STANDARD;
 }
