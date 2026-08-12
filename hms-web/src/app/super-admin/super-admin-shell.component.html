@@ -4,6 +4,10 @@
       <span class="sa-topbar-icon" aria-hidden="true">◆</span>
       <span>CareOwn Super Admin</span>
     </div>
+    <nav class="sa-topbar-nav">
+      <a routerLink="/super-admin/clients" routerLinkActive="sa-topbar-nav-active">Clients</a>
+      <a routerLink="/super-admin/backups" routerLinkActive="sa-topbar-nav-active">Backup &amp; Recovery</a>
+    </nav>
     <div class="sa-topbar-actions">
       @if (currentUsername()) {
         <span class="sa-topbar-user">{{ currentUsername() }}</span>

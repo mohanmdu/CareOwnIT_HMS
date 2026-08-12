@@ -34,3 +34,7 @@ build/
 
 ### Uploaded files (app.upload-dir) ###
 /uploads/
+
+### Backup staging scratch space (app.backup.staging-dir) - dump files in
+### flight before upload; never anything meant to persist, let alone commit ###
+/backup-staging/

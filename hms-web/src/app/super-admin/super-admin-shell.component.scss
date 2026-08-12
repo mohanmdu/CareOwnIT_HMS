@@ -24,6 +24,31 @@
   color: #a5b4fc;
 }
 
+.sa-topbar-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-5);
+
+  a {
+    color: #94a0be;
+    text-decoration: none;
+    font-size: var(--hms-font-size-sm);
+    font-weight: var(--hms-font-weight-semibold);
+    padding: var(--hms-space-2) 0;
+    border-bottom: 2px solid transparent;
+    transition: color var(--hms-transition-fast);
+
+    &:hover {
+      color: #e7eaf3;
+    }
+  }
+}
+
+.sa-topbar-nav-active {
+  color: #e7eaf3 !important;
+  border-bottom-color: #a5b4fc !important;
+}
+
 .sa-topbar-actions {
   display: flex;
   align-items: center;

@@ -69,6 +69,14 @@
 			<artifactId>mysql-connector-j</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		<!-- S3-compatible client for offsite backup storage (see com.pms.superadmin.backup) -
+		     works against any S3-compatible endpoint (Backblaze B2, Cloudflare R2, AWS S3
+		     itself) via a configurable endpoint override, not just AWS. -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<version>2.29.6</version>
+		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>

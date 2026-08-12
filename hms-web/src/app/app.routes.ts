@@ -24,6 +24,10 @@ export const routes: Routes = [
       {
         path: 'clients',
         loadComponent: () => import('./super-admin/clients/client-list.component').then((m) => m.ClientListComponent)
+      },
+      {
+        path: 'backups',
+        loadComponent: () => import('./super-admin/backups/backup-list.component').then((m) => m.BackupListComponent)
       }
     ]
   },

@@ -1,0 +1,120 @@
+<div class="hms-page sa-backups">
+  <app-page-header
+    title="Database Backup &amp; Recovery"
+    subtitle="One verified, encrypted, offsite backup per client. A failed backup never replaces the last known-good one."
+  />
+
+  @if (restorePanelClientId(); as clientId) {
+    @for (backup of backups(); track backup.clientId) {
+      @if (backup.clientId === clientId) {
+        <section class="hms-card-surface sa-restore-panel">
+          <h2 class="sa-restore-title">Restore {{ backup.clientName }}?</h2>
+          <p class="sa-restore-warning">
+            <mat-icon aria-hidden="true">warning</mat-icon>
+            This replaces {{ backup.clientName }}'s live database with the backup taken
+            {{ ageDisplay(backup.lastSuccessAt) }}. Their current data is automatically snapshotted first, so this can
+            itself be undone - but the app will be briefly disrupted for this client while the restore runs.
+          </p>
+          <p class="sa-restore-instruction">
+            To confirm, type this client's code exactly: <strong>{{ backup.clientCode }}</strong>
+          </p>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sa-restore-field">
+            <mat-label>Client code</mat-label>
+            <input matInput name="restoreConfirm" [(ngModel)]="restoreConfirmInput" autocomplete="off" />
+          </mat-form-field>
+          <div class="sa-restore-actions">
+            <button
+              mat-flat-button
+              color="warn"
+              type="button"
+              [disabled]="!isRestoreConfirmValid(backup) || restoringClientId() === backup.clientId"
+              (click)="confirmRestore(backup)"
+            >
+              {{ restoringClientId() === backup.clientId ? 'Restoring…' : 'Restore Database' }}
+            </button>
+            <button mat-button type="button" [disabled]="restoringClientId() === backup.clientId" (click)="cancelRestore()">Cancel</button>
+          </div>
+        </section>
+      }
+    }
+  }
+
+  <section class="hms-card-surface sa-list">
+    <div class="sa-list-body">
+      @if (loading()) {
+        <mat-progress-bar mode="indeterminate" />
+      }
+
+      @if (!loading() && backups().length === 0) {
+        <app-empty-state icon="backup" title="No clients yet" message="Clients will appear here once they exist." />
+      } @else if (backups().length > 0) {
+        <table mat-table [dataSource]="backups()" class="sa-table">
+          <ng-container matColumnDef="clientName">
+            <th mat-header-cell *matHeaderCellDef>Client</th>
+            <td mat-cell *matCellDef="let backup">{{ backup.clientName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="databaseName">
+            <th mat-header-cell *matHeaderCellDef>Database</th>
+            <td mat-cell *matCellDef="let backup">{{ backup.databaseName ?? '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let backup">
+              <app-status-badge [label]="statusLabel(backup.status)" [tone]="statusTone(backup.status)" />
+              @if (backup.status === 'FAILED' && backup.lastFailureReason) {
+                <span class="sa-failure-reason" [title]="backup.lastFailureReason">{{ backup.lastFailureReason }}</span>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="lastSuccessAt">
+            <th mat-header-cell *matHeaderCellDef>Last Successful Backup</th>
+            <td mat-cell *matCellDef="let backup">{{ backup.lastSuccessAt ? (backup.lastSuccessAt | date: 'medium') : 'Never' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="size">
+            <th mat-header-cell *matHeaderCellDef>Size</th>
+            <td mat-cell *matCellDef="let backup">{{ sizeDisplay(backup.lastSuccessSizeBytes) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="age">
+            <th mat-header-cell *matHeaderCellDef>Age</th>
+            <td mat-cell *matCellDef="let backup">{{ ageDisplay(backup.lastSuccessAt) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="sa-actions-header"></th>
+            <td mat-cell *matCellDef="let backup" class="sa-actions-cell">
+              <div class="sa-actions-inner">
+                <button
+                  mat-stroked-button
+                  type="button"
+                  [disabled]="runningClientId() === backup.clientId"
+                  (click)="runNow(backup)"
+                >
+                  {{ runningClientId() === backup.clientId ? 'Running…' : 'Run Backup Now' }}
+                </button>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  [disabled]="backup.status !== 'SUCCESS' || downloadingClientId() === backup.clientId"
+                  (click)="download(backup)"
+                >
+                  {{ downloadingClientId() === backup.clientId ? 'Downloading…' : 'Download' }}
+                </button>
+                <button mat-stroked-button color="warn" type="button" [disabled]="backup.status !== 'SUCCESS'" (click)="openRestorePanel(backup)">
+                  Restore
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns"></tr>
+        </table>
+      }
+    </div>
+  </section>
+</div>

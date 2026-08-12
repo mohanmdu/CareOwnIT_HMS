@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { SuperAdminAuthService } from './super-admin-auth.service';
 
 /**
@@ -13,7 +13,7 @@ import { SuperAdminAuthService } from './super-admin-auth.service';
 @Component({
   selector: 'app-super-admin-shell',
   standalone: true,
-  imports: [RouterOutlet, MatButtonModule, MatIconModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatButtonModule, MatIconModule],
   templateUrl: './super-admin-shell.component.html',
   styleUrl: './super-admin-shell.component.scss'
 })

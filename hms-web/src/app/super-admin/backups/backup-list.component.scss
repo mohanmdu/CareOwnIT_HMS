@@ -1,0 +1,95 @@
+.sa-backups {
+  color: #e7eaf3;
+}
+
+.sa-restore-panel {
+  padding: var(--hms-space-5);
+  border: 1px solid var(--hms-color-danger, #dc2626);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+}
+
+.sa-restore-title {
+  margin: 0;
+  font-size: var(--hms-font-size-lg);
+}
+
+.sa-restore-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--hms-space-2);
+  margin: 0;
+  padding: var(--hms-space-3);
+  border-radius: var(--hms-radius-sm);
+  background: var(--hms-color-danger-container, #fee2e2);
+  color: var(--hms-color-on-danger-container, #7f1d1d);
+  font-size: var(--hms-font-size-sm);
+
+  mat-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+}
+
+.sa-restore-instruction {
+  margin: 0;
+  font-size: var(--hms-font-size-sm);
+}
+
+.sa-restore-field {
+  max-width: 280px;
+}
+
+.sa-restore-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+}
+
+.sa-list {
+  overflow-x: auto;
+}
+
+.sa-list-body {
+  padding: var(--hms-space-4) 0 var(--hms-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+}
+
+.sa-table {
+  width: 100%;
+
+  td,
+  th {
+    vertical-align: middle;
+  }
+}
+
+.sa-actions-header {
+  width: 340px;
+  white-space: nowrap;
+}
+
+.sa-actions-cell {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.sa-actions-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+}
+
+.sa-failure-reason {
+  display: block;
+  margin-top: var(--hms-space-1);
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--hms-font-size-xs);
+  color: var(--hms-color-danger, #dc2626);
+}
