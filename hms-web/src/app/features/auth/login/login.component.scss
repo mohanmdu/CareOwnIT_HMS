@@ -1,29 +1,39 @@
+// The page itself: a neutral background the card floats on, centered both
+// axes - not full-bleed (see login-composition below for the actual card).
 .login-shell {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  // The gradient is the default background-image; a resolved client's
-  // loginBackgroundImage (login.component.ts, bound via [style.backgroundImage])
-  // overrides just that one property via inline-style specificity, leaving
-  // size/position/repeat below in effect for either case.
-  background-image: linear-gradient(160deg, var(--hms-color-primary) 0%, var(--hms-color-tertiary) 100%);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  padding: var(--hms-space-4);
+  background: var(--hms-color-surface-alt);
+  padding: var(--hms-space-6);
 }
 
-.login-card {
+// Split-screen card: a plain white form panel on the left, an abstract
+// brand-colored art panel on the right - collapses to just the form panel
+// on narrow viewports rather than stacking, since a login form is the one
+// screen where "just show the form" beats "show everything, smaller" on
+// mobile.
+.login-composition {
+  display: flex;
   width: 100%;
-  max-width: 380px;
+  max-width: 1080px;
+  min-height: 620px;
   background: var(--hms-color-surface);
   border-radius: var(--hms-radius-lg);
   box-shadow: var(--hms-shadow-lg);
-  padding: var(--hms-space-8) var(--hms-space-6);
+  overflow: hidden;
+}
+
+.login-panel {
+  width: 100%;
+  max-width: 440px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: var(--hms-space-6);
+  padding: var(--hms-space-8);
+  margin: 0 auto;
 }
 
 .login-brand {
@@ -33,22 +43,26 @@
 
   h1 {
     font-size: var(--hms-font-size-xl);
-    margin: 0;
+    margin: 2px 0 0;
+    color: var(--hms-color-text);
   }
+}
 
-  p {
-    margin: 0;
-    color: var(--hms-color-text-muted);
-    font-size: var(--hms-font-size-sm);
-  }
+.login-eyebrow {
+  margin: 0;
+  font-size: var(--hms-font-size-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--hms-color-text-muted);
+  font-weight: var(--hms-font-weight-semibold);
 }
 
 .login-brand-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: var(--hms-radius-md);
   background: var(--hms-color-primary-container);
   color: var(--hms-color-primary);
@@ -58,30 +72,209 @@
 }
 
 .login-brand-logo {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
   border-radius: var(--hms-radius-md);
   flex-shrink: 0;
 }
 
-form {
+.login-form {
   display: flex;
   flex-direction: column;
-  gap: var(--hms-space-2);
+  gap: var(--hms-space-4);
 }
 
 .login-field {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-1);
+
+  label {
+    font-size: var(--hms-font-size-sm);
+    font-weight: var(--hms-font-weight-semibold);
+    color: var(--hms-color-text);
+
+    span {
+      color: var(--hms-color-danger);
+      margin-left: 2px;
+    }
+  }
+
+  input {
+    height: 44px;
+    padding: 0 var(--hms-space-3);
+    border: 1px solid var(--hms-color-border);
+    border-radius: var(--hms-radius-md);
+    background: var(--hms-color-surface);
+    color: var(--hms-color-text);
+    font-size: var(--hms-font-size-md);
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color var(--hms-transition-fast), box-shadow var(--hms-transition-fast);
+
+    &:focus {
+      outline: none;
+      border-color: var(--hms-color-primary);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--hms-color-primary) 18%, transparent);
+    }
+
+    &::placeholder {
+      color: var(--hms-color-text-muted);
+    }
+
+    // Neutralizes the browser's own autofill styling (a solid yellow/blue
+    // fill behind the value in Chrome/Edge) rather than letting it show
+    // through - a huge inset box-shadow of the field's own background color
+    // paints over autofill's internal background layer, which is the only
+    // reliable cross-engine way to suppress it (there's no clean "disable
+    // autofill styling" property).
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus {
+      -webkit-text-fill-color: var(--hms-color-text);
+      -webkit-box-shadow: 0 0 0 1000px var(--hms-color-surface) inset;
+      box-shadow: 0 0 0 1000px var(--hms-color-surface) inset;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+  }
+}
+
+.login-password-wrap {
+  position: relative;
+
+  input {
+    padding-right: 44px;
+  }
+}
+
+.login-password-toggle {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--hms-color-text-muted);
+  cursor: pointer;
+  transition: background-color var(--hms-transition-fast), color var(--hms-transition-fast);
+
+  &:hover {
+    background: var(--hms-color-surface-alt);
+    color: var(--hms-color-text);
+  }
 }
 
 .login-submit {
   margin-top: var(--hms-space-2);
-  height: 44px;
+  height: 48px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--hms-space-2);
+}
+
+// A plain span, not mat-icon - MatButton hoists any mat-icon child out in
+// front of the label unconditionally, which put the arrow before "Sign in"
+// instead of after it (confirmed via the rendered DOM, not guessed at).
+.login-submit-arrow {
+  font-size: 1.1em;
+  line-height: 1;
+  transition: transform var(--hms-transition-fast);
+}
+
+.login-submit:hover .login-submit-arrow {
+  transform: translateX(3px);
 }
 
 .login-error {
   margin: 0;
-  color: var(--hms-color-danger);
+  padding: var(--hms-space-2) var(--hms-space-3);
+  border-radius: var(--hms-radius-sm);
+  background: var(--hms-color-danger-container);
+  color: var(--hms-color-on-danger-container);
   font-size: var(--hms-font-size-sm);
+}
+
+// A client's own uploaded login background (see LoginComponent.
+// loginBackgroundImage) sets background-image inline on this element,
+// beating the mesh gradient below via inline-style specificity - the CSS
+// gradient stays in the DOM either way but sits invisibly under an opaque
+// photo when that happens.
+//
+// This exact warm-to-cool mesh (cream -> violet -> red) is a fixed brand
+// asset shared identically by both login screens (see
+// super-admin-login.component.scss) - deliberately NOT built from
+// --hms-color-* theme tokens like the rest of the app's chrome, since it's
+// meant to look the same regardless of a tenant's own brand colors.
+.login-art {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background-color: #fdf8f6;
+}
+
+// The gradient lives on an oversized, blurred pseudo-element rather than
+// directly on .login-art's own background - blurring a background-image
+// in place would blur its edges too, revealing the plain background-color
+// underneath at the container's border. Oversizing by 20% and centering
+// keeps the blur radius entirely within the visible area, so .login-art's
+// own overflow:hidden crops only the (already-blurred, still-covering)
+// excess, never a visible seam.
+//
+// Cool blue/teal palette - same mesh structure (position/size/blur) as the
+// Super Admin login's warm red/violet one (see super-admin-login.component.
+// scss), deliberately a different palette so the two screens read as
+// distinct at a glance even before either heading is read.
+.login-art::before {
+  content: '';
+  position: absolute;
+  inset: -10%;
+  background-image:
+    radial-gradient(55% 55% at 88% 12%, #5eead4 0%, transparent 62%),
+    radial-gradient(60% 60% at 68% 45%, #3b82f6 0%, transparent 55%),
+    radial-gradient(75% 75% at 78% 88%, #1d4ed8 0%, transparent 65%),
+    radial-gradient(45% 45% at 98% 98%, #0b1f4a 0%, transparent 60%),
+    linear-gradient(135deg, #f6fcfb 0%, #eaf2fb 35%, transparent 65%);
+  filter: blur(50px);
+}
+
+// Suppresses the mesh gradient when a client has uploaded their own login
+// background (see LoginComponent.loginBackgroundImage) - that photo sets
+// background-image directly on .login-art itself via an inline style, and
+// a pseudo-element always paints above its host's own background, so
+// without this the mesh would sit on top of and hide the client's photo
+// instead of being replaced by it.
+.login-art-custom-bg {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  &::before {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .login-composition {
+    min-height: auto;
+    max-width: 440px;
+  }
+
+  .login-art {
+    display: none;
+  }
+
+  .login-panel {
+    max-width: 440px;
+    padding: var(--hms-space-6);
+  }
 }

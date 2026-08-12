@@ -1,9 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
 import { Router } from '@angular/router';
 import { SuperAdminAuthService } from '../super-admin-auth.service';
 
@@ -11,7 +9,7 @@ import { SuperAdminAuthService } from '../super-admin-auth.service';
 @Component({
   selector: 'app-super-admin-login',
   standalone: true,
-  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule],
+  imports: [FormsModule, MatButtonModule, MatIconModule],
   templateUrl: './super-admin-login.component.html',
   styleUrl: './super-admin-login.component.scss'
 })

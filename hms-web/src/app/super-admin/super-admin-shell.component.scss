@@ -1,6 +1,11 @@
+// Light theme, matching super-admin-login.component.scss's own redesign -
+// this shell (topbar + page content) was left on the original dark navy
+// theme when only the login page was redesigned earlier; same "differentiate
+// via the secondary/purple token, not a whole separate dark palette"
+// reasoning applies here too.
 .sa-shell {
   min-height: 100vh;
-  background: #0b1120;
+  background: var(--hms-color-surface-alt);
 }
 
 .sa-topbar {
@@ -8,20 +13,23 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--hms-space-3) var(--hms-space-6);
-  background: #121a2c;
-  border-bottom: 1px solid #2a3550;
+  background: var(--hms-color-surface);
+  border-bottom: 1px solid var(--hms-color-border);
 }
 
 .sa-topbar-brand {
   display: flex;
   align-items: center;
   gap: var(--hms-space-2);
-  color: #e7eaf3;
+  color: var(--hms-color-text);
   font-weight: var(--hms-font-weight-bold);
 }
 
-.sa-topbar-icon {
-  color: #a5b4fc;
+.sa-topbar-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .sa-topbar-nav {
@@ -30,7 +38,7 @@
   gap: var(--hms-space-5);
 
   a {
-    color: #94a0be;
+    color: var(--hms-color-text-muted);
     text-decoration: none;
     font-size: var(--hms-font-size-sm);
     font-weight: var(--hms-font-weight-semibold);
@@ -39,14 +47,14 @@
     transition: color var(--hms-transition-fast);
 
     &:hover {
-      color: #e7eaf3;
+      color: var(--hms-color-text);
     }
   }
 }
 
 .sa-topbar-nav-active {
-  color: #e7eaf3 !important;
-  border-bottom-color: #a5b4fc !important;
+  color: var(--hms-color-text) !important;
+  border-bottom-color: var(--hms-color-secondary) !important;
 }
 
 .sa-topbar-actions {
@@ -56,7 +64,7 @@
 }
 
 .sa-topbar-user {
-  color: #94a0be;
+  color: var(--hms-color-text-muted);
   font-size: var(--hms-font-size-sm);
 }
 

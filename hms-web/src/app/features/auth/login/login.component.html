@@ -1,5 +1,6 @@
-<div class="login-shell" [style.backgroundImage]="loginBackgroundImage()">
-  <section class="login-card">
+<div class="login-shell">
+  <div class="login-composition">
+  <section class="login-panel">
     <div class="login-brand">
       @if (branding()?.logoUrl) {
         <img [src]="branding()!.logoUrl" alt="" class="login-brand-logo" />
@@ -7,52 +8,71 @@
         <span class="login-brand-icon" aria-hidden="true">+</span>
       }
       <div>
+        <p class="login-eyebrow">Hospital Management System</p>
         <h1>{{ branding()?.clinicName || 'HMS' }}</h1>
-        <p>Hospital Management System</p>
       </div>
     </div>
 
-    <form (ngSubmit)="login()">
+    <form (ngSubmit)="login()" class="login-form">
       @if (showClientCode) {
-        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="login-field">
-          <mat-label>Client Code</mat-label>
-          <input matInput name="clientCode" [(ngModel)]="clientCode" (blur)="onClientCodeBlur()" required autocomplete="organization" />
-        </mat-form-field>
+        <div class="login-field">
+          <label for="clientCode">Client Code<span aria-hidden="true">*</span></label>
+          <input
+            id="clientCode"
+            name="clientCode"
+            [(ngModel)]="clientCode"
+            (blur)="onClientCodeBlur()"
+            required
+            autocomplete="organization"
+          />
+        </div>
       }
 
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="login-field">
-        <mat-label>Username</mat-label>
-        <input matInput name="username" [(ngModel)]="username" required autocomplete="username" />
-      </mat-form-field>
+      <div class="login-field">
+        <label for="username">Username<span aria-hidden="true">*</span></label>
+        <input id="username" name="username" [(ngModel)]="username" required autocomplete="username" />
+      </div>
 
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="login-field">
-        <mat-label>Password</mat-label>
-        <input
-          matInput
-          name="password"
-          [type]="hidePassword() ? 'password' : 'text'"
-          [(ngModel)]="password"
-          required
-          autocomplete="current-password"
-        />
-        <button
-          mat-icon-button
-          matSuffix
-          type="button"
-          [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
-          (click)="togglePasswordVisibility()"
-        >
-          <mat-icon aria-hidden="true">{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-        </button>
-      </mat-form-field>
+      <div class="login-field">
+        <label for="password">Password<span aria-hidden="true">*</span></label>
+        <div class="login-password-wrap">
+          <input
+            id="password"
+            name="password"
+            [type]="hidePassword() ? 'password' : 'text'"
+            [(ngModel)]="password"
+            required
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="login-password-toggle"
+            [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+            (click)="togglePasswordVisibility()"
+          >
+            <mat-icon aria-hidden="true">{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </div>
+      </div>
 
       @if (errorMessage()) {
         <p class="login-error" role="alert">{{ errorMessage() }}</p>
       }
 
       <button mat-flat-button color="primary" type="submit" class="login-submit" [disabled]="submitting()">
-        {{ submitting() ? 'Signing in…' : 'Sign in' }}
+        <span>{{ submitting() ? 'Signing in…' : 'Sign in' }}</span>
+        @if (!submitting()) {
+          <span class="login-submit-arrow" aria-hidden="true">→</span>
+        }
       </button>
     </form>
   </section>
+
+  <aside
+    class="login-art"
+    [class.login-art-custom-bg]="!!loginBackgroundImage()"
+    [style.backgroundImage]="loginBackgroundImage()"
+    aria-hidden="true"
+  ></aside>
+  </div>
 </div>

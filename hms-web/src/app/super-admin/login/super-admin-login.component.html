@@ -1,5 +1,6 @@
 <div class="sa-login-shell">
-  <section class="sa-login-card">
+  <div class="sa-login-composition">
+  <section class="sa-login-panel">
     <div class="sa-login-brand">
       <span class="sa-login-brand-icon" aria-hidden="true"><mat-icon>admin_panel_settings</mat-icon></span>
       <div>
@@ -8,40 +9,47 @@
       </div>
     </div>
 
-    <form (ngSubmit)="login()">
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sa-login-field">
-        <mat-label>Username</mat-label>
-        <input matInput name="username" [(ngModel)]="username" required autocomplete="username" />
-      </mat-form-field>
+    <form (ngSubmit)="login()" class="sa-login-form">
+      <div class="sa-login-field">
+        <label for="sa-username">Username<span aria-hidden="true">*</span></label>
+        <input id="sa-username" name="username" [(ngModel)]="username" required autocomplete="username" />
+      </div>
 
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sa-login-field">
-        <mat-label>Password</mat-label>
-        <input
-          matInput
-          name="password"
-          [type]="hidePassword() ? 'password' : 'text'"
-          [(ngModel)]="password"
-          required
-          autocomplete="current-password"
-        />
-        <button
-          mat-icon-button
-          matSuffix
-          type="button"
-          [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
-          (click)="togglePasswordVisibility()"
-        >
-          <mat-icon aria-hidden="true">{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-        </button>
-      </mat-form-field>
+      <div class="sa-login-field">
+        <label for="sa-password">Password<span aria-hidden="true">*</span></label>
+        <div class="sa-login-password-wrap">
+          <input
+            id="sa-password"
+            name="password"
+            [type]="hidePassword() ? 'password' : 'text'"
+            [(ngModel)]="password"
+            required
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="sa-login-password-toggle"
+            [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+            (click)="togglePasswordVisibility()"
+          >
+            <mat-icon aria-hidden="true">{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </div>
+      </div>
 
       @if (errorMessage()) {
         <p class="sa-login-error" role="alert">{{ errorMessage() }}</p>
       }
 
       <button mat-flat-button color="primary" type="submit" class="sa-login-submit" [disabled]="submitting()">
-        {{ submitting() ? 'Signing in…' : 'Sign in' }}
+        <span>{{ submitting() ? 'Signing in…' : 'Sign in' }}</span>
+        @if (!submitting()) {
+          <span class="sa-login-submit-arrow" aria-hidden="true">→</span>
+        }
       </button>
     </form>
   </section>
+
+  <aside class="sa-login-art" aria-hidden="true"></aside>
+  </div>
 </div>

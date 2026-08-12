@@ -1,42 +1,39 @@
-// Light theme, on-token like every other screen in the app - a previous
-// dark/slate palette here was meant to signal "platform console, not a
-// tenant screen" at a glance, but read as dated/heavy rather than distinct.
-// Differentiation from the tenant login (login.component.scss's brand
-// gradient) now comes from the secondary (purple) token instead of a
-// different color scheme entirely - a colored accent bar + badge, same
-// light surface as everywhere else.
+// Same split-screen pattern as the tenant login (login.component.scss) -
+// differentiation from that screen comes from the secondary (purple) token
+// driving the icon badge/eyebrow/art panel, not a different layout
+// structure. See this file's previous revision's own note on why a whole
+// separate dark theme read as dated rather than distinct - the same
+// reasoning applies here: one deliberate accent, not a parallel design
+// language to maintain forever.
 .sa-login-shell {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--hms-color-surface-alt);
-  padding: var(--hms-space-4);
+  padding: var(--hms-space-6);
 }
 
-.sa-login-card {
+.sa-login-composition {
+  display: flex;
   width: 100%;
-  max-width: 400px;
+  max-width: 1080px;
+  min-height: 620px;
   background: var(--hms-color-surface);
-  border: 1px solid var(--hms-color-border);
   border-radius: var(--hms-radius-lg);
   box-shadow: var(--hms-shadow-lg);
-  padding: var(--hms-space-8) var(--hms-space-6) var(--hms-space-6);
+  overflow: hidden;
+}
+
+.sa-login-panel {
+  width: 100%;
+  max-width: 440px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: var(--hms-space-6);
-  position: relative;
-  overflow: hidden;
-
-  // Thin top accent bar - the one deliberate "this isn't the tenant login"
-  // cue, instead of a whole dark theme.
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--hms-color-secondary) 0%, var(--hms-color-primary) 100%);
-  }
+  padding: var(--hms-space-8);
+  margin: 0 auto;
 }
 
 .sa-login-brand {
@@ -78,19 +75,116 @@
   }
 }
 
-form {
+.sa-login-form {
   display: flex;
   flex-direction: column;
-  gap: var(--hms-space-2);
+  gap: var(--hms-space-4);
 }
 
 .sa-login-field {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-1);
+
+  label {
+    font-size: var(--hms-font-size-sm);
+    font-weight: var(--hms-font-weight-semibold);
+    color: var(--hms-color-text);
+
+    span {
+      color: var(--hms-color-danger);
+      margin-left: 2px;
+    }
+  }
+
+  input {
+    height: 44px;
+    padding: 0 var(--hms-space-3);
+    border: 1px solid var(--hms-color-border);
+    border-radius: var(--hms-radius-md);
+    background: var(--hms-color-surface);
+    color: var(--hms-color-text);
+    font-size: var(--hms-font-size-md);
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color var(--hms-transition-fast), box-shadow var(--hms-transition-fast);
+
+    &:focus {
+      outline: none;
+      border-color: var(--hms-color-secondary);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--hms-color-secondary) 18%, transparent);
+    }
+
+    &::placeholder {
+      color: var(--hms-color-text-muted);
+    }
+
+    // Neutralizes the browser's own autofill styling - see
+    // login.component.scss's identical rule for the full explanation.
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus {
+      -webkit-text-fill-color: var(--hms-color-text);
+      -webkit-box-shadow: 0 0 0 1000px var(--hms-color-surface) inset;
+      box-shadow: 0 0 0 1000px var(--hms-color-surface) inset;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+  }
+}
+
+.sa-login-password-wrap {
+  position: relative;
+
+  input {
+    padding-right: 44px;
+  }
+}
+
+.sa-login-password-toggle {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--hms-color-text-muted);
+  cursor: pointer;
+  transition: background-color var(--hms-transition-fast), color var(--hms-transition-fast);
+
+  &:hover {
+    background: var(--hms-color-surface-alt);
+    color: var(--hms-color-text);
+  }
 }
 
 .sa-login-submit {
   margin-top: var(--hms-space-2);
-  height: 44px;
+  height: 48px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--hms-space-2);
+}
+
+// A plain span, not mat-icon - see login.component.scss's identical rule
+// for why (MatButton hoists mat-icon children in front of the label
+// unconditionally).
+.sa-login-submit-arrow {
+  font-size: 1.1em;
+  line-height: 1;
+  transition: transform var(--hms-transition-fast);
+}
+
+.sa-login-submit:hover .sa-login-submit-arrow {
+  transform: translateX(3px);
 }
 
 .sa-login-error {
@@ -100,4 +194,39 @@ form {
   background: var(--hms-color-danger-container);
   color: var(--hms-color-on-danger-container);
   font-size: var(--hms-font-size-sm);
+}
+
+// Same fixed mesh gradient as the tenant login (login.component.scss) - a
+// shared brand asset, deliberately identical on both screens rather than
+// differentiated per-screen like the rest of this file's --hms-color-*
+// driven accents.
+.sa-login-art {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background-color: #fdf8f6;
+  background-image:
+    radial-gradient(55% 55% at 88% 12%, #8b7ae0 0%, transparent 62%),
+    radial-gradient(60% 60% at 68% 45%, #e0529c 0%, transparent 55%),
+    radial-gradient(75% 75% at 78% 88%, #dc1f1f 0%, transparent 65%),
+    radial-gradient(45% 45% at 98% 98%, #6a0f1f 0%, transparent 60%),
+    linear-gradient(135deg, #fdf9f7 0%, #f4ecf8 35%, transparent 65%);
+  background-size: cover;
+  background-position: center;
+}
+
+@media (max-width: 900px) {
+  .sa-login-composition {
+    min-height: auto;
+    max-width: 440px;
+  }
+
+  .sa-login-art {
+    display: none;
+  }
+
+  .sa-login-panel {
+    max-width: 440px;
+    padding: var(--hms-space-6);
+  }
 }
