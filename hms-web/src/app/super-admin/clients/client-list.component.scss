@@ -54,6 +54,18 @@
   gap: var(--hms-space-2);
 }
 
+.sa-domain-status {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  margin-top: var(--hms-space-4);
+}
+
+.sa-domain-status-label {
+  color: var(--hms-color-text-muted);
+  font-size: var(--hms-font-size-sm);
+}
+
 .sa-list {
   overflow-x: auto;
 }
@@ -71,7 +83,16 @@
 }
 
 .sa-table {
-  width: 100%;
+  // max-content (not 100%) - with table-layout:fixed, a 100% width forces
+  // the browser to proportionally *shrink* every column (including the
+  // fixed-width actions column) to fit the container instead of letting the
+  // table grow past it, which silently clipped the trailing action buttons
+  // with no way to reach them. max-content lets the table take its real
+  // width (sum of column widths); min-width keeps it at least full-width on
+  // wide viewports. .sa-list's overflow-x:auto then supplies the horizontal
+  // scrollbar once the table is genuinely wider than its container.
+  width: max-content;
+  min-width: 100%;
   table-layout: fixed;
 
   // Keep every cell a plain table-cell (Angular Material's native <table
@@ -109,10 +130,11 @@
 
 .sa-actions-header {
   // Wide enough for "Manage" + "Provision Database" + "Add Admin" +
-  // "Reactivate" (the longest of the toggle labels) side by side without
-  // wrapping - table-layout:fixed enforces this width strictly, so anything
-  // narrower gets visually clipped rather than wrapping to a second line.
-  width: 580px;
+  // "Website Domain" + "Reactivate" (the longest of the toggle labels) side
+  // by side without wrapping - table-layout:fixed enforces this width
+  // strictly, so anything narrower gets visually clipped rather than
+  // wrapping to a second line.
+  width: 700px;
   white-space: nowrap;
 }
 

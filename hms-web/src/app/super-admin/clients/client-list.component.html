@@ -27,7 +27,7 @@
   </section>
 
   @if (managingClient(); as client) {
-    <section class="hms-card-surface sa-license">
+    <section id="sa-manage-panel" class="hms-card-surface sa-license">
       <h2 class="sa-license-title">{{ client.name }} — Client License</h2>
       <p class="sa-license-subtitle">Toggle which modules this client has purchased. Takes effect within seconds, no redeploy.</p>
       <div class="sa-license-grid">
@@ -48,26 +48,48 @@
         <button mat-flat-button color="primary" type="button" (click)="saveModules()" [disabled]="savingModules()">Save License</button>
         <button mat-button type="button" (click)="cancelManage()">Cancel</button>
       </div>
+    </section>
+  }
 
-      <h2 class="sa-license-title">{{ client.name }} — Public Website Domain</h2>
+  @if (domainClient(); as client) {
+    <section id="sa-domain-panel" class="hms-card-surface sa-license">
+      <h2 class="sa-license-title">{{ client.name }} — Website Domain</h2>
       <p class="sa-license-subtitle">
         The domain visitors use to reach this client's public hospital website (e.g. clienta-hospital.com). Leave blank if this client
-        doesn't have one yet.
+        doesn't have one yet. Saving this alone doesn't make the site reachable — DNS and hosting still need to be set up separately by
+        your platform administrator; use the status below to confirm once that's done.
       </p>
       <form class="sa-create-form" (ngSubmit)="saveDomain()">
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sa-create-field">
           <mat-label>Domain</mat-label>
           <input matInput name="domain" [(ngModel)]="domainForm.domain" placeholder="e.g. clienta-hospital.com" />
+          @if (domainForm.domain.trim() && !isDomainValid) {
+            <mat-hint>Must be a valid hostname, e.g. clienta-hospital.com</mat-hint>
+          } @else if (isDomainSuggested) {
+            <mat-hint>Suggested based on "{{ client.name }}" — edit this if they have (or will use) their own domain instead.</mat-hint>
+          }
         </mat-form-field>
         <div class="sa-create-actions">
-          <button mat-flat-button color="primary" type="submit" [disabled]="savingDomain()">Save Domain</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="savingDomain() || !isDomainValid">Save Domain</button>
+          <button mat-button type="button" (click)="cancelDomainPanel()">Cancel</button>
         </div>
       </form>
+      <div class="sa-domain-status">
+        <span class="sa-domain-status-label">Status:</span>
+        @if (domainStatus(); as status) {
+          <app-status-badge [label]="domainStatusLabel(status)" [tone]="domainStatusTone(status)" />
+        } @else if (!checkingDomainStatus()) {
+          <app-status-badge label="Not Checked" tone="neutral" />
+        }
+        <button mat-button type="button" [disabled]="checkingDomainStatus()" (click)="checkDomainStatus()">
+          {{ checkingDomainStatus() ? 'Checking…' : 'Check Status' }}
+        </button>
+      </div>
     </section>
   }
 
   @if (bootstrappingClient(); as client) {
-    <section class="hms-card-surface sa-license">
+    <section id="sa-bootstrap-panel" class="hms-card-surface sa-license">
       <h2 class="sa-license-title">{{ client.name }} — Add Admin</h2>
       <p class="sa-license-subtitle">
         Creates a login for this client. Only needed for their very first user — after that, they can add more from their own General
@@ -165,6 +187,7 @@
                   {{ provisioningClientId() === client.id ? 'Provisioning…' : 'Provision Database' }}
                 </button>
                 <button mat-stroked-button type="button" (click)="bootstrapAdmin(client)">Add Admin</button>
+                <button mat-stroked-button type="button" (click)="openDomainPanel(client)">Website Domain</button>
                 <button mat-stroked-button [color]="client.status === 'ACTIVE' ? 'warn' : 'primary'" type="button" (click)="toggleStatus(client)">
                   {{ client.status === 'ACTIVE' ? 'Suspend' : 'Reactivate' }}
                 </button>

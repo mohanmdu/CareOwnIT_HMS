@@ -27,6 +27,8 @@ export interface ClientAdminBootstrapResult {
   roleName: string;
 }
 
+export type ClientDomainStatus = 'NOT_SET' | 'LIVE' | 'UNREACHABLE';
+
 export type ClientDatabaseStatus = 'PROVISIONING' | 'READY' | 'FAILED' | 'SUSPENDED';
 
 export interface ClientDatabaseRecord {

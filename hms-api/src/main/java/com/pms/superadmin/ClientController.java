@@ -3,6 +3,7 @@ package com.pms.superadmin;
 import com.pms.superadmin.dto.ClientAdminBootstrapRequest;
 import com.pms.superadmin.dto.ClientAdminBootstrapResponse;
 import com.pms.superadmin.dto.ClientDatabaseDto;
+import com.pms.superadmin.dto.ClientDomainStatusResponse;
 import com.pms.superadmin.dto.ClientDomainUpdateRequest;
 import com.pms.superadmin.dto.ClientDto;
 import com.pms.superadmin.dto.ClientStatusUpdateRequest;
@@ -33,16 +34,19 @@ public class ClientController {
     private final ClientAdminBootstrapService bootstrapService;
     private final TenantProvisioningService provisioningService;
     private final ClientDatabaseRepository clientDatabaseRepository;
+    private final ClientDomainStatusService domainStatusService;
 
     public ClientController(
             ClientService service,
             ClientAdminBootstrapService bootstrapService,
             TenantProvisioningService provisioningService,
-            ClientDatabaseRepository clientDatabaseRepository) {
+            ClientDatabaseRepository clientDatabaseRepository,
+            ClientDomainStatusService domainStatusService) {
         this.service = service;
         this.bootstrapService = bootstrapService;
         this.provisioningService = provisioningService;
         this.clientDatabaseRepository = clientDatabaseRepository;
+        this.domainStatusService = domainStatusService;
     }
 
     @GetMapping
@@ -75,6 +79,19 @@ public class ClientController {
     @PatchMapping("/{id}/domain")
     public ClientDto updateDomain(@PathVariable Long id, @Valid @RequestBody ClientDomainUpdateRequest body) {
         return service.updateDomain(id, body.domain());
+    }
+
+    /**
+     * On-demand HTTPS reachability probe for this client's public-website
+     * domain - see ClientDomainStatusService's own doc comment. Never
+     * throws; NOT_SET/UNREACHABLE are both normal, expected responses, not
+     * errors, since DNS/nginx/TLS provisioning is a separate manual step
+     * (scripts/provision-client-subdomain.sh) that may not have happened yet.
+     */
+    @GetMapping("/{id}/domain/status")
+    public ClientDomainStatusResponse domainStatus(@PathVariable Long id) {
+        ClientDto client = service.findById(id);
+        return new ClientDomainStatusResponse(domainStatusService.check(client.domain()));
     }
 
     /**

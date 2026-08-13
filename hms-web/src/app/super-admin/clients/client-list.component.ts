@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -16,11 +16,37 @@ import { TablePagination } from '../../shared/table/table-pagination';
 import { TableSearchComponent } from '../../shared/table/table-search.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
-import { StatusBadgeComponent } from '../../shared/ui/status-badge/status-badge.component';
+import { StatusBadgeComponent, StatusBadgeTone } from '../../shared/ui/status-badge/status-badge.component';
 import { ClientService } from './client.service';
-import { ClientRecord } from './client.model';
+import { ClientDomainStatus, ClientRecord } from './client.model';
 
 const BOOTSTRAP_FORM_DEFAULTS = { name: '', mobileNumber: '', username: '', initialPassword: '' };
+
+/** Same hostname pattern hms-api's ClientDomainUpdateRequest validates server-side - mirrored here purely for instant feedback, not as the source of truth. */
+const HOSTNAME_PATTERN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$/;
+
+const DOMAIN_STATUS_LABELS: Record<ClientDomainStatus, string> = {
+  NOT_SET: 'Not Set',
+  LIVE: 'Live',
+  UNREACHABLE: 'Not Reachable Yet'
+};
+
+const DOMAIN_STATUS_TONES: Record<ClientDomainStatus, StatusBadgeTone> = {
+  NOT_SET: 'neutral',
+  LIVE: 'success',
+  UNREACHABLE: 'warning'
+};
+
+/** The zone scripts/provision-client-subdomain.sh already provisions subdomains under (e.g. abc.careownitsolutions.com) - just the easy default suggestion, not a requirement, since a client may well have their own real domain instead. */
+const SUGGESTED_DOMAIN_SUFFIX = 'careownitsolutions.com';
+
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
 
 interface ModuleOption {
   key: ModuleKey;
@@ -79,6 +105,7 @@ export class ClientListComponent {
   private readonly service = inject(ClientService);
   private readonly notification = inject(NotificationService);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly elementRef: ElementRef<HTMLElement> = inject(ElementRef);
 
   readonly moduleOptions = buildModuleOptions();
   readonly columns = ['name', 'code', 'status', 'modules', 'actions'];
@@ -90,8 +117,13 @@ export class ClientListComponent {
   managingClient = signal<ClientRecord | null>(null);
   savingModules = signal(false);
   selectedModules = new Set<ModuleKey>();
+
+  domainClient = signal<ClientRecord | null>(null);
   savingDomain = signal(false);
   domainForm = { domain: '' };
+  /** null = not checked yet this panel-open (distinct from an actual NOT_SET/UNREACHABLE result). */
+  domainStatus = signal<ClientDomainStatus | null>(null);
+  checkingDomainStatus = signal(false);
 
   bootstrappingClient = signal<ClientRecord | null>(null);
   savingBootstrap = signal(false);
@@ -218,10 +250,28 @@ export class ClientListComponent {
     }
   }
 
+  /**
+   * Scrolls the just-opened inline panel into view and focuses its first
+   * field - these panels render above what can be a long, scrolled-down
+   * client table, so without this a click on a row action can land with no
+   * visible change if the newly opened panel is off-screen above the
+   * viewport. Mirrors admission-registration-form.component.ts's
+   * scrollToFirstError() pattern: a 0ms setTimeout to let the just-updated
+   * @if render before querying for it.
+   */
+  private scrollToPanel(panelId: string): void {
+    setTimeout(() => {
+      const panel = this.elementRef.nativeElement.querySelector<HTMLElement>(`#${panelId}`);
+      panel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // 'input' alone covers every panel here - the license grid's first mat-checkbox renders a native <input type="checkbox"> internally, same as the plain text fields on the other two panels.
+      panel?.querySelector<HTMLElement>('input')?.focus({ preventScroll: true });
+    });
+  }
+
   manageClient(client: ClientRecord): void {
     this.managingClient.set(client);
     this.selectedModules = new Set(client.licensedModules);
-    this.domainForm = { domain: client.domain ?? '' };
+    this.scrollToPanel('sa-manage-panel');
   }
 
   cancelManage(): void {
@@ -252,9 +302,69 @@ export class ClientListComponent {
     });
   }
 
-  saveDomain(): void {
-    const client = this.managingClient();
+  /** Opens the peer "Website Domain" panel - a first-class onboarding step alongside Provision Database/Add Admin, not buried inside Manage. Pre-fills a suggested subdomain for clients that don't have one yet, rather than leaving the Super Admin to think one up from scratch. */
+  openDomainPanel(client: ClientRecord): void {
+    this.domainClient.set(client);
+    this.domainForm = { domain: client.domain ?? this.suggestDomain(client) };
+    this.domainStatus.set(null);
+    if (client.domain) {
+      this.checkDomainStatus();
+    }
+    this.scrollToPanel('sa-domain-panel');
+  }
+
+  cancelDomainPanel(): void {
+    this.domainClient.set(null);
+  }
+
+  private suggestDomain(client: ClientRecord): string {
+    return `${slugify(client.name)}.${SUGGESTED_DOMAIN_SUFFIX}`;
+  }
+
+  /** True only while the field still holds the exact auto-fill for a client with no saved domain yet - disappears the moment they edit it, so the hint never misrepresents a deliberately-typed value as "just a suggestion". */
+  get isDomainSuggested(): boolean {
+    const client = this.domainClient();
+    if (!client || client.domain) {
+      return false;
+    }
+    return this.domainForm.domain.trim() === this.suggestDomain(client);
+  }
+
+  get isDomainValid(): boolean {
+    const value = this.domainForm.domain.trim();
+    return value.length === 0 || HOSTNAME_PATTERN.test(value);
+  }
+
+  domainStatusLabel(status: ClientDomainStatus): string {
+    return DOMAIN_STATUS_LABELS[status];
+  }
+
+  domainStatusTone(status: ClientDomainStatus): StatusBadgeTone {
+    return DOMAIN_STATUS_TONES[status];
+  }
+
+  /** On-demand reachability probe (see hms-api's ClientDomainStatusService) - not auto-polled, matching this screen's existing "explicit action, not a background job" style. */
+  checkDomainStatus(): void {
+    const client = this.domainClient();
     if (!client) {
+      return;
+    }
+    this.checkingDomainStatus.set(true);
+    this.service.checkDomainStatus(client.id).subscribe({
+      next: ({ status }) => {
+        this.checkingDomainStatus.set(false);
+        this.domainStatus.set(status);
+      },
+      error: () => {
+        this.checkingDomainStatus.set(false);
+        this.notification.error('Failed to check domain status.');
+      }
+    });
+  }
+
+  saveDomain(): void {
+    const client = this.domainClient();
+    if (!client || !this.isDomainValid) {
       return;
     }
     this.savingDomain.set(true);
@@ -262,6 +372,11 @@ export class ClientListComponent {
       next: (updated) => {
         this.savingDomain.set(false);
         this.notification.success(updated.domain ? 'Domain updated.' : 'Domain cleared.');
+        this.domainClient.set(updated);
+        this.domainStatus.set(null);
+        if (updated.domain) {
+          this.checkDomainStatus();
+        }
         this.refresh();
       },
       error: (err) => {
@@ -290,6 +405,7 @@ export class ClientListComponent {
   bootstrapAdmin(client: ClientRecord): void {
     this.bootstrappingClient.set(client);
     this.bootstrapForm = { ...BOOTSTRAP_FORM_DEFAULTS };
+    this.scrollToPanel('sa-bootstrap-panel');
   }
 
   cancelBootstrap(): void {
